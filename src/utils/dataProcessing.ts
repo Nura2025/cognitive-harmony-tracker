@@ -1,142 +1,84 @@
-import { formatDistance, parseISO } from 'date-fns';
-import { CognitiveDomain } from '@/types/databaseTypes';
-import { SessionData } from '@/utils/types/patientTypes';
+// Utility functions for data processing and formatting
 
-// Function to determine the background color class based on the score
-export const getScoreBgClass = (score: number): string => {
-  if (score >= 80) {
-    return 'bg-green-100';
-  } else if (score >= 60) {
-    return 'bg-yellow-100';
-  } else {
-    return 'bg-red-100';
-  }
+import { formatDistanceToNow } from 'date-fns';
+
+// Format a date to show how long ago it was
+export const formatDateDistance = (date: string): string => {
+  return formatDistanceToNow(new Date(date), {
+    addSuffix: true,
+  });
 };
 
-// Function to determine the text color class based on the score
-export const getScoreColorClass = (score: number): string => {
-  if (score >= 80) {
-    return 'text-green-500';
-  } else if (score >= 60) {
-    return 'text-yellow-500';
-  } else {
-    return 'text-red-500';
-  }
-};
-
-// Function to format a percentile value
-export const formatPercentile = (percentile: number | null): string => {
+// Format a number as a percentile
+export const formatPercentile = (percentile: number | null | undefined): string => {
   if (percentile === null || percentile === undefined) {
     return 'N/A';
   }
   return `${Math.round(percentile)}th`;
 };
 
-// Function to format duration from minutes to a human-readable format
-export const formatDuration = (minutes: number): string => {
-  const hours = Math.floor(minutes / 60);
-  const remainingMinutes = minutes % 60;
-  
-  if (hours > 0) {
-    return `${hours}h ${remainingMinutes}m`;
+// Get a color class based on a score
+export const getScoreColorClass = (score: number | null | undefined): string => {
+  if (score === null || score === undefined) {
+    return 'text-gray-500';
+  }
+  if (score >= 75) {
+    return 'text-green-500';
+  } else if (score >= 50) {
+    return 'text-yellow-500';
   } else {
-    return `${remainingMinutes}m`;
+    return 'text-red-500';
   }
 };
 
-// Format a date to show how long ago it was (e.g., "2 days ago")
-export const formatDateDistance = (dateString: string) => {
-  try {
-    const date = parseISO(dateString);
-    return formatDistance(date, new Date(), { addSuffix: true });
-  } catch (error) {
-    return 'Invalid date';
-  }
-};
-
-// Format a date to show how long ago it was (e.g., "2 days ago") or "Never" if null
-export const formatLastSession = (dateString: string | null) => {
-  if (!dateString) return 'Never';
-  return formatDateDistance(dateString);
-};
-
-// Get the user-friendly name of a cognitive domain
-export const getDomainName = (domain: keyof CognitiveDomain): string => {
-  const domainNames: Record<keyof CognitiveDomain, string> = {
-    attention: 'Attention',
-    memory: 'Memory',
-    executive_function: 'Executive Function',
-    behavioral: 'Behavioral Control'
+// Map snake_case domain keys to human-readable names
+export const getDomainName = (domain: string): string => {
+  const domainNames: Record<string, string> = {
+    'attention': 'Attention',
+    'memory': 'Memory',
+    'executive_function': 'Executive Function',
+    'behavioral': 'Behavioral Regulation'
   };
   
-  return domainNames[domain] || 'Unknown Domain';
+  return domainNames[domain] || domain;
 };
 
-// Get the background color class for a domain
-export const getDomainBgColor = (domain: keyof CognitiveDomain): string => {
-  const bgColors: Record<keyof CognitiveDomain, string> = {
-    attention: 'bg-blue-50',
-    memory: 'bg-purple-50',
-    executive_function: 'bg-amber-50',
-    behavioral: 'bg-emerald-50'
+// Get domain-specific background color
+export const getDomainBgColor = (domain: string): string => {
+  const colors: Record<string, string> = {
+    'attention': 'bg-blue-100 dark:bg-blue-900/20',
+    'memory': 'bg-green-100 dark:bg-green-900/20',
+    'executive_function': 'bg-purple-100 dark:bg-purple-900/20',
+    'behavioral': 'bg-orange-100 dark:bg-orange-900/20'
   };
   
-  return bgColors[domain] || 'bg-gray-50';
+  return colors[domain] || 'bg-gray-100 dark:bg-gray-800';
 };
 
-// Get the text color class for a domain
-export const getDomainColor = (domain: keyof CognitiveDomain): string => {
-  const colors: Record<keyof CognitiveDomain, string> = {
-    attention: 'text-blue-600',
-    memory: 'text-purple-600',
-    executive_function: 'text-amber-600',
-    behavioral: 'text-emerald-600'
+// Get domain-specific color
+export const getDomainColor = (domain: string): string => {
+  const colors: Record<string, string> = {
+    'attention': 'text-blue-600 dark:text-blue-400',
+    'memory': 'text-green-600 dark:text-green-400',
+    'executive_function': 'text-purple-600 dark:text-purple-400',
+    'behavioral': 'text-orange-600 dark:text-orange-400'
   };
   
-  return colors[domain] || 'text-gray-600';
+  return colors[domain] || 'text-gray-600 dark:text-gray-400';
 };
 
-// Get a descriptive status for a score
-export const getScoreStatus = (score: number): string => {
-  if (score >= 80) {
-    return 'Excellent';
-  } else if (score >= 60) {
-    return 'Good';
-  } else if (score >= 40) {
-    return 'Needs Improvement';
-  } else {
-    return 'Concerning';
-  }
-};
-
-// Process sessions for timeline chart
-export const processSessionsForTimeline = (sessions: SessionData[]): Array<{date: string; score: number}> => {
-  const sortedSessions = [...sessions].sort((a, b) => {
-    return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
-  });
-  
-  return sortedSessions.map(session => {
-    const date = new Date(session.startTime).toISOString().split('T')[0];
-    
-    return {
-      date,
-      score: session.overallScore
-    };
-  });
-};
-
-// Data type mapping functions for database types
+// Map database objects to client-side objects
 export const mapPatientFromDB = (dbPatient: any): any => {
   if (!dbPatient) return null;
   
   return {
-    ...dbPatient,
-    gender: ['Male', 'Female', 'Other'].includes(dbPatient.gender) 
-      ? dbPatient.gender as 'Male' | 'Female' | 'Other'
-      : 'Other',
-    adhd_subtype: ['Inattentive', 'Hyperactive-Impulsive', 'Combined'].includes(dbPatient.adhd_subtype)
-      ? dbPatient.adhd_subtype as 'Inattentive' | 'Hyperactive-Impulsive' | 'Combined'
-      : 'Combined'
+    id: dbPatient.id,
+    name: dbPatient.name,
+    age: dbPatient.age,
+    gender: dbPatient.gender,
+    diagnosisDate: dbPatient.diagnosis_date,
+    adhdSubtype: dbPatient.adhd_subtype,
+    created_at: dbPatient.created_at
   };
 };
 
@@ -144,28 +86,26 @@ export const mapSessionFromDB = (dbSession: any): any => {
   if (!dbSession) return null;
   
   return {
-    ...dbSession,
-    environment: ['Home', 'School', 'Clinic'].includes(dbSession.environment)
-      ? dbSession.environment as 'Home' | 'School' | 'Clinic'
-      : 'Home',
-    completion_status: ['Completed', 'Abandoned', 'Interrupted'].includes(dbSession.completion_status)
-      ? dbSession.completion_status as 'Completed' | 'Abandoned' | 'Interrupted'
-      : 'Completed'
+    id: dbSession.id,
+    patientId: dbSession.patient_id,
+    startTime: dbSession.start_time,
+    endTime: dbSession.end_time,
+    duration: dbSession.duration,
+    environment: dbSession.environment,
+    completionStatus: dbSession.completion_status,
+    overallScore: dbSession.overall_score,
+    device: dbSession.device,
+    domainScores: {
+      attention: dbSession.attention,
+      memory: dbSession.memory,
+      executiveFunction: dbSession.executive_function,
+      behavioral: dbSession.behavioral
+    },
+    // Copy the original properties to maintain compatibility with database functions
+    attention: dbSession.attention,
+    memory: dbSession.memory,
+    executive_function: dbSession.executive_function,
+    behavioral: dbSession.behavioral,
+    activities: dbSession.activities || []
   };
-};
-
-// Helper function to convert snake_case domain key to camelCase for legacy code support
-export const convertDomainKeyCasing = (key: keyof CognitiveDomain): string => {
-  if (key === 'executive_function') {
-    return 'executiveFunction';
-  }
-  return key;
-};
-
-// Helper function to convert camelCase domain key to snake_case for database compatibility
-export const convertToDatabaseKey = (key: string): keyof CognitiveDomain => {
-  if (key === 'executiveFunction') {
-    return 'executive_function';
-  }
-  return key as keyof CognitiveDomain;
 };

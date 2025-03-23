@@ -7,7 +7,7 @@ import {
   PatientMetrics, 
   SessionData, 
   CognitiveDomain 
-} from './types/patientTypes';
+} from '@/types/databaseTypes';
 import { generatePatients, generatePatientMetrics } from './generators/patientGenerators';
 import { generateSessionData } from './generators/sessionGenerators';
 import { generateTrendData, generatePercentileData } from './generators/trendGenerators';

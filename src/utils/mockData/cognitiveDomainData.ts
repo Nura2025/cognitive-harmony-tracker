@@ -1,12 +1,11 @@
 
-import { CognitiveDomain } from '../types/patientTypes';
-import { randomInt } from '../helpers/randomUtils';
+import { CognitiveDomain } from '@/types/databaseTypes';
 
 // Mock data for patient cognitive domains
 export const mockPatientData: CognitiveDomain = {
   attention: 78,
   memory: 84,
-  executiveFunction: 65,
+  executive_function: 65,
   behavioral: 52
 };
 
@@ -14,7 +13,7 @@ export const mockPatientData: CognitiveDomain = {
 export const mockNormativeData: CognitiveDomain = {
   attention: 65,
   memory: 67,
-  executiveFunction: 70,
+  executive_function: 70,
   behavioral: 68
 };
 
@@ -22,6 +21,6 @@ export const mockNormativeData: CognitiveDomain = {
 export const mockSubtypeData: CognitiveDomain = {
   attention: 45,
   memory: 72,
-  executiveFunction: 58,
+  executive_function: 58,
   behavioral: 43
 };

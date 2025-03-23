@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,16 +8,13 @@ import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { DomainComparison } from '@/components/analysis/DomainComparison';
-import { 
-  mockPatientData, 
-  mockNormativeData, 
-  mockSubtypeData,
-  CognitiveDomain
-} from '@/utils/mockData';
+import { Patient, CognitiveDomain } from '@/types/databaseTypes';
+import { getPatient, getPatientMetrics } from '@/services/patientService';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { randomInt } from '@/utils/helpers/randomUtils';
 
-// Mock data for test scores
-const testScores = {
+// Mock data for test scores (these will eventually come from the database)
+const generateTestScores = () => ({
   attention: {
     sustainedAttention: randomInt(60, 95),
     selectiveAttention: randomInt(55, 90),
@@ -29,7 +27,7 @@ const testScores = {
     longTermMemory: randomInt(65, 95),
     visualMemory: randomInt(50, 85),
   },
-  executiveFunction: {
+  executive_function: {
     inhibition: randomInt(40, 75),
     planning: randomInt(45, 80),
     problemSolving: randomInt(50, 85),
@@ -41,7 +39,7 @@ const testScores = {
     socialCognition: randomInt(45, 80),
     selfMonitoring: randomInt(40, 75),
   }
-};
+});
 
 // Mock recommendations
 const recommendations = [
@@ -83,8 +81,81 @@ const recommendations = [
   }
 ];
 
+// Generated normative and subtype data
+const generateNormativeData = (): CognitiveDomain => ({
+  attention: randomInt(60, 70),
+  memory: randomInt(60, 70),
+  executive_function: randomInt(60, 70),
+  behavioral: randomInt(60, 70)
+});
+
+const generateSubtypeData = (): CognitiveDomain => ({
+  attention: randomInt(40, 50),
+  memory: randomInt(60, 80),
+  executive_function: randomInt(50, 60),
+  behavioral: randomInt(40, 50)
+});
+
 const Reports: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [patientId, setPatientId] = useState<string | null>(null);
+  const [patientData, setPatientData] = useState<any>(null);
+  const [patientMetrics, setPatientMetrics] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [testScores, setTestScores] = useState(generateTestScores());
+  const [normativeData, setNormativeData] = useState(generateNormativeData());
+  const [subtypeData, setSubtypeData] = useState(generateSubtypeData());
+  
+  // Parse patient ID from URL query params
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const id = params.get('patient');
+    
+    if (id) {
+      setPatientId(id);
+    }
+  }, [location]);
+  
+  // Load patient data
+  useEffect(() => {
+    if (!patientId) return;
+    
+    const fetchPatientData = async () => {
+      setIsLoading(true);
+      try {
+        const patient = await getPatient(patientId);
+        const metrics = await getPatientMetrics(patientId);
+        
+        setPatientData(patient);
+        setPatientMetrics(metrics);
+        
+        // Generate test scores and comparison data
+        setTestScores(generateTestScores());
+        setNormativeData(generateNormativeData());
+        setSubtypeData(generateSubtypeData());
+      } catch (error) {
+        console.error("Error fetching patient data:", error);
+      }
+      setIsLoading(false);
+    };
+    
+    fetchPatientData();
+  }, [patientId]);
+  
+  if (isLoading || !patientMetrics) {
+    return <div className="p-8">Loading report data...</div>;
+  }
+  
+  // Create a cognitive domain object from the metrics
+  const patientDomainData: CognitiveDomain = {
+    attention: patientMetrics.attention,
+    memory: patientMetrics.memory,
+    executive_function: patientMetrics.executive_function,
+    behavioral: patientMetrics.behavioral
+  };
   
   return (
     <div className="container mx-auto p-4 max-w-6xl">
@@ -132,41 +203,41 @@ const Reports: React.FC = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <Label>Attention</Label>
-                    <span className="text-sm">{mockPatientData.attention}%</span>
+                    <span className="text-sm">{patientDomainData.attention}%</span>
                   </div>
-                  <Progress value={mockPatientData.attention} className="h-2" />
+                  <Progress value={patientDomainData.attention} className="h-2" />
                 </div>
                 
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <Label>Memory</Label>
-                    <span className="text-sm">{mockPatientData.memory}%</span>
+                    <span className="text-sm">{patientDomainData.memory}%</span>
                   </div>
-                  <Progress value={mockPatientData.memory} className="h-2" />
+                  <Progress value={patientDomainData.memory} className="h-2" />
                 </div>
                 
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <Label>Executive Function</Label>
-                    <span className="text-sm">{mockPatientData.executiveFunction}%</span>
+                    <span className="text-sm">{patientDomainData.executive_function}%</span>
                   </div>
-                  <Progress value={mockPatientData.executiveFunction} className="h-2" />
+                  <Progress value={patientDomainData.executive_function} className="h-2" />
                 </div>
                 
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <Label>Behavioral Regulation</Label>
-                    <span className="text-sm">{mockPatientData.behavioral}%</span>
+                    <span className="text-sm">{patientDomainData.behavioral}%</span>
                   </div>
-                  <Progress value={mockPatientData.behavioral} className="h-2" />
+                  <Progress value={patientDomainData.behavioral} className="h-2" />
                 </div>
               </CardContent>
             </Card>
           </div>
           
           <DomainComparison 
-            patientData={mockPatientData} 
-            normativeData={mockNormativeData}
+            patientData={patientDomainData} 
+            normativeData={normativeData}
           />
         </TabsContent>
         
@@ -175,7 +246,7 @@ const Reports: React.FC = () => {
           {Object.entries(testScores).map(([domain, tests]) => (
             <Card key={domain} className="glass">
               <CardHeader>
-                <CardTitle className="capitalize">{domain} Domain</CardTitle>
+                <CardTitle className="capitalize">{domain.replace(/_/g, ' ')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -207,8 +278,8 @@ const Reports: React.FC = () => {
                   age-matched normative data from our research database.
                 </p>
                 <DomainComparison 
-                  patientData={mockPatientData} 
-                  normativeData={mockNormativeData}
+                  patientData={patientDomainData} 
+                  normativeData={normativeData}
                 />
               </CardContent>
             </Card>
@@ -223,8 +294,8 @@ const Reports: React.FC = () => {
                   typical patterns seen in specific ADHD subtypes.
                 </p>
                 <DomainComparison 
-                  patientData={mockPatientData} 
-                  subtypeData={mockSubtypeData}
+                  patientData={patientDomainData} 
+                  subtypeData={subtypeData}
                 />
               </CardContent>
             </Card>
@@ -241,9 +312,9 @@ const Reports: React.FC = () => {
                 ADHD subtype patterns.
               </p>
               <DomainComparison 
-                patientData={mockPatientData} 
-                normativeData={mockNormativeData}
-                subtypeData={mockSubtypeData}
+                patientData={patientDomainData} 
+                normativeData={normativeData}
+                subtypeData={subtypeData}
               />
             </CardContent>
           </Card>

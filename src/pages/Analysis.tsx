@@ -10,16 +10,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { patients, metricsMap, generatePercentileData, generateTrendData } from '@/utils/mockData';
-import { CognitiveDomain } from '@/components/analysis/CognitiveDomain';
+import { getPatients } from '@/services/patientService';
+import { getPatientMetrics } from '@/services/patientService';
+import { Patient, CognitiveDomain } from '@/types/databaseTypes';
+import { CognitiveDomain as DomainComponent } from '@/components/analysis/CognitiveDomain';
 import { DomainComparison } from '@/components/analysis/DomainComparison';
 import { PerformanceTrend } from '@/components/analysis/PerformanceTrend';
+import { generatePercentileData, generateTrendData } from '@/utils/mockData';
 
 const Analysis = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [patientId, setPatientId] = useState<string | null>(null);
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [patientMetrics, setPatientMetrics] = useState<any>(null);
   const [domainTrendData, setDomainTrendData] = useState<Record<string, any>>({});
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Fetch patients data
+  useEffect(() => {
+    const fetchPatients = async () => {
+      const data = await getPatients();
+      setPatients(data);
+      setIsLoading(false);
+    };
+    
+    fetchPatients();
+  }, []);
   
   // Parse patient ID from URL query params
   useEffect(() => {
@@ -31,16 +48,24 @@ const Analysis = () => {
     } else if (patients.length > 0) {
       setPatientId(patients[0].id);
     }
-  }, [location]);
+  }, [location, patients]);
   
-  // Generate trend data when patient changes
+  // Fetch metrics when patient changes
   useEffect(() => {
     if (!patientId) return;
     
+    const fetchMetrics = async () => {
+      const metrics = await getPatientMetrics(patientId);
+      setPatientMetrics(metrics);
+    };
+    
+    fetchMetrics();
+    
+    // Generate trend data for visualization
     setDomainTrendData({
       attention: generateTrendData('attention'),
       memory: generateTrendData('memory'),
-      executiveFunction: generateTrendData('executiveFunction'),
+      executive_function: generateTrendData('executive_function'),
       behavioral: generateTrendData('behavioral')
     });
   }, [patientId]);
@@ -53,10 +78,6 @@ const Analysis = () => {
     navigate('/');
   };
   
-  // Find the current patient
-  const currentPatient = patients.find(p => p.id === patientId);
-  const patientMetrics = patientId ? metricsMap[patientId] : null;
-  
   // Generate percentile comparison data
   const percentileData = generatePercentileData();
   
@@ -67,8 +88,12 @@ const Analysis = () => {
       score: typeof item.value === 'number' && !isNaN(item.value) ? item.value : 0
     }));
   
-  if (!currentPatient || !patientMetrics) {
+  if (isLoading) {
     return <div className="p-8 pixel-text">Loading patient data...</div>;
+  }
+  
+  if (!patientId || !patientMetrics) {
+    return <div className="p-8 pixel-text">Select a patient to view analysis.</div>;
   }
   
   return (
@@ -108,7 +133,12 @@ const Analysis = () => {
       
       <div className="grid gap-6 md:grid-cols-2">
         <DomainComparison 
-          patientData={patientMetrics}
+          patientData={{
+            attention: patientMetrics.attention,
+            memory: patientMetrics.memory,
+            executive_function: patientMetrics.executive_function,
+            behavioral: patientMetrics.behavioral
+          }}
           normativeData={percentileData.ageGroup}
           subtypeData={percentileData.adhdSubtype}
         />
@@ -120,12 +150,12 @@ const Analysis = () => {
       </div>
       
       <div className="grid gap-6 md:grid-cols-2">
-        <CognitiveDomain 
+        <DomainComponent 
           domain="attention"
           score={patientMetrics.attention}
           trendData={domainTrendData.attention || []}
         />
-        <CognitiveDomain 
+        <DomainComponent 
           domain="memory"
           score={patientMetrics.memory}
           trendData={domainTrendData.memory || []}
@@ -133,12 +163,12 @@ const Analysis = () => {
       </div>
       
       <div className="grid gap-6 md:grid-cols-2">
-        <CognitiveDomain 
-          domain="executiveFunction"
-          score={patientMetrics.executiveFunction}
-          trendData={domainTrendData.executiveFunction || []}
+        <DomainComponent 
+          domain="executive_function"
+          score={patientMetrics.executive_function}
+          trendData={domainTrendData.executive_function || []}
         />
-        <CognitiveDomain 
+        <DomainComponent 
           domain="behavioral"
           score={patientMetrics.behavioral}
           trendData={domainTrendData.behavioral || []}
