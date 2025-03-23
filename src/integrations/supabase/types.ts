@@ -9,7 +9,215 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      activities: {
+        Row: {
+          created_at: string
+          difficulty: number
+          duration: number
+          id: string
+          score: number
+          session_id: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          difficulty: number
+          duration: number
+          id?: string
+          score: number
+          session_id: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          difficulty?: number
+          duration?: number
+          id?: string
+          score?: number
+          session_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clinical_concerns: {
+        Row: {
+          concern: string
+          created_at: string
+          id: string
+          patient_metric_id: string
+        }
+        Insert: {
+          concern: string
+          created_at?: string
+          id?: string
+          patient_metric_id: string
+        }
+        Update: {
+          concern?: string
+          created_at?: string
+          id?: string
+          patient_metric_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clinical_concerns_patient_metric_id_fkey"
+            columns: ["patient_metric_id"]
+            isOneToOne: false
+            referencedRelation: "patient_metrics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_metrics: {
+        Row: {
+          attention: number
+          behavioral: number
+          created_at: string
+          date: string
+          executive_function: number
+          id: string
+          memory: number
+          patient_id: string
+          percentile: number | null
+          progress: number
+          sessions_completed: number
+          sessions_duration: number
+        }
+        Insert: {
+          attention: number
+          behavioral: number
+          created_at?: string
+          date?: string
+          executive_function: number
+          id?: string
+          memory: number
+          patient_id: string
+          percentile?: number | null
+          progress?: number
+          sessions_completed?: number
+          sessions_duration?: number
+        }
+        Update: {
+          attention?: number
+          behavioral?: number
+          created_at?: string
+          date?: string
+          executive_function?: number
+          id?: string
+          memory?: number
+          patient_id?: string
+          percentile?: number | null
+          progress?: number
+          sessions_completed?: number
+          sessions_duration?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_metrics_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patients: {
+        Row: {
+          adhd_subtype: string
+          age: number
+          created_at: string
+          diagnosis_date: string
+          gender: string
+          id: string
+          name: string
+        }
+        Insert: {
+          adhd_subtype: string
+          age: number
+          created_at?: string
+          diagnosis_date: string
+          gender: string
+          id?: string
+          name: string
+        }
+        Update: {
+          adhd_subtype?: string
+          age?: number
+          created_at?: string
+          diagnosis_date?: string
+          gender?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      sessions: {
+        Row: {
+          attention: number
+          behavioral: number
+          completion_status: string
+          created_at: string
+          device: string
+          duration: number
+          end_time: string
+          environment: string
+          executive_function: number
+          id: string
+          memory: number
+          overall_score: number
+          patient_id: string
+          start_time: string
+        }
+        Insert: {
+          attention: number
+          behavioral: number
+          completion_status: string
+          created_at?: string
+          device: string
+          duration: number
+          end_time: string
+          environment: string
+          executive_function: number
+          id?: string
+          memory: number
+          overall_score: number
+          patient_id: string
+          start_time: string
+        }
+        Update: {
+          attention?: number
+          behavioral?: number
+          completion_status?: string
+          created_at?: string
+          device?: string
+          duration?: number
+          end_time?: string
+          environment?: string
+          executive_function?: number
+          id?: string
+          memory?: number
+          overall_score?: number
+          patient_id?: string
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sessions_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
