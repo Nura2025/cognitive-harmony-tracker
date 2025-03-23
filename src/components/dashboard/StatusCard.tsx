@@ -1,0 +1,61 @@
+
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { ArrowDown, ArrowUp } from 'lucide-react';
+import { formatPercentile, getScoreColorClass } from '@/utils/dataProcessing';
+
+interface StatusCardProps {
+  title: string;
+  value: number | string;
+  isPercentile?: boolean;
+  change?: { value: number; isImprovement: boolean };
+  icon: React.ReactNode;
+}
+
+export const StatusCard: React.FC<StatusCardProps> = ({
+  title,
+  value,
+  isPercentile = false,
+  change,
+  icon
+}) => {
+  const formattedValue = isPercentile ? formatPercentile(value as number) : value;
+  const colorClass = isPercentile ? getScoreColorClass(value as number) : '';
+  
+  return (
+    <Card className="glass overflow-hidden">
+      <CardContent className="p-6">
+        <div className="flex justify-between items-start">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">{title}</p>
+            <h4 className={`text-2xl font-bold mt-1 ${colorClass}`}>
+              {formattedValue}
+              {isPercentile && ' Percentile'}
+            </h4>
+            
+            {change && (
+              <div className="flex items-center mt-2">
+                {change.isImprovement ? (
+                  <div className="flex items-center text-emerald-600 text-sm">
+                    <ArrowUp className="h-3 w-3 mr-1" />
+                    <span>{change.value}%</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center text-red-600 text-sm">
+                    <ArrowDown className="h-3 w-3 mr-1" />
+                    <span>{change.value}%</span>
+                  </div>
+                )}
+                <span className="text-muted-foreground text-xs ml-1.5">from last month</span>
+              </div>
+            )}
+          </div>
+          
+          <div className="p-2 rounded-md bg-primary/10 text-primary">
+            {icon}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
