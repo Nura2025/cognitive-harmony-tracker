@@ -59,7 +59,7 @@ export const createSession = async (
 ): Promise<Session | null> => {
   try {
     // Ensure all required fields have values
-    const sessionData = {
+    const sessionToInsert = {
       patient_id: session.patient_id,
       start_time: session.start_time,
       end_time: session.end_time,
@@ -75,18 +75,18 @@ export const createSession = async (
     };
     
     // Insert the session
-    const { data: sessionData, error: sessionError } = await supabase
+    const { data: insertedSession, error: sessionError } = await supabase
       .from('sessions')
-      .insert([sessionData])
+      .insert([sessionToInsert])
       .select()
       .single();
     
     if (sessionError) throw sessionError;
     
     // Insert activities if provided
-    if (activities.length > 0) {
+    if (activities.length > 0 && insertedSession) {
       const activitiesToInsert = activities.map(activity => ({
-        session_id: sessionData.id,
+        session_id: insertedSession.id,
         type: activity.type,
         score: activity.score,
         duration: activity.duration,
@@ -100,7 +100,7 @@ export const createSession = async (
         
       if (activitiesError) throw activitiesError;
       
-      const result = mapSessionFromDB(sessionData) as Session;
+      const result = mapSessionFromDB(insertedSession) as Session;
       result.activities = activitiesData;
       return result;
     }
@@ -110,7 +110,7 @@ export const createSession = async (
       description: 'The assessment session has been recorded successfully.'
     });
     
-    return mapSessionFromDB(sessionData) as Session;
+    return mapSessionFromDB(insertedSession) as Session;
   } catch (error) {
     console.error('Error creating session:', error);
     toast({

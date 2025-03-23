@@ -176,7 +176,7 @@ export const createPatientMetrics = async (
 ): Promise<PatientMetrics | null> => {
   try {
     // Ensure all required fields have values
-    const metricsData = {
+    const metricsToInsert = {
       patient_id: metrics.patient_id,
       date: metrics.date,
       attention: metrics.attention || 0,
@@ -190,18 +190,18 @@ export const createPatientMetrics = async (
     };
     
     // Start a transaction to insert metrics and concerns
-    const { data: metricsData, error: metricsError } = await supabase
+    const { data: insertedMetrics, error: metricsError } = await supabase
       .from('patient_metrics')
-      .insert([metricsData])
+      .insert([metricsToInsert])
       .select()
       .single();
     
     if (metricsError) throw metricsError;
     
     // If we have concerns, insert them
-    if (concerns.length > 0) {
+    if (concerns.length > 0 && insertedMetrics) {
       const concernsToInsert = concerns.map(concern => ({
-        patient_metric_id: metricsData.id,
+        patient_metric_id: insertedMetrics.id,
         concern
       }));
       
@@ -218,9 +218,9 @@ export const createPatientMetrics = async (
     });
     
     return {
-      ...metricsData,
+      ...insertedMetrics,
       clinical_concerns: concerns
-    };
+    } as PatientMetrics;
   } catch (error) {
     console.error('Error creating patient metrics:', error);
     toast({

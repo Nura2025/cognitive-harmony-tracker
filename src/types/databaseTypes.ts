@@ -9,14 +9,17 @@ export interface Patient {
   created_at: string;
 }
 
-export interface PatientMetrics {
-  id: string;
-  patient_id: string;
-  date: string;
+export interface CognitiveDomain {
   attention: number;
   memory: number;
   executive_function: number;
   behavioral: number;
+}
+
+export interface PatientMetrics extends CognitiveDomain {
+  id: string;
+  patient_id: string;
+  date: string;
   percentile: number | null;
   sessions_duration: number;
   sessions_completed: number;
@@ -25,7 +28,7 @@ export interface PatientMetrics {
   clinical_concerns?: string[];
 }
 
-export interface Session {
+export interface Session extends CognitiveDomain {
   id: string;
   patient_id: string;
   start_time: string;
@@ -35,10 +38,6 @@ export interface Session {
   completion_status: 'Completed' | 'Abandoned' | 'Interrupted';
   overall_score: number;
   device: string;
-  attention: number;
-  memory: number;
-  executive_function: number;
-  behavioral: number;
   created_at: string;
   activities?: Activity[];
 }
