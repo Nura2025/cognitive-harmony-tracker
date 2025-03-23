@@ -1,191 +1,288 @@
-
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { patients, metricsMap, generateRecommendations } from '@/utils/mockData';
-import { ReportGenerator } from '@/components/reports/ReportGenerator';
-import { formatDuration, formatPercentile, getScoreColorClass } from '@/utils/dataProcessing';
-import { format } from 'date-fns';
+import { Progress } from '@/components/ui/progress';
+import { Label } from '@/components/ui/label';
+import { DomainComparison } from '@/components/analysis/DomainComparison';
+import { 
+  mockPatientData, 
+  mockNormativeData, 
+  mockSubtypeData,
+  CognitiveDomain
+} from '@/utils/mockData';
+import { randomInt } from '@/utils/helpers/randomUtils';
 
-const Reports = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [patientId, setPatientId] = useState<string | null>(null);
-  
-  // Parse patient ID from URL query params
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const id = params.get('patient');
-    
-    if (id && patients.some(p => p.id === id)) {
-      setPatientId(id);
-    } else if (patients.length > 0) {
-      setPatientId(patients[0].id);
-    }
-  }, [location]);
-  
-  const handlePatientChange = (id: string) => {
-    navigate(`/reports?patient=${id}`);
-  };
-  
-  const handleBackToDashboard = () => {
-    navigate('/');
-  };
-  
-  // Find the current patient
-  const currentPatient = patients.find(p => p.id === patientId);
-  const patientMetrics = patientId ? metricsMap[patientId] : null;
-  
-  if (!currentPatient || !patientMetrics) {
-    return <div>Loading...</div>;
+// Mock data for test scores
+const testScores = {
+  attention: {
+    sustainedAttention: randomInt(60, 95),
+    selectiveAttention: randomInt(55, 90),
+    dividedAttention: randomInt(50, 85),
+    attentionalSwitching: randomInt(45, 80),
+  },
+  memory: {
+    workingMemory: randomInt(55, 90),
+    shortTermMemory: randomInt(60, 95),
+    longTermMemory: randomInt(65, 95),
+    visualMemory: randomInt(50, 85),
+  },
+  executive: {
+    inhibition: randomInt(40, 75),
+    planning: randomInt(45, 80),
+    problemSolving: randomInt(50, 85),
+    decisionMaking: randomInt(55, 90),
+  },
+  behavioral: {
+    emotionalRegulation: randomInt(35, 70),
+    impulseControl: randomInt(30, 65),
+    socialCognition: randomInt(45, 80),
+    selfMonitoring: randomInt(40, 75),
   }
-  
-  const recommendations = generateRecommendations(patientMetrics);
+};
+
+// Mock recommendations
+const recommendations = [
+  {
+    domain: 'Attention',
+    strategies: [
+      'Daily mindfulness meditation practice (10-15 minutes)',
+      'Use of external timers and reminders for task management',
+      'Implementation of the Pomodoro technique for focused work periods',
+      'Regular physical exercise to improve overall attentional capacity'
+    ]
+  },
+  {
+    domain: 'Memory',
+    strategies: [
+      'Spaced repetition techniques for important information',
+      'Use of visual organizers and mind maps',
+      'Implementation of memory palace techniques for complex information',
+      'Regular sleep hygiene practices to support memory consolidation'
+    ]
+  },
+  {
+    domain: 'Executive Function',
+    strategies: [
+      'Breaking complex tasks into smaller, manageable steps',
+      'Use of structured planning tools and digital organizers',
+      'Regular review and reflection on completed tasks',
+      'Implementation of if-then planning for anticipated challenges'
+    ]
+  },
+  {
+    domain: 'Behavioral Regulation',
+    strategies: [
+      'Regular practice of emotional awareness techniques',
+      'Use of structured response delay strategies for emotional situations',
+      'Implementation of regular self-monitoring practices',
+      'Development of specific social scripts for challenging interactions'
+    ]
+  }
+];
+
+const Reports: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('overview');
   
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="mb-2 -ml-2 text-muted-foreground"
-            onClick={handleBackToDashboard}
-          >
-            <ChevronLeft className="mr-1 h-4 w-4" />
-            Back to Dashboard
-          </Button>
-          <h1 className="text-3xl font-bold mb-1">Clinical Reports</h1>
-          <p className="text-muted-foreground">
-            Generate and export assessment reports for clinical use
-          </p>
-        </div>
-        
-        <div className="min-w-[200px]">
-          <Select value={patientId || ''} onValueChange={handlePatientChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a patient" />
-            </SelectTrigger>
-            <SelectContent>
-              {patients.map(patient => (
-                <SelectItem key={patient.id} value={patient.id}>
-                  {patient.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+    <div className="container mx-auto p-4 max-w-6xl">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Cognitive Assessment Report</h1>
+        <p className="text-muted-foreground">
+          Comprehensive analysis of cognitive performance across key domains
+        </p>
       </div>
       
-      <div className="grid gap-6 md:grid-cols-3">
-        <div className="md:col-span-2">
+      <Tabs defaultValue="overview" onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid grid-cols-4 mb-8">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="detailed">Detailed Analysis</TabsTrigger>
+          <TabsTrigger value="comparison">Comparisons</TabsTrigger>
+          <TabsTrigger value="recommendations">Recommendations</TabsTrigger>
+        </TabsList>
+        
+        {/* Overview Tab */}
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="glass">
+              <CardHeader>
+                <CardTitle>Executive Summary</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-4">
+                  This cognitive assessment evaluates performance across four key domains: 
+                  Attention, Memory, Executive Function, and Behavioral Regulation.
+                </p>
+                <p>
+                  Results indicate relative strengths in Memory and Attention domains, 
+                  with opportunities for development in Executive Function and Behavioral 
+                  Regulation. Specific strategies are recommended to support cognitive 
+                  functioning in daily activities.
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="glass">
+              <CardHeader>
+                <CardTitle>Domain Performance</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <Label>Attention</Label>
+                    <span className="text-sm">{mockPatientData.attention}%</span>
+                  </div>
+                  <Progress value={mockPatientData.attention} className="h-2" />
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <Label>Memory</Label>
+                    <span className="text-sm">{mockPatientData.memory}%</span>
+                  </div>
+                  <Progress value={mockPatientData.memory} className="h-2" />
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <Label>Executive Function</Label>
+                    <span className="text-sm">{mockPatientData.executive}%</span>
+                  </div>
+                  <Progress value={mockPatientData.executive} className="h-2" />
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <Label>Behavioral Regulation</Label>
+                    <span className="text-sm">{mockPatientData.behavioral}%</span>
+                  </div>
+                  <Progress value={mockPatientData.behavioral} className="h-2" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <DomainComparison 
+            patientData={mockPatientData} 
+            normativeData={mockNormativeData}
+          />
+        </TabsContent>
+        
+        {/* Detailed Analysis Tab */}
+        <TabsContent value="detailed" className="space-y-6">
+          {Object.entries(testScores).map(([domain, tests]) => (
+            <Card key={domain} className="glass">
+              <CardHeader>
+                <CardTitle className="capitalize">{domain} Domain</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {Object.entries(tests).map(([test, score]) => (
+                    <div key={test} className="space-y-2">
+                      <div className="flex justify-between">
+                        <Label className="capitalize">{test.replace(/([A-Z])/g, ' $1').trim()}</Label>
+                        <span className="text-sm">{score}%</span>
+                      </div>
+                      <Progress value={score} className="h-2" />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+        
+        {/* Comparisons Tab */}
+        <TabsContent value="comparison" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="glass">
+              <CardHeader>
+                <CardTitle>Age-Based Comparison</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-4">
+                  This comparison shows how your cognitive performance compares to 
+                  age-matched normative data from our research database.
+                </p>
+                <DomainComparison 
+                  patientData={mockPatientData} 
+                  normativeData={mockNormativeData}
+                />
+              </CardContent>
+            </Card>
+            
+            <Card className="glass">
+              <CardHeader>
+                <CardTitle>ADHD Subtype Comparison</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-4">
+                  This comparison shows how your cognitive profile relates to 
+                  typical patterns seen in specific ADHD subtypes.
+                </p>
+                <DomainComparison 
+                  patientData={mockPatientData} 
+                  subtypeData={mockSubtypeData}
+                />
+              </CardContent>
+            </Card>
+          </div>
+          
           <Card className="glass">
             <CardHeader>
-              <CardTitle className="text-lg">Patient Summary</CardTitle>
+              <CardTitle>Comprehensive Comparison</CardTitle>
             </CardHeader>
             <CardContent>
+              <p className="mb-4">
+                This visualization combines all comparison data to provide a comprehensive 
+                view of your cognitive profile relative to both normative data and 
+                ADHD subtype patterns.
+              </p>
+              <DomainComparison 
+                patientData={mockPatientData} 
+                normativeData={mockNormativeData}
+                subtypeData={mockSubtypeData}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* Recommendations Tab */}
+        <TabsContent value="recommendations" className="space-y-6">
+          <Card className="glass">
+            <CardHeader>
+              <CardTitle>Personalized Recommendations</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="mb-6">
+                Based on your cognitive assessment results, the following strategies 
+                are recommended to support your cognitive functioning in daily life:
+              </p>
+              
               <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div>
-                    <h2 className="text-2xl font-bold">{currentPatient.name}</h2>
-                    <div className="flex items-center gap-3 mt-1">
-                      <span className="text-sm text-muted-foreground">
-                        {currentPatient.age} years old, {currentPatient.gender}
-                      </span>
-                      <Badge variant="outline" className="font-normal">
-                        {currentPatient.adhdSubtype} ADHD
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="text-sm text-muted-foreground">Overall Percentile</span>
-                    <span className={`text-2xl font-bold ${getScoreColorClass(patientMetrics.percentile)}`}>
-                      {formatPercentile(patientMetrics.percentile)}
-                    </span>
-                  </div>
-                </div>
-                
-                <Separator />
-                
-                <div>
-                  <h3 className="font-semibold mb-3">Assessment Overview</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-muted/30 p-3 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Session Count</p>
-                      <p className="text-lg font-medium">{patientMetrics.sessionsCompleted}</p>
-                    </div>
-                    <div className="bg-muted/30 p-3 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Total Duration</p>
-                      <p className="text-lg font-medium">{formatDuration(patientMetrics.sessionsDuration * 60)}</p>
-                    </div>
-                    <div className="bg-muted/30 p-3 rounded-lg">
-                      <p className="text-sm text-muted-foreground">First Assessment</p>
-                      <p className="text-lg font-medium">{format(new Date(currentPatient.diagnosisDate), 'MM/dd/yyyy')}</p>
-                    </div>
-                    <div className="bg-muted/30 p-3 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Last Assessment</p>
-                      <p className="text-lg font-medium">{format(new Date(currentPatient.lastAssessment), 'MM/dd/yyyy')}</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <Separator />
-                
-                <div>
-                  <h3 className="font-semibold mb-3">Cognitive Domain Scores</h3>
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-                    {(Object.keys(patientMetrics) as Array<keyof typeof patientMetrics>)
-                      .filter(key => ['attention', 'memory', 'executiveFunction', 'behavioral'].includes(key))
-                      .map(domain => (
-                        <div key={domain} className="flex items-center justify-between">
-                          <div className="flex items-center">
-                            <div className={`w-3 h-3 rounded-full bg-cognitive-${domain} mr-2`} />
-                            <span className="text-sm">
-                              {domain === 'executiveFunction' ? 'Executive Function' : 
-                               domain.charAt(0).toUpperCase() + domain.slice(1)}
-                            </span>
-                          </div>
-                          <span className={`font-medium ${getScoreColorClass(patientMetrics[domain])}`}>
-                            {Math.round(patientMetrics[domain])}%
-                          </span>
-                        </div>
+                {recommendations.map((rec) => (
+                  <div key={rec.domain}>
+                    <h3 className="text-lg font-medium mb-2">{rec.domain}</h3>
+                    <ul className="list-disc pl-5 space-y-1">
+                      {rec.strategies.map((strategy, index) => (
+                        <li key={index} className="text-muted-foreground">{strategy}</li>
                       ))}
+                    </ul>
+                    {rec.domain !== recommendations[recommendations.length - 1].domain && (
+                      <Separator className="my-4" />
+                    )}
                   </div>
-                </div>
-                
-                <Separator />
-                
-                <div>
-                  <h3 className="font-semibold mb-3">Recommendations</h3>
-                  <ul className="space-y-2">
-                    {recommendations.map((rec, index) => (
-                      <li key={index} className="flex items-start">
-                        <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 mr-2" />
-                        <span className="text-sm">{rec}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                ))}
               </div>
             </CardContent>
           </Card>
-        </div>
-        
-        <div>
-          <ReportGenerator patient={currentPatient} metrics={patientMetrics} />
-        </div>
-      </div>
+          
+          <div className="flex justify-end">
+            <Button>Download Full Report</Button>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

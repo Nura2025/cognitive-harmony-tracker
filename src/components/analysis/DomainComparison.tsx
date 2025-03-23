@@ -55,25 +55,25 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
   });
   
   return (
-    <Card className="glass pixel-border">
+    <Card className="glass">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg pixel-text">Cognitive Domain Comparison</CardTitle>
+        <CardTitle className="text-lg">Cognitive Domain Comparison</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-4 mb-4">
           <div className="flex items-center">
-            <div className="w-3 h-3 rounded-full bg-nura-primary mr-1.5" />
+            <div className="w-3 h-3 rounded-full bg-primary mr-1.5" />
             <span className="text-xs">Patient</span>
           </div>
           {normativeData && (
             <div className="flex items-center">
-              <div className="w-3 h-3 rounded-full bg-nura-secondary mr-1.5" />
+              <div className="w-3 h-3 rounded-full bg-blue-400 mr-1.5" />
               <span className="text-xs">Age-Based Normative</span>
             </div>
           )}
           {subtypeData && (
             <div className="flex items-center">
-              <div className="w-3 h-3 rounded-full bg-nura-accent mr-1.5" />
+              <div className="w-3 h-3 rounded-full bg-amber-400 mr-1.5" />
               <span className="text-xs">ADHD Subtype Average</span>
             </div>
           )}
@@ -99,8 +99,8 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
                   <Radar
                     name="ADHD Subtype Average"
                     dataKey="subtype"
-                    stroke="hsl(var(--nura-accent))"
-                    fill="hsl(var(--nura-accent))"
+                    stroke="rgb(251, 191, 36)"
+                    fill="rgb(251, 191, 36)"
                     fillOpacity={0.5}
                   />
                 )}
@@ -109,8 +109,8 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
                   <Radar
                     name="Age-Based Normative"
                     dataKey="normative"
-                    stroke="hsl(var(--nura-secondary))"
-                    fill="hsl(var(--nura-secondary))"
+                    stroke="rgb(96, 165, 250)"
+                    fill="rgb(96, 165, 250)"
                     fillOpacity={0.5}
                   />
                 )}
@@ -118,15 +118,15 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
                 <Radar
                   name="Patient"
                   dataKey="patient"
-                  stroke="hsl(var(--nura-primary))"
-                  fill="hsl(var(--nura-primary))"
+                  stroke="hsl(var(--primary))"
+                  fill="hsl(var(--primary))"
                   fillOpacity={0.4}
                 />
               </RadarChart>
             </ResponsiveContainer>
           )}
           {(!chartData.length || !isValidData) && (
-            <div className="flex h-full items-center justify-center text-muted-foreground pixel-text">
+            <div className="flex h-full items-center justify-center text-muted-foreground">
               No valid data available for visualization
             </div>
           )}
