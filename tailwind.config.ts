@@ -68,6 +68,14 @@ export default {
 					memory: 'hsl(var(--cognitive-memory))',
 					executive: 'hsl(var(--cognitive-executive))',
 					behavioral: 'hsl(var(--cognitive-behavioral))',
+				},
+				nura: {
+					primary: 'hsl(var(--nura-primary))',
+					secondary: 'hsl(var(--nura-secondary))',
+					accent: 'hsl(var(--nura-accent))',
+					background: 'hsl(var(--nura-background))',
+					foreground: 'hsl(var(--nura-foreground))',
+					border: 'hsl(var(--nura-border))',
 				}
 			},
 			borderRadius: {
@@ -129,6 +137,7 @@ export default {
 				'glass-hover': '0 4px 40px rgba(0, 0, 0, 0.15)',
 				'neuro': '5px 5px 10px #d1d9e6, -5px -5px 10px #ffffff',
 				'neuro-inset': 'inset 5px 5px 10px #d1d9e6, inset -5px -5px 10px #ffffff',
+				'pixel': '4px 4px 0px rgba(0, 0, 0, 0.2)',
 			},
 			backdropBlur: {
 				'xs': '2px',
@@ -137,6 +146,7 @@ export default {
 				sans: ['Inter var', 'sans-serif'],
 				display: ['Manrope', 'sans-serif'],
 				mono: ['JetBrains Mono', 'monospace'],
+				pixel: ['"Press Start 2P"', 'cursive'],
 			},
 			backgroundImage: {
 				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

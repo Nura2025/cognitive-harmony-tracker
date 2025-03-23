@@ -180,8 +180,10 @@ export const generateTrendData = (domain: keyof CognitiveDomain, days: number = 
   for (let i = days; i >= 0; i -= randomInt(3, 7)) {
     const date = format(subDays(new Date(), i), 'yyyy-MM-dd');
     // Add some randomness but ensure an overall improving trend
-    const value = randomFloat(50, 85) + ((days - i) / days) * 15;
-    data.push({ date, value: Math.min(value, 100) });
+    const baseValue = 50 + ((days - i) / days) * 15;
+    const randomVariation = randomFloat(-5, 5);
+    const value = Math.min(Math.max(baseValue + randomVariation, 0), 100); // Ensure value is between 0 and 100
+    data.push({ date, value });
   }
   return data;
 };

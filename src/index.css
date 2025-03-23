@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Press+Start+2P&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -50,6 +50,14 @@
     --cognitive-memory: 43 96% 58%;
     --cognitive-executive: 142 72% 45%;
     --cognitive-behavioral: 325 80% 56%;
+    
+    /* NURA Pixel Theme Colors */
+    --nura-primary: 280 75% 60%;
+    --nura-secondary: 200 75% 55%;
+    --nura-accent: 48 95% 65%;
+    --nura-background: 230 15% 15%;
+    --nura-foreground: 0 0% 95%;
+    --nura-border: 280 70% 70%;
   }
 
   * {
@@ -121,4 +129,53 @@
   100% {
     transform: translateX(100%);
   }
+}
+
+/* NURA Pixel Theme */
+.pixel-text {
+  font-family: 'Press Start 2P', cursive;
+  @apply tracking-wide text-foreground;
+}
+
+.pixel-border {
+  @apply border-2 border-nura-border;
+  image-rendering: pixelated;
+  box-shadow: 4px 4px 0px 0px hsl(var(--nura-border) / 0.5);
+}
+
+.nura-card {
+  @apply bg-nura-background/90 border-2 border-nura-border text-nura-foreground;
+  box-shadow: 4px 4px 0px 0px hsl(var(--nura-border) / 0.5);
+}
+
+.nura-title {
+  font-family: 'Press Start 2P', cursive;
+  @apply text-nura-accent tracking-wide;
+}
+
+.nura-button {
+  @apply bg-nura-primary text-white border-2 border-nura-border px-4 py-2 font-semibold;
+  font-family: 'Press Start 2P', cursive;
+  box-shadow: 3px 3px 0px 0px hsl(var(--nura-border) / 0.5);
+  transition: all 0.1s ease-in-out;
+}
+
+.nura-button:hover {
+  @apply bg-nura-primary/90;
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px 0px hsl(var(--nura-border) / 0.5);
+}
+
+/* Pixel animations */
+@keyframes pixel-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.pixel-float {
+  animation: pixel-float 2s ease-in-out infinite;
 }

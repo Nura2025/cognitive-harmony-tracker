@@ -68,7 +68,7 @@ const Analysis = () => {
     }));
   
   if (!currentPatient || !patientMetrics) {
-    return <div className="p-8">Loading patient data...</div>;
+    return <div className="p-8 pixel-text">Loading patient data...</div>;
   }
   
   return (
@@ -84,7 +84,7 @@ const Analysis = () => {
             <ChevronLeft className="mr-1 h-4 w-4" />
             Back to Dashboard
           </Button>
-          <h1 className="text-3xl font-bold mb-1">Cognitive Analysis</h1>
+          <h1 className="text-3xl font-bold mb-1 nura-title">NURA Cognitive Analysis</h1>
           <p className="text-muted-foreground">
             Detailed cognitive domain assessment and trends
           </p>
@@ -92,7 +92,7 @@ const Analysis = () => {
         
         <div className="min-w-[200px]">
           <Select value={patientId || ''} onValueChange={handlePatientChange}>
-            <SelectTrigger>
+            <SelectTrigger className="pixel-border">
               <SelectValue placeholder="Select a patient" />
             </SelectTrigger>
             <SelectContent>
