@@ -12,11 +12,15 @@ import { generatePatients, generatePatientMetrics } from './generators/patientGe
 import { generateSessionData } from './generators/sessionGenerators';
 import { generateTrendData, generatePercentileData } from './generators/trendGenerators';
 import { generateRecommendations } from './generators/recommendationGenerators';
+import { mockPatientData, mockNormativeData, mockSubtypeData } from './mockData/cognitiveDomainData';
 
 // Initialize mock data
 export const patients = generatePatients(12);
 export const patientMetrics = generatePatientMetrics(patients);
 export const sessionData = generateSessionData(patients);
+
+// Export mock cognitive domain data
+export { mockPatientData, mockNormativeData, mockSubtypeData };
 
 // For convenience, create a map of patient IDs to their metrics
 export const metricsMap = patientMetrics.reduce((acc, metrics) => {
