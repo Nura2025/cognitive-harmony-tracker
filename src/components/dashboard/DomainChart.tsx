@@ -11,8 +11,8 @@ import {
   CartesianGrid,
   ReferenceLine
 } from 'recharts';
-import { CognitiveDomain } from '@/utils/mockData';
-import { getDomainName } from '@/utils/dataProcessing';
+import { CognitiveDomain } from '@/types/databaseTypes';
+import { getDomainName, convertToDatabaseKey } from '@/utils/dataProcessing';
 
 interface DomainChartProps {
   domainData: {
@@ -50,15 +50,18 @@ export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-3 mb-3">
-          {(Object.keys(domainData) as (keyof typeof domainData)[]).map(domain => (
-            <div key={domain} className="flex items-center">
-              <div 
-                className="w-3 h-3 rounded-full mr-1.5" 
-                style={{ backgroundColor: domainColors[domain] }}
-              />
-              <span className="text-xs">{getDomainName(domain as keyof CognitiveDomain)}</span>
-            </div>
-          ))}
+          {(Object.keys(domainData) as (keyof typeof domainData)[]).map(domain => {
+            const dbKey = convertToDatabaseKey(domain as string);
+            return (
+              <div key={domain} className="flex items-center">
+                <div 
+                  className="w-3 h-3 rounded-full mr-1.5" 
+                  style={{ backgroundColor: domainColors[domain] }}
+                />
+                <span className="text-xs">{getDomainName(dbKey)}</span>
+              </div>
+            );
+          })}
         </div>
         
         <div className="h-[300px] w-full pt-4">

@@ -56,7 +56,16 @@ export const PatientForm: React.FC = () => {
       diagnosis_date: format(values.diagnosis_date, 'yyyy-MM-dd'),
     };
     
-    await createPatient(patientData);
+    // Ensure all required fields are present
+    const patientToCreate = {
+      name: patientData.name,
+      age: patientData.age,
+      gender: patientData.gender,
+      diagnosis_date: patientData.diagnosis_date,
+      adhd_subtype: patientData.adhd_subtype
+    };
+    
+    await createPatient(patientToCreate);
     form.reset();
   };
 

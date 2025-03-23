@@ -102,9 +102,19 @@ export const SessionForm: React.FC = () => {
     const startTime = new Date(now.getTime() - values.duration * 1000).toISOString();
     
     const sessionData = {
-      ...values,
+      // Ensure all required fields are non-optional
+      patient_id: values.patient_id,
       start_time: startTime,
       end_time: endTime,
+      duration: values.duration,
+      environment: values.environment,
+      completion_status: values.completion_status,
+      overall_score: values.overall_score,
+      device: values.device,
+      attention: values.attention,
+      memory: values.memory,
+      executive_function: values.executive_function,
+      behavioral: values.behavioral
     };
     
     await createSession(sessionData, activities);

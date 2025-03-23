@@ -85,6 +85,16 @@ export const MetricsForm: React.FC = () => {
     const metricsData = {
       ...values,
       date: new Date().toISOString().split('T')[0],
+      // Ensure all required fields are non-optional
+      patient_id: values.patient_id,
+      attention: values.attention,
+      memory: values.memory,
+      executive_function: values.executive_function,
+      behavioral: values.behavioral,
+      percentile: values.percentile ?? null,
+      sessions_duration: values.sessions_duration,
+      sessions_completed: values.sessions_completed,
+      progress: values.progress
     };
     
     await createPatientMetrics(metricsData, concerns);

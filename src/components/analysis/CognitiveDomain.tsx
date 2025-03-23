@@ -12,8 +12,9 @@ import {
   YAxis,
   CartesianGrid
 } from 'recharts';
-import { CognitiveDomain as CognitiveDomainType } from '@/utils/mockData';
+import { CognitiveDomain as CognitiveDomainType } from '@/types/databaseTypes';
 import { 
+  convertToDatabaseKey,
   getDomainBgColor, 
   getDomainColor, 
   getDomainName, 
@@ -22,7 +23,7 @@ import {
 } from '@/utils/dataProcessing';
 
 interface CognitiveDomainProps {
-  domain: keyof CognitiveDomainType;
+  domain: string;
   score: number;
   trendData: Array<{date: string; value: number}>;
 }
@@ -32,6 +33,8 @@ export const CognitiveDomain: React.FC<CognitiveDomainProps> = ({
   score,
   trendData
 }) => {
+  const domainKey = convertToDatabaseKey(domain);
+  
   const formattedTrendData = trendData.map(item => ({
     ...item,
     date: item.date.substring(5) // Remove year part
@@ -41,8 +44,8 @@ export const CognitiveDomain: React.FC<CognitiveDomainProps> = ({
   const firstScore = formattedTrendData[0]?.value || latestScore;
   const improvement = Math.round((latestScore - firstScore) * 10) / 10;
   
-  const colorClass = getDomainColor(domain);
-  const bgColorClass = getDomainBgColor(domain);
+  const colorClass = getDomainColor(domainKey);
+  const bgColorClass = getDomainBgColor(domainKey);
   const scoreColorClass = getScoreColorClass(score);
   const scoreStatus = getScoreStatus(score);
   
@@ -53,7 +56,7 @@ export const CognitiveDomain: React.FC<CognitiveDomainProps> = ({
     <Card className="glass overflow-hidden">
       <CardHeader className={`${bgColorClass} pb-2`}>
         <div className="flex items-center justify-between">
-          <CardTitle className={`text-lg ${colorClass}`}>{getDomainName(domain)}</CardTitle>
+          <CardTitle className={`text-lg ${colorClass}`}>{getDomainName(domainKey)}</CardTitle>
           <Badge 
             className={`${scoreColorClass} bg-white`}
             variant="outline"
@@ -92,7 +95,7 @@ export const CognitiveDomain: React.FC<CognitiveDomainProps> = ({
                   borderRadius: 'var(--radius)',
                   color: 'hsl(var(--foreground))'
                 }}
-                formatter={(value: number) => [`${value}%`, getDomainName(domain)]}
+                formatter={(value: number) => [`${value}%`, getDomainName(domainKey)]}
               />
               <Line
                 type="monotone"
@@ -142,7 +145,7 @@ export const CognitiveDomain: React.FC<CognitiveDomainProps> = ({
 };
 
 // Helper function to get domain-specific insights
-const getDomainInsights = (domain: keyof CognitiveDomainType, score: number): string[] => {
+const getDomainInsights = (domain: string, score: number): string[] => {
   if (score < 60) {
     switch (domain) {
       case 'attention':
@@ -158,6 +161,7 @@ const getDomainInsights = (domain: keyof CognitiveDomainType, score: number): st
           'Better performance with visual memory compared to verbal memory'
         ];
       case 'executiveFunction':
+      case 'executive_function':
         return [
           'Struggles with planning and organizing multi-step activities',
           'Difficulty adjusting to changing task requirements',
@@ -187,6 +191,7 @@ const getDomainInsights = (domain: keyof CognitiveDomainType, score: number): st
           'Shows appropriate memory strategies during complex tasks'
         ];
       case 'executiveFunction':
+      case 'executive_function':
         return [
           'Demonstrates effective planning and organizational skills',
           'Good cognitive flexibility when adapting to changing requirements',

@@ -1,4 +1,3 @@
-
 import { formatDistance, parseISO } from 'date-fns';
 import { CognitiveDomain } from '@/types/databaseTypes';
 import { SessionData } from '@/utils/types/patientTypes';
@@ -66,7 +65,7 @@ export const getDomainName = (domain: keyof CognitiveDomain): string => {
   const domainNames: Record<keyof CognitiveDomain, string> = {
     attention: 'Attention',
     memory: 'Memory',
-    executiveFunction: 'Executive Function',
+    executive_function: 'Executive Function',
     behavioral: 'Behavioral Control'
   };
   
@@ -78,7 +77,7 @@ export const getDomainBgColor = (domain: keyof CognitiveDomain): string => {
   const bgColors: Record<keyof CognitiveDomain, string> = {
     attention: 'bg-blue-50',
     memory: 'bg-purple-50',
-    executiveFunction: 'bg-amber-50',
+    executive_function: 'bg-amber-50',
     behavioral: 'bg-emerald-50'
   };
   
@@ -90,7 +89,7 @@ export const getDomainColor = (domain: keyof CognitiveDomain): string => {
   const colors: Record<keyof CognitiveDomain, string> = {
     attention: 'text-blue-600',
     memory: 'text-purple-600',
-    executiveFunction: 'text-amber-600',
+    executive_function: 'text-amber-600',
     behavioral: 'text-emerald-600'
   };
   
@@ -112,14 +111,11 @@ export const getScoreStatus = (score: number): string => {
 
 // Process sessions for timeline chart
 export const processSessionsForTimeline = (sessions: SessionData[]): Array<{date: string; score: number}> => {
-  // Sort sessions by date
   const sortedSessions = [...sessions].sort((a, b) => {
     return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
   });
   
-  // Map to the format needed for the chart
   return sortedSessions.map(session => {
-    // Format date as YYYY-MM-DD for the chart
     const date = new Date(session.startTime).toISOString().split('T')[0];
     
     return {
@@ -135,11 +131,9 @@ export const mapPatientFromDB = (dbPatient: any): any => {
   
   return {
     ...dbPatient,
-    // Ensure gender is one of the allowed values
     gender: ['Male', 'Female', 'Other'].includes(dbPatient.gender) 
       ? dbPatient.gender as 'Male' | 'Female' | 'Other'
       : 'Other',
-    // Ensure adhd_subtype is one of the allowed values
     adhd_subtype: ['Inattentive', 'Hyperactive-Impulsive', 'Combined'].includes(dbPatient.adhd_subtype)
       ? dbPatient.adhd_subtype as 'Inattentive' | 'Hyperactive-Impulsive' | 'Combined'
       : 'Combined'
@@ -151,13 +145,27 @@ export const mapSessionFromDB = (dbSession: any): any => {
   
   return {
     ...dbSession,
-    // Ensure environment is one of the allowed values
     environment: ['Home', 'School', 'Clinic'].includes(dbSession.environment)
       ? dbSession.environment as 'Home' | 'School' | 'Clinic'
       : 'Home',
-    // Ensure completion_status is one of the allowed values
     completion_status: ['Completed', 'Abandoned', 'Interrupted'].includes(dbSession.completion_status)
       ? dbSession.completion_status as 'Completed' | 'Abandoned' | 'Interrupted'
       : 'Completed'
   };
+};
+
+// Helper function to convert snake_case domain key to camelCase for legacy code support
+export const convertDomainKeyCasing = (key: keyof CognitiveDomain): string => {
+  if (key === 'executive_function') {
+    return 'executiveFunction';
+  }
+  return key;
+};
+
+// Helper function to convert camelCase domain key to snake_case for database compatibility
+export const convertToDatabaseKey = (key: string): keyof CognitiveDomain => {
+  if (key === 'executiveFunction') {
+    return 'executive_function';
+  }
+  return key as keyof CognitiveDomain;
 };
