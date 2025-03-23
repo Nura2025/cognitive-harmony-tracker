@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Patient, PatientMetrics, ClinicalConcern } from '@/types/databaseTypes';
 import { toast } from '@/hooks/use-toast';
+import { mapPatientFromDB } from '@/utils/dataProcessing';
 
 // Fetch all patients
 export const getPatients = async (): Promise<Patient[]> => {
@@ -12,7 +13,7 @@ export const getPatients = async (): Promise<Patient[]> => {
       .order('name');
     
     if (error) throw error;
-    return data || [];
+    return (data || []).map(mapPatientFromDB) as Patient[];
   } catch (error) {
     console.error('Error fetching patients:', error);
     toast({
@@ -34,7 +35,7 @@ export const getPatient = async (id: string): Promise<Patient | null> => {
       .single();
     
     if (error) throw error;
-    return data;
+    return mapPatientFromDB(data) as Patient;
   } catch (error) {
     console.error(`Error fetching patient ${id}:`, error);
     toast({
@@ -49,9 +50,18 @@ export const getPatient = async (id: string): Promise<Patient | null> => {
 // Create a new patient
 export const createPatient = async (patient: Omit<Patient, 'id' | 'created_at'>): Promise<Patient | null> => {
   try {
+    // Ensure all required fields are present
+    const patientData = {
+      name: patient.name,
+      age: patient.age,
+      gender: patient.gender,
+      diagnosis_date: patient.diagnosis_date,
+      adhd_subtype: patient.adhd_subtype
+    };
+    
     const { data, error } = await supabase
       .from('patients')
-      .insert([patient])
+      .insert([patientData])
       .select()
       .single();
     
@@ -60,7 +70,7 @@ export const createPatient = async (patient: Omit<Patient, 'id' | 'created_at'>)
       title: 'Patient created',
       description: `${patient.name} has been added successfully.`
     });
-    return data;
+    return mapPatientFromDB(data) as Patient;
   } catch (error) {
     console.error('Error creating patient:', error);
     toast({
@@ -87,7 +97,7 @@ export const updatePatient = async (id: string, patient: Partial<Patient>): Prom
       title: 'Patient updated',
       description: `Patient information has been updated successfully.`
     });
-    return data;
+    return mapPatientFromDB(data) as Patient;
   } catch (error) {
     console.error(`Error updating patient ${id}:`, error);
     toast({
@@ -165,21 +175,24 @@ export const createPatientMetrics = async (
   concerns: string[]
 ): Promise<PatientMetrics | null> => {
   try {
+    // Ensure all required fields have values
+    const metricsData = {
+      patient_id: metrics.patient_id,
+      date: metrics.date,
+      attention: metrics.attention || 0,
+      memory: metrics.memory || 0,
+      executive_function: metrics.executive_function || 0,
+      behavioral: metrics.behavioral || 0,
+      percentile: metrics.percentile || 0,
+      sessions_duration: metrics.sessions_duration || 0,
+      sessions_completed: metrics.sessions_completed || 0,
+      progress: metrics.progress || 0
+    };
+    
     // Start a transaction to insert metrics and concerns
     const { data: metricsData, error: metricsError } = await supabase
       .from('patient_metrics')
-      .insert([{
-        patient_id: metrics.patient_id,
-        date: metrics.date,
-        attention: metrics.attention,
-        memory: metrics.memory,
-        executive_function: metrics.executive_function,
-        behavioral: metrics.behavioral,
-        percentile: metrics.percentile,
-        sessions_duration: metrics.sessions_duration,
-        sessions_completed: metrics.sessions_completed,
-        progress: metrics.progress
-      }])
+      .insert([metricsData])
       .select()
       .single();
     
