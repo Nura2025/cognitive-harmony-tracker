@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -28,7 +29,7 @@ const testScores = {
     longTermMemory: randomInt(65, 95),
     visualMemory: randomInt(50, 85),
   },
-  executive: {
+  executiveFunction: {
     inhibition: randomInt(40, 75),
     planning: randomInt(45, 80),
     problemSolving: randomInt(50, 85),
@@ -147,9 +148,9 @@ const Reports: React.FC = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <Label>Executive Function</Label>
-                    <span className="text-sm">{mockPatientData.executive}%</span>
+                    <span className="text-sm">{mockPatientData.executiveFunction}%</span>
                   </div>
-                  <Progress value={mockPatientData.executive} className="h-2" />
+                  <Progress value={mockPatientData.executiveFunction} className="h-2" />
                 </div>
                 
                 <div className="space-y-2">
