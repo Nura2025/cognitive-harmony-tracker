@@ -61,13 +61,14 @@ const Analysis = () => {
   const percentileData = generatePercentileData();
   
   // Generate performance trend data with validation
-  const performanceTrendData = generateTrendData('attention', 60).map(item => ({ 
-    date: item.date, 
-    score: typeof item.value === 'number' && !isNaN(item.value) ? item.value : 0
-  }));
+  const performanceTrendData = generateTrendData('attention', 60)
+    .map(item => ({ 
+      date: item.date, 
+      score: typeof item.value === 'number' && !isNaN(item.value) ? item.value : 0
+    }));
   
   if (!currentPatient || !patientMetrics) {
-    return <div>Loading...</div>;
+    return <div className="p-8">Loading patient data...</div>;
   }
   
   return (

@@ -26,12 +26,31 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
   // Process the data for the radar chart
   const domains = Object.keys(patientData) as (keyof CognitiveDomain)[];
   
+  // Validate that all patient data is numeric and not NaN
+  const isValidData = domains.every(domain => 
+    typeof patientData[domain] === 'number' && !isNaN(patientData[domain])
+  );
+  
+  // Create safe chart data with fallbacks for missing or invalid values
   const chartData = domains.map(domain => {
+    // Ensure all values are valid numbers
+    const patientValue = typeof patientData[domain] === 'number' && !isNaN(patientData[domain]) 
+      ? patientData[domain] 
+      : 0;
+    
+    const normativeValue = normativeData && typeof normativeData[domain] === 'number' && !isNaN(normativeData[domain])
+      ? normativeData[domain]
+      : 50;
+      
+    const subtypeValue = subtypeData && typeof subtypeData[domain] === 'number' && !isNaN(subtypeData[domain])
+      ? subtypeData[domain]
+      : 40;
+      
     return {
       domain: getDomainName(domain),
-      patient: patientData[domain] || 0, // Ensure we have a fallback value
-      normative: normativeData?.[domain] || 50,
-      subtype: subtypeData?.[domain] || 40
+      patient: patientValue,
+      normative: normativeValue,
+      subtype: subtypeValue
     };
   });
   
@@ -61,7 +80,7 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
         </div>
         
         <div className="h-[350px] w-full">
-          {chartData.length > 0 && (
+          {chartData.length > 0 && isValidData && (
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart outerRadius="75%" data={chartData}>
                 <PolarGrid stroke="hsl(var(--border))" />
@@ -105,6 +124,11 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
                 />
               </RadarChart>
             </ResponsiveContainer>
+          )}
+          {(!chartData.length || !isValidData) && (
+            <div className="flex h-full items-center justify-center text-muted-foreground">
+              No valid data available for visualization
+            </div>
           )}
         </div>
       </CardContent>
