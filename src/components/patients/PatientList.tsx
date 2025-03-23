@@ -12,8 +12,9 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Eye, FileText } from 'lucide-react';
-import { Patient, PatientMetrics } from '@/utils/mockData';
-import { formatLastSession, formatPercentile, getScoreColorClass } from '@/utils/dataProcessing';
+import { Patient, PatientMetrics } from '@/types/databaseTypes';
+import { formatDateDistance, formatPercentile, getScoreColorClass } from '@/utils/dataProcessing';
+import { format, parseISO } from 'date-fns';
 
 interface PatientListProps {
   patients: Patient[];
@@ -23,6 +24,14 @@ interface PatientListProps {
 export const PatientList: React.FC<PatientListProps> = ({ patients, metrics }) => {
   const navigate = useNavigate();
   
+  if (patients.length === 0) {
+    return (
+      <div className="glass rounded-md p-8 text-center border border-border">
+        <p className="text-muted-foreground">No patients found</p>
+      </div>
+    );
+  }
+  
   return (
     <div className="glass rounded-md overflow-hidden border border-border">
       <Table>
@@ -31,8 +40,7 @@ export const PatientList: React.FC<PatientListProps> = ({ patients, metrics }) =
             <TableHead>Patient Name</TableHead>
             <TableHead>Age</TableHead>
             <TableHead>ADHD Subtype</TableHead>
-            <TableHead>Last Session</TableHead>
-            <TableHead>Sessions</TableHead>
+            <TableHead>Diagnosis Date</TableHead>
             <TableHead>Percentile</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -47,17 +55,20 @@ export const PatientList: React.FC<PatientListProps> = ({ patients, metrics }) =
               <TableCell>{patient.age}</TableCell>
               <TableCell>
                 <Badge variant="outline" className="font-normal">
-                  {patient.adhdSubtype}
+                  {patient.adhd_subtype}
                 </Badge>
               </TableCell>
-              <TableCell>{formatLastSession(patient.lastAssessment)}</TableCell>
-              <TableCell>{patient.assessmentCount}</TableCell>
+              <TableCell>{format(parseISO(patient.diagnosis_date), 'MMM d, yyyy')}</TableCell>
               <TableCell>
-                <span 
-                  className={`font-medium ${getScoreColorClass(metrics[patient.id]?.percentile)}`}
-                >
-                  {formatPercentile(metrics[patient.id]?.percentile)}
-                </span>
+                {metrics[patient.id] ? (
+                  <span 
+                    className={`font-medium ${getScoreColorClass(metrics[patient.id]?.percentile)}`}
+                  >
+                    {formatPercentile(metrics[patient.id]?.percentile)}
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">No data</span>
+                )}
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex items-center justify-end space-x-2">

@@ -2,17 +2,59 @@
 import React, { useState, useEffect } from 'react';
 import { PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { patients, metricsMap } from '@/utils/mockData';
 import { PatientFilters } from '@/components/patients/PatientFilters';
 import { PatientList } from '@/components/patients/PatientList';
+import { getPatients, getPatientMetrics } from '@/services/patientService';
+import { Patient, PatientMetrics } from '@/types/databaseTypes';
+import { toast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const Patients = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilters, setActiveFilters] = useState<Record<string, boolean>>({});
-  const [filteredPatients, setFilteredPatients] = useState(patients);
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
+  const [metricsMap, setMetricsMap] = useState<Record<string, PatientMetrics>>({});
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Fetch patients and their metrics from the database
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const patientsData = await getPatients();
+        setPatients(patientsData);
+        
+        // Fetch metrics for each patient
+        const metricsData: Record<string, PatientMetrics> = {};
+        for (const patient of patientsData) {
+          const metrics = await getPatientMetrics(patient.id);
+          if (metrics) {
+            metricsData[patient.id] = metrics;
+          }
+        }
+        
+        setMetricsMap(metricsData);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error fetching patients:', error);
+        toast({
+          title: 'Error loading patients',
+          description: 'Failed to load patient data from the database.',
+          variant: 'destructive'
+        });
+        setIsLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
   
   // Filter patients based on search term and active filters
   useEffect(() => {
+    if (patients.length === 0) return;
+    
     let result = [...patients];
     
     // Apply search filter
@@ -29,7 +71,7 @@ const Patients = () => {
       .map(key => key.replace('subtype-', ''));
     
     if (activeSubtypes.length > 0) {
-      result = result.filter(patient => activeSubtypes.includes(patient.adhdSubtype));
+      result = result.filter(patient => activeSubtypes.includes(patient.adhd_subtype));
     }
     
     // Apply age range filters
@@ -47,7 +89,7 @@ const Patients = () => {
     }
     
     setFilteredPatients(result);
-  }, [searchTerm, activeFilters]);
+  }, [searchTerm, activeFilters, patients]);
   
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
@@ -65,6 +107,10 @@ const Patients = () => {
     setSearchTerm('');
   };
   
+  const handleAddPatient = () => {
+    navigate('/data-entry?tab=patient');
+  };
+  
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -75,7 +121,7 @@ const Patients = () => {
           </p>
         </div>
         
-        <Button className="gap-1.5">
+        <Button className="gap-1.5" onClick={handleAddPatient}>
           <PlusCircle className="h-4 w-4" />
           <span>Add Patient</span>
         </Button>
@@ -89,10 +135,16 @@ const Patients = () => {
         onResetFilters={handleResetFilters}
       />
       
-      <PatientList 
-        patients={filteredPatients} 
-        metrics={metricsMap} 
-      />
+      {isLoading ? (
+        <div className="flex justify-center p-8">
+          <p>Loading patients...</p>
+        </div>
+      ) : (
+        <PatientList 
+          patients={filteredPatients} 
+          metrics={metricsMap} 
+        />
+      )}
     </div>
   );
 };
