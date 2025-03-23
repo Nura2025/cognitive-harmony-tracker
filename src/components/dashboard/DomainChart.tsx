@@ -26,9 +26,11 @@ interface DomainChartProps {
 export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
   // Convert domain data to a format suitable for the chart
   const chartData = Array(10).fill(0).map((_, index) => {
-    const dataPoint: any = { day: index + 1 };
+    const dataPoint: Record<string, number | string> = { day: index + 1 };
     (Object.keys(domainData) as (keyof typeof domainData)[]).forEach(domain => {
-      dataPoint[domain] = domainData[domain][index];
+      // Ensure we have valid numbers in the dataset
+      const value = domainData[domain][index];
+      dataPoint[domain] = typeof value === 'number' && !isNaN(value) ? value : 0;
     });
     return dataPoint;
   });
@@ -100,6 +102,7 @@ export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
                 formatter={(value: number) => [`${value}%`, '']}
                 labelFormatter={(day) => `Day ${day}`}
               />
+              {/* Use a fixed numeric value instead of a variable for ReferenceLine */}
               <ReferenceLine y={60} stroke="hsl(var(--muted))" strokeDasharray="3 3" />
               
               {(Object.keys(domainData) as (keyof typeof domainData)[]).map(domain => (

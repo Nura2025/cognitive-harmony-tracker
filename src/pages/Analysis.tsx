@@ -60,6 +60,12 @@ const Analysis = () => {
   // Generate percentile comparison data
   const percentileData = generatePercentileData();
   
+  // Generate performance trend data with validation
+  const performanceTrendData = generateTrendData('attention', 60).map(item => ({ 
+    date: item.date, 
+    score: typeof item.value === 'number' && !isNaN(item.value) ? item.value : 0
+  }));
+  
   if (!currentPatient || !patientMetrics) {
     return <div>Loading...</div>;
   }
@@ -106,10 +112,7 @@ const Analysis = () => {
           subtypeData={percentileData.adhdSubtype}
         />
         <PerformanceTrend 
-          data={generateTrendData('attention', 60).map(item => ({ 
-            date: item.date, 
-            score: item.value 
-          }))}
+          data={performanceTrendData}
           title="Overall Performance Trend"
           description="90-day progress tracking across all cognitive metrics"
         />

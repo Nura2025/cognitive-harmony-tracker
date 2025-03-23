@@ -29,7 +29,7 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
   const chartData = domains.map(domain => {
     return {
       domain: getDomainName(domain),
-      patient: patientData[domain],
+      patient: patientData[domain] || 0, // Ensure we have a fallback value
       normative: normativeData?.[domain] || 50,
       subtype: subtypeData?.[domain] || 40
     };
@@ -61,49 +61,51 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
         </div>
         
         <div className="h-[350px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <RadarChart outerRadius="75%" data={chartData}>
-              <PolarGrid stroke="hsl(var(--border))" />
-              <PolarAngleAxis 
-                dataKey="domain" 
-                tick={{ fill: 'hsl(var(--foreground))', fontSize: 12 }}
-              />
-              <PolarRadiusAxis 
-                angle={30} 
-                domain={[0, 100]} 
-                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
-                stroke="hsl(var(--border))"
-              />
-              
-              {subtypeData && (
-                <Radar
-                  name="ADHD Subtype Average"
-                  dataKey="subtype"
-                  stroke="hsl(var(--muted-foreground)/20)"
-                  fill="hsl(var(--muted-foreground)/20)"
-                  fillOpacity={0.5}
+          {chartData.length > 0 && (
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart outerRadius="75%" data={chartData}>
+                <PolarGrid stroke="hsl(var(--border))" />
+                <PolarAngleAxis 
+                  dataKey="domain" 
+                  tick={{ fill: 'hsl(var(--foreground))', fontSize: 12 }}
                 />
-              )}
-              
-              {normativeData && (
-                <Radar
-                  name="Age-Based Normative"
-                  dataKey="normative"
-                  stroke="hsl(var(--muted-foreground)/50)"
-                  fill="hsl(var(--muted-foreground)/50)"
-                  fillOpacity={0.5}
+                <PolarRadiusAxis 
+                  angle={30} 
+                  domain={[0, 100]} 
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                  stroke="hsl(var(--border))"
                 />
-              )}
-              
-              <Radar
-                name="Patient"
-                dataKey="patient"
-                stroke="hsl(var(--primary))"
-                fill="hsl(var(--primary))"
-                fillOpacity={0.4}
-              />
-            </RadarChart>
-          </ResponsiveContainer>
+                
+                {subtypeData && (
+                  <Radar
+                    name="ADHD Subtype Average"
+                    dataKey="subtype"
+                    stroke="hsl(var(--muted-foreground)/20)"
+                    fill="hsl(var(--muted-foreground)/20)"
+                    fillOpacity={0.5}
+                  />
+                )}
+                
+                {normativeData && (
+                  <Radar
+                    name="Age-Based Normative"
+                    dataKey="normative"
+                    stroke="hsl(var(--muted-foreground)/50)"
+                    fill="hsl(var(--muted-foreground)/50)"
+                    fillOpacity={0.5}
+                  />
+                )}
+                
+                <Radar
+                  name="Patient"
+                  dataKey="patient"
+                  stroke="hsl(var(--primary))"
+                  fill="hsl(var(--primary))"
+                  fillOpacity={0.4}
+                />
+              </RadarChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </CardContent>
     </Card>

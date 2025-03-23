@@ -1,3 +1,4 @@
+
 import { subDays, format, addMinutes, subMonths } from 'date-fns';
 
 // Generate a random number between min and max (inclusive)
@@ -63,8 +64,8 @@ export interface SessionData {
 
 // Generate mock patients
 export const generatePatients = (count: number = 10): Patient[] => {
-  const subtypes = ['Inattentive', 'Hyperactive-Impulsive', 'Combined'] as const;
-  const genders = ['Male', 'Female', 'Other'] as const;
+  const subtypes: Array<'Inattentive' | 'Hyperactive-Impulsive' | 'Combined'> = ['Inattentive', 'Hyperactive-Impulsive', 'Combined'];
+  const genders: Array<'Male' | 'Female' | 'Other'> = ['Male', 'Female', 'Other'];
   const firstNames = ['Alex', 'Jamie', 'Taylor', 'Jordan', 'Casey', 'Riley', 'Avery', 'Quinn', 'Skyler', 'Morgan', 'Sam', 'Drew'];
   const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Miller', 'Davis', 'Garcia', 'Rodriguez', 'Martinez'];
   
@@ -121,8 +122,8 @@ export const generatePatientMetrics = (patients: Patient[]): PatientMetrics[] =>
 
 // Generate session data for patients
 export const generateSessionData = (patients: Patient[], sessionsPerPatient: number = 5): SessionData[] => {
-  const environments = ['Home', 'School', 'Clinic'] as const;
-  const completionStatuses = ['Completed', 'Abandoned', 'Interrupted'] as const;
+  const environments: Array<'Home' | 'School' | 'Clinic'> = ['Home', 'School', 'Clinic'];
+  const completionStatuses: Array<'Completed' | 'Abandoned' | 'Interrupted'> = ['Completed', 'Abandoned', 'Interrupted'];
   const devices = ['iPad Pro', 'iPhone 13', 'Android Tablet', 'Samsung Galaxy S21', 'Desktop Computer', 'Laptop'];
   const activityTypes = ['Attention Farming', 'Memory Sequence', 'Card Matching', 'Response Inhibition', 'Task Switching'];
   
