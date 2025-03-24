@@ -15,14 +15,14 @@ import { CognitiveDomain, PatientMetrics } from '@/types/databaseTypes';
 import { getDomainName, convertToDatabaseKey } from '@/utils/dataProcessing';
 
 interface DomainChartProps {
-  patient: string;
-  isLoading: boolean;
-  metrics: PatientMetrics | null;
+  patient?: string;
+  isLoading?: boolean;
+  metrics?: PatientMetrics | null;
 }
 
 export const DomainChart: React.FC<DomainChartProps> = ({ 
   patient, 
-  isLoading,
+  isLoading = false,
   metrics 
 }) => {
   // Create domain data structure from metrics if available

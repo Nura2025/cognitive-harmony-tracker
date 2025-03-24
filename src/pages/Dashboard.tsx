@@ -244,7 +244,10 @@ const Dashboard = () => {
       </div>
       
       <div className="grid gap-6 md:grid-cols-2">
-        <DomainChart domainData={domainTrendData} />
+        <DomainChart 
+          isLoading={isLoading}
+          metrics={allPatientMetrics && allPatientMetrics.length > 0 ? allPatientMetrics[0] : null}
+        />
         <SessionTimeline sessions={allSessions || []} />
       </div>
       

@@ -1,59 +1,75 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowDown, ArrowUp } from 'lucide-react';
-import { formatPercentile, getScoreColorClass } from '@/utils/dataProcessing';
+import { cn } from '@/lib/utils';
 
 interface StatusCardProps {
   title: string;
   value: number | string;
+  icon?: React.ReactNode;
   isPercentile?: boolean;
-  change?: { value: number; isImprovement: boolean };
-  icon: React.ReactNode;
+  change?: {
+    value: number;
+    isImprovement: boolean;
+  };
+  isLoading?: boolean;
 }
 
 export const StatusCard: React.FC<StatusCardProps> = ({
   title,
   value,
+  icon,
   isPercentile = false,
   change,
-  icon
+  isLoading = false
 }) => {
-  const formattedValue = isPercentile ? formatPercentile(value as number) : value;
-  const colorClass = isPercentile ? getScoreColorClass(value as number) : '';
-  
-  return (
-    <Card className="glass overflow-hidden">
-      <CardContent className="p-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <h4 className={`text-2xl font-bold mt-1 ${colorClass}`}>
-              {formattedValue}
-              {isPercentile && ' Percentile'}
-            </h4>
-            
-            {change && (
-              <div className="flex items-center mt-2">
-                {change.isImprovement ? (
-                  <div className="flex items-center text-emerald-600 text-sm">
-                    <ArrowUp className="h-3 w-3 mr-1" />
-                    <span>{change.value}%</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center text-red-600 text-sm">
-                    <ArrowDown className="h-3 w-3 mr-1" />
-                    <span>{change.value}%</span>
-                  </div>
-                )}
-                <span className="text-muted-foreground text-xs ml-1.5">from last month</span>
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between space-x-4">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">{title}</p>
+              <div className="h-5 w-16 bg-muted animate-pulse rounded-md"></div>
+            </div>
+            {icon && (
+              <div className="p-2 rounded-full bg-muted/10">
+                {icon}
               </div>
             )}
           </div>
-          
-          <div className="p-2 rounded-md bg-primary/10 text-primary">
-            {icon}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between space-x-4">
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-muted-foreground">{title}</p>
+            <div className="flex items-baseline gap-1.5">
+              <p className="text-2xl font-bold">
+                {isPercentile ? `${value}%` : value}
+              </p>
+              {change && (
+                <span 
+                  className={cn(
+                    "text-xs font-medium",
+                    change.isImprovement ? "text-emerald-500" : "text-rose-500"
+                  )}
+                >
+                  {change.isImprovement ? '+' : '-'}{change.value}%
+                </span>
+              )}
+            </div>
           </div>
+          {icon && (
+            <div className="p-2 rounded-full bg-muted/10">
+              {icon}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
