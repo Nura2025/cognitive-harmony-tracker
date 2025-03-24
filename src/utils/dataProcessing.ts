@@ -39,8 +39,8 @@ export const formatDuration = (minutes: number): string => {
 };
 
 // Process sessions for timeline chart
-export const processSessionsForTimeline = (sessions: Session[] | undefined): { date: string; score: number }[] => {
-  if (!sessions || sessions.length === 0) return [];
+export const processSessionsForTimeline = (sessions: Session[] | null | undefined): { date: string; score: number }[] => {
+  if (!sessions || !Array.isArray(sessions) || sessions.length === 0) return [];
   
   try {
     // Map sessions to timeline data points

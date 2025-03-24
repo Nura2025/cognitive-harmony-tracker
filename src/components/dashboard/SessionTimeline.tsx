@@ -15,7 +15,7 @@ import { formatDuration, processSessionsForTimeline } from '@/utils/dataProcessi
 
 interface SessionTimelineProps {
   patientId?: string;
-  sessions?: Session[];
+  sessions?: Session[] | null;
   title?: string;
 }
 
@@ -24,17 +24,20 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = ({
   sessions = [], 
   title = 'Session Progress' 
 }) => {
+  // Safely handle null sessions by defaulting to empty array
+  const safeSessions = sessions || [];
+  
   // Process data for the chart with defensive programming
-  const timelineData = processSessionsForTimeline(sessions);
+  const timelineData = processSessionsForTimeline(safeSessions);
   
   // Calculate sessions statistics with null checks
-  const totalSessions = sessions?.length || 0;
-  const totalDuration = sessions?.reduce((sum, session) => sum + (session.duration || 0), 0) || 0;
-  const averageScore = Math.round(
-    sessions?.reduce((sum, session) => sum + (session.overall_score || 0), 0) / (sessions?.length || 1)
-  ) || 0;
+  const totalSessions = safeSessions.length || 0;
+  const totalDuration = safeSessions.reduce((sum, session) => sum + (session.duration || 0), 0) || 0;
+  const averageScore = safeSessions.length > 0 
+    ? Math.round(safeSessions.reduce((sum, session) => sum + (session.overall_score || 0), 0) / safeSessions.length)
+    : 0;
   
-  const isLoading = patientId && sessions.length === 0;
+  const isLoading = patientId && (!sessions || (Array.isArray(sessions) && sessions.length === 0));
   
   if (isLoading) {
     return (

@@ -3,8 +3,11 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { PostgrestFilterBuilder } from '@supabase/postgrest-js';
 
+// Define the allowed table names to match Supabase tables
+type TableName = 'sessions' | 'patients' | 'activities' | 'patient_metrics' | 'clinical_concerns';
+
 type SupabaseQueryOptions<T> = {
-  table: string;
+  table: TableName;
   columns?: string;
   filter?: (query: PostgrestFilterBuilder<any, any, any>) => PostgrestFilterBuilder<any, any, any>;
   orderBy?: { column: string; ascending?: boolean };
@@ -91,5 +94,48 @@ export function useSupabaseQuery<T>({
     };
   }, [table, columns, singleRow, enabled, ...dependencies]);
 
-  return { data, isLoading, error, refetch: () => {} };
+  const refetch = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      let query = supabase
+        .from(table)
+        .select(columns);
+      
+      // Apply filter if provided
+      if (filter) {
+        query = filter(query);
+      }
+      
+      // Apply ordering if provided
+      if (orderBy) {
+        query = query.order(orderBy.column, { 
+          ascending: orderBy.ascending !== false 
+        });
+      }
+      
+      // Apply limit if provided
+      if (limit) {
+        query = query.limit(limit);
+      }
+      
+      // Get single row or all results
+      const { data: result, error: supabaseError } = singleRow 
+        ? await query.single() 
+        : await query;
+      
+      if (supabaseError) {
+        throw new Error(supabaseError.message);
+      }
+      
+      setData(result as T);
+      setIsLoading(false);
+    } catch (err: any) {
+      console.error(`Error fetching data from ${table}:`, err);
+      setError(err instanceof Error ? err : new Error(String(err)));
+      setIsLoading(false);
+    }
+  };
+
+  return { data, isLoading, error, refetch };
 }
