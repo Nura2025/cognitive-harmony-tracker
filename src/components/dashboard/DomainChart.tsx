@@ -58,7 +58,7 @@ export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
                   className="w-3 h-3 rounded-full mr-1.5" 
                   style={{ backgroundColor: domainColors[domain] }}
                 />
-                <span className="text-xs">{getDomainName(dbKey)}</span>
+                <span className="text-xs">{getDomainName(dbKey as keyof CognitiveDomain)}</span>
               </div>
             );
           })}

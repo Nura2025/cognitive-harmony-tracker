@@ -81,7 +81,7 @@ const Dashboard = () => {
       
       <div className="grid gap-6 md:grid-cols-2">
         <DomainChart domainData={domainTrendData} />
-        <SessionTimeline sessions={sessionData.slice(0, 10)} />
+        <SessionTimeline sessions={sessionData.slice(0, 10) as any} />
       </div>
       
       <div>

@@ -56,7 +56,7 @@ export const CognitiveDomain: React.FC<CognitiveDomainProps> = ({
     <Card className="glass overflow-hidden">
       <CardHeader className={`${bgColorClass} pb-2`}>
         <div className="flex items-center justify-between">
-          <CardTitle className={`text-lg ${colorClass}`}>{getDomainName(domainKey)}</CardTitle>
+          <CardTitle className={`text-lg ${colorClass}`}>{getDomainName(domainKey as keyof CognitiveDomainType)}</CardTitle>
           <Badge 
             className={`${scoreColorClass} bg-white`}
             variant="outline"
@@ -95,7 +95,7 @@ export const CognitiveDomain: React.FC<CognitiveDomainProps> = ({
                   borderRadius: 'var(--radius)',
                   color: 'hsl(var(--foreground))'
                 }}
-                formatter={(value: number) => [`${value}%`, getDomainName(domainKey)]}
+                formatter={(value: number) => [`${value}%`, getDomainName(domainKey as keyof CognitiveDomainType)]}
               />
               <Line
                 type="monotone"

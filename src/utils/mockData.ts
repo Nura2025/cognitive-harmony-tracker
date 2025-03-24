@@ -6,7 +6,8 @@ import {
   Patient, 
   PatientMetrics, 
   CognitiveDomain,
-  Session
+  Session,
+  Activity
 } from '@/types/databaseTypes';
 import { generatePatients, generatePatientMetrics } from './generators/patientGenerators';
 import { generateSessionData } from './generators/sessionGenerators';
@@ -22,13 +23,7 @@ export interface SessionData extends Session {
     executiveFunction: number;
     behavioral: number;
   };
-  activities: Array<{
-    id: string;
-    type: string;
-    score: number;
-    duration: number;
-    difficulty: number;
-  }>;
+  activities: Activity[];
 }
 
 // Initialize mock data - make sure we're creating properly structured data
@@ -36,8 +31,8 @@ export const patients = generatePatients(12);
 
 export const patientMetrics = generatePatientMetrics(patients);
 
-// Convert session data to what frontend components expect
-export const sessionData = generateSessionData(patients).map(session => {
+// Convert session data to SessionData format
+export const sessionData: SessionData[] = generateSessionData(patients).map(session => {
   return {
     ...session,
     domainScores: {
@@ -54,7 +49,9 @@ export { mockPatientData, mockNormativeData, mockSubtypeData };
 
 // For convenience, create a map of patient IDs to their metrics
 export const metricsMap = patientMetrics.reduce((acc, metrics) => {
-  acc[metrics.patient_id] = metrics;
+  if (!acc[metrics.patient_id]) {
+    acc[metrics.patient_id] = metrics;
+  }
   return acc;
 }, {} as Record<string, PatientMetrics>);
 

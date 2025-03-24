@@ -21,6 +21,11 @@ export const generateRecommendations = (subtypeOrPatient: string | any = ''): st
     subtype = subtypeOrPatient.adhd_subtype.toLowerCase();
   }
   
+  // If no valid subtype is provided, return common recommendations
+  if (!subtype) {
+    return commonRecommendations;
+  }
+  
   // Specific recommendations based on ADHD subtype
   let specificRecommendations: string[] = [];
   

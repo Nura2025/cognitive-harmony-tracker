@@ -1,6 +1,6 @@
 // Add this to the top of the file, keeping any other imports
 import { format, formatDistance, parseISO } from 'date-fns';
-import { Patient, Session, PatientMetrics } from '@/types/databaseTypes';
+import { Activity, Patient, Session, PatientMetrics, CognitiveDomain } from '@/types/databaseTypes';
 
 // Format percentile for display
 export const formatPercentile = (percentile?: number | null): string => {
@@ -79,6 +79,65 @@ export const convertToDatabaseKey = (key: string): string => {
   }
 };
 
+// Get friendly domain name for display
+export const getDomainName = (domain: keyof CognitiveDomain): string => {
+  switch (domain) {
+    case 'attention':
+      return 'Attention';
+    case 'memory':
+      return 'Memory';
+    case 'executive_function':
+      return 'Executive Function';
+    case 'behavioral':
+      return 'Behavioral Control';
+    default:
+      return 'Unknown Domain';
+  }
+};
+
+// Get domain color for UI elements
+export const getDomainColor = (domain: string): string => {
+  switch (domain) {
+    case 'attention':
+      return 'text-blue-600';
+    case 'memory':
+      return 'text-purple-600';
+    case 'executive_function':
+      return 'text-amber-600';
+    case 'behavioral':
+      return 'text-emerald-600';
+    default:
+      return 'text-gray-600';
+  }
+};
+
+// Get domain background color for UI elements
+export const getDomainBgColor = (domain: string): string => {
+  switch (domain) {
+    case 'attention':
+      return 'bg-blue-50';
+    case 'memory':
+      return 'bg-purple-50';
+    case 'executive_function':
+      return 'bg-amber-50';
+    case 'behavioral':
+      return 'bg-emerald-50';
+    default:
+      return 'bg-gray-50';
+  }
+};
+
+// Format last session date for display
+export const formatLastSession = (date?: string): string => {
+  if (!date) return 'No sessions yet';
+  try {
+    return formatDistance(parseISO(date), new Date(), { addSuffix: true });
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return 'Invalid date';
+  }
+};
+
 // Map patient from database format to application format
 export const mapPatientFromDB = (dbPatient: any): Patient => {
   if (!dbPatient) return null as unknown as Patient;
@@ -91,5 +150,29 @@ export const mapPatientFromDB = (dbPatient: any): Patient => {
     diagnosis_date: dbPatient.diagnosis_date,
     adhd_subtype: dbPatient.adhd_subtype,
     created_at: dbPatient.created_at
+  };
+};
+
+// Map session from database format to application format
+export const mapSessionFromDB = (dbSession: any): Session => {
+  if (!dbSession) return null as unknown as Session;
+  
+  return {
+    id: dbSession.id,
+    patient_id: dbSession.patient_id,
+    start_time: dbSession.start_time,
+    end_time: dbSession.end_time,
+    duration: dbSession.duration,
+    environment: dbSession.environment,
+    completion_status: dbSession.completion_status,
+    overall_score: dbSession.overall_score,
+    device: dbSession.device,
+    attention: dbSession.attention,
+    memory: dbSession.memory,
+    executive_function: dbSession.executive_function,
+    behavioral: dbSession.behavioral,
+    activities: dbSession.activities || [],
+    notes: dbSession.notes,
+    created_at: dbSession.created_at
   };
 };
