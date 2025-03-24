@@ -50,27 +50,43 @@ const Analysis = () => {
 
     // Get metrics for this patient
     const patientMetrics = metricsMap[patientId];
-    setMetrics(patientMetrics);
+    setMetrics(patientMetrics || {});
 
     // Get sessions for this patient
     const patientSessions = sessionsMap[patientId] || [];
     setSessions(patientSessions);
 
-    // Generate recommendations based on patient subtype
-    if (patientMetrics && patientMetrics.adhd_subtype) {
-      const recs = generateRecommendations(patientMetrics.adhd_subtype);
+    // Generate recommendations based on patient metrics
+    try {
+      const subtypeValue = selectedPatient.adhd_subtype || 'Combined';
+      const recs = generateRecommendations(subtypeValue);
       setRecommendations(recs);
-    } else {
-      // Default recommendations if no subtype available
+    } catch (error) {
+      console.error("Error generating recommendations:", error);
       setRecommendations(generateRecommendations());
     }
 
-    // Generate percentile and trend data
-    setPercentileData(generatePercentileData(patientMetrics));
-    setTrendData(generateTrendData(patientSessions));
+    // Generate percentile and trend data with error handling
+    try {
+      if (patientMetrics) {
+        setPercentileData(generatePercentileData(patientMetrics));
+      }
+    } catch (error) {
+      console.error("Error generating percentile data:", error);
+      setPercentileData([]);
+    }
+
+    try {
+      if (patientSessions && patientSessions.length > 0) {
+        setTrendData(generateTrendData(patientSessions));
+      }
+    } catch (error) {
+      console.error("Error generating trend data:", error);
+      setTrendData([]);
+    }
   }, [patientId, navigate]);
 
-  if (!patient || !metrics) {
+  if (!patient) {
     return (
       <div className="flex items-center justify-center h-full">
         <p>Loading patient data...</p>
@@ -85,10 +101,10 @@ const Analysis = () => {
           <h1 className="text-2xl font-bold mb-2">Cognitive Analysis</h1>
           <div className="flex items-center text-sm text-muted-foreground">
             <UserRound className="h-4 w-4 mr-1" />
-            <span>{patient.first_name} {patient.last_name}</span>
+            <span>{patient.name || `${patient.first_name || ''} ${patient.last_name || ''}`}</span>
             <span className="mx-2">•</span>
             <Calendar className="h-4 w-4 mr-1" />
-            <span>Age: {patient.age}</span>
+            <span>Age: {patient.age || 'Unknown'}</span>
           </div>
         </div>
         <div className="mt-4 md:mt-0 space-x-2">
@@ -110,7 +126,7 @@ const Analysis = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {metrics.adhd_subtype || "Not Specified"}
+              {patient.adhd_subtype || "Not Specified"}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               Based on cognitive assessment
@@ -123,7 +139,7 @@ const Analysis = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {metrics.severity_level || "Not Assessed"}
+              {metrics?.severity_level || "Not Assessed"}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               Overall condition severity
@@ -139,8 +155,8 @@ const Analysis = () => {
               {sessions.length}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {sessions.length > 0 
-                ? `Latest: ${format(parseISO(sessions[sessions.length - 1].date), 'MMM d, yyyy')}`
+              {sessions.length > 0 && sessions[sessions.length - 1].start_time
+                ? `Latest: ${format(parseISO(sessions[sessions.length - 1].start_time), 'MMM d, yyyy')}`
                 : "No sessions recorded"}
             </p>
           </CardContent>
@@ -165,7 +181,10 @@ const Analysis = () => {
             <CardTitle>Performance Trend</CardTitle>
           </CardHeader>
           <CardContent>
-            <PerformanceTrend data={trendData} />
+            <PerformanceTrend 
+              data={trendData} 
+              title="Performance Over Time"
+            />
           </CardContent>
         </Card>
       </div>
@@ -228,17 +247,17 @@ const Analysis = () => {
                   <div className="w-full bg-gray-200 rounded-full h-4 mr-2">
                     <div 
                       className="bg-blue-600 h-4 rounded-full" 
-                      style={{ width: `${metrics.attention_percentile || 0}%` }}
+                      style={{ width: `${metrics?.attention_percentile || 0}%` }}
                     ></div>
                   </div>
-                  <span className="text-sm font-medium">{metrics.attention_percentile || 0}%</span>
+                  <span className="text-sm font-medium">{metrics?.attention_percentile || 0}%</span>
                 </div>
               </div>
               <Separator className="my-4" />
               <div>
                 <h4 className="font-medium mb-2">Key Observations</h4>
                 <p className="text-sm text-muted-foreground">
-                  {metrics.attention_notes || "No specific observations recorded for attention domain."}
+                  {metrics?.attention_notes || "No specific observations recorded for attention domain."}
                 </p>
               </div>
             </CardContent>
@@ -255,17 +274,17 @@ const Analysis = () => {
                   <div className="w-full bg-gray-200 rounded-full h-4 mr-2">
                     <div 
                       className="bg-purple-600 h-4 rounded-full" 
-                      style={{ width: `${metrics.memory_percentile || 0}%` }}
+                      style={{ width: `${metrics?.memory_percentile || 0}%` }}
                     ></div>
                   </div>
-                  <span className="text-sm font-medium">{metrics.memory_percentile || 0}%</span>
+                  <span className="text-sm font-medium">{metrics?.memory_percentile || 0}%</span>
                 </div>
               </div>
               <Separator className="my-4" />
               <div>
                 <h4 className="font-medium mb-2">Key Observations</h4>
                 <p className="text-sm text-muted-foreground">
-                  {metrics.memory_notes || "No specific observations recorded for memory domain."}
+                  {metrics?.memory_notes || "No specific observations recorded for memory domain."}
                 </p>
               </div>
             </CardContent>
@@ -282,17 +301,17 @@ const Analysis = () => {
                   <div className="w-full bg-gray-200 rounded-full h-4 mr-2">
                     <div 
                       className="bg-green-600 h-4 rounded-full" 
-                      style={{ width: `${metrics.executive_function_percentile || 0}%` }}
+                      style={{ width: `${metrics?.executive_function_percentile || 0}%` }}
                     ></div>
                   </div>
-                  <span className="text-sm font-medium">{metrics.executive_function_percentile || 0}%</span>
+                  <span className="text-sm font-medium">{metrics?.executive_function_percentile || 0}%</span>
                 </div>
               </div>
               <Separator className="my-4" />
               <div>
                 <h4 className="font-medium mb-2">Key Observations</h4>
                 <p className="text-sm text-muted-foreground">
-                  {metrics.executive_function_notes || "No specific observations recorded for executive function domain."}
+                  {metrics?.executive_function_notes || "No specific observations recorded for executive function domain."}
                 </p>
               </div>
             </CardContent>
@@ -309,17 +328,17 @@ const Analysis = () => {
                   <div className="w-full bg-gray-200 rounded-full h-4 mr-2">
                     <div 
                       className="bg-red-600 h-4 rounded-full" 
-                      style={{ width: `${metrics.behavioral_percentile || 0}%` }}
+                      style={{ width: `${metrics?.behavioral_percentile || 0}%` }}
                     ></div>
                   </div>
-                  <span className="text-sm font-medium">{metrics.behavioral_percentile || 0}%</span>
+                  <span className="text-sm font-medium">{metrics?.behavioral_percentile || 0}%</span>
                 </div>
               </div>
               <Separator className="my-4" />
               <div>
                 <h4 className="font-medium mb-2">Key Observations</h4>
                 <p className="text-sm text-muted-foreground">
-                  {metrics.behavioral_notes || "No specific observations recorded for behavioral domain."}
+                  {metrics?.behavioral_notes || "No specific observations recorded for behavioral domain."}
                 </p>
               </div>
             </CardContent>

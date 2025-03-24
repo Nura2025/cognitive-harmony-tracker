@@ -10,11 +10,11 @@ import {
   YAxis,
   CartesianGrid
 } from 'recharts';
-import { SessionData } from '@/utils/mockData';
+import { Session } from '@/types/databaseTypes';
 import { formatDuration, processSessionsForTimeline } from '@/utils/dataProcessing';
 
 interface SessionTimelineProps {
-  sessions: SessionData[];
+  sessions: Session[];
   title?: string;
 }
 
@@ -22,15 +22,15 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = ({
   sessions, 
   title = 'Session Progress' 
 }) => {
-  // Process data for the chart
+  // Process data for the chart with defensive programming
   const timelineData = processSessionsForTimeline(sessions);
   
-  // Calculate sessions statistics
-  const totalSessions = sessions.length;
-  const totalDuration = sessions.reduce((sum, session) => sum + session.duration, 0);
+  // Calculate sessions statistics with null checks
+  const totalSessions = sessions?.length || 0;
+  const totalDuration = sessions?.reduce((sum, session) => sum + (session.duration || 0), 0) || 0;
   const averageScore = Math.round(
-    sessions.reduce((sum, session) => sum + session.overallScore, 0) / (sessions.length || 1)
-  );
+    sessions?.reduce((sum, session) => sum + (session.overall_score || 0), 0) / (sessions?.length || 1)
+  ) || 0;
   
   return (
     <Card className="glass">
@@ -54,50 +54,58 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = ({
         </div>
         
         <div className="h-[250px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={timelineData}
-              margin={{ top: 20, right: 5, left: 0, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-              <XAxis 
-                dataKey="date" 
-                axisLine={false} 
-                tickLine={false}
-                tickFormatter={(date) => {
-                  const parts = date.split('-');
-                  return `${parts[1]}/${parts[2]}`;
-                }}
-                stroke="hsl(var(--muted-foreground))"
-                tickMargin={10}
-              />
-              <YAxis 
-                axisLine={false} 
-                tickLine={false} 
-                domain={[0, 100]}
-                stroke="hsl(var(--muted-foreground))"
-                tickMargin={10}
-              />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--background))',
-                  borderColor: 'hsl(var(--border))',
-                  boxShadow: 'var(--shadow)',
-                  borderRadius: 'var(--radius)',
-                  color: 'hsl(var(--foreground))'
-                }}
-                formatter={(value: number) => [`${value}%`, 'Score']}
-              />
-              <Line
-                type="monotone"
-                dataKey="score"
-                stroke="hsl(var(--primary))"
-                strokeWidth={2}
-                activeDot={{ r: 6, strokeWidth: 2, stroke: 'hsl(var(--background))' }}
-                dot={{ r: 1 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          {timelineData.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={timelineData}
+                margin={{ top: 20, right: 5, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis 
+                  dataKey="date" 
+                  axisLine={false} 
+                  tickLine={false}
+                  tickFormatter={(date) => {
+                    if (!date || typeof date !== 'string') return '';
+                    const parts = date.split('-');
+                    if (parts.length < 3) return date;
+                    return `${parts[1]}/${parts[2]}`;
+                  }}
+                  stroke="hsl(var(--muted-foreground))"
+                  tickMargin={10}
+                />
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  domain={[0, 100]}
+                  stroke="hsl(var(--muted-foreground))"
+                  tickMargin={10}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--background))',
+                    borderColor: 'hsl(var(--border))',
+                    boxShadow: 'var(--shadow)',
+                    borderRadius: 'var(--radius)',
+                    color: 'hsl(var(--foreground))'
+                  }}
+                  formatter={(value: number) => [`${value}%`, 'Score']}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="score"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                  activeDot={{ r: 6, strokeWidth: 2, stroke: 'hsl(var(--background))' }}
+                  dot={{ r: 1 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+              No session data available
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

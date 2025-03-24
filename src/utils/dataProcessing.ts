@@ -38,17 +38,43 @@ export const formatDuration = (minutes: number): string => {
   return `${hours} hr${hours !== 1 ? 's' : ''} ${remainingMinutes > 0 ? `${remainingMinutes} min${remainingMinutes !== 1 ? 's' : ''}` : ''}`;
 };
 
-// Process session data for timeline visualization
+// Process session data for timeline visualization with null/undefined checks
 export const processSessionsForTimeline = (sessions: Session[]): any[] => {
+  if (!sessions || !Array.isArray(sessions)) {
+    console.warn("Invalid sessions data provided to processSessionsForTimeline:", sessions);
+    return [];
+  }
+  
   return sessions.map(session => {
+    // Add strong null checks for date values
+    const startTime = session.start_time || null;
+    let formattedDate = 'Unknown';
+    let formattedTime = 'Unknown';
+    
+    try {
+      if (startTime) {
+        formattedDate = format(parseISO(startTime), 'yyyy-MM-dd');
+        formattedTime = format(parseISO(startTime), 'h:mm a');
+      }
+    } catch (error) {
+      console.error("Error parsing date:", startTime, error);
+    }
+    
+    // Calculate average score with fallbacks for missing values
+    const attention = session.attention || 0;
+    const memory = session.memory || 0;
+    const executiveFunction = session.executive_function || 0;
+    const behavioral = session.behavioral || 0;
+    const averageScore = Math.round((attention + memory + executiveFunction + behavioral) / 4);
+    
     return {
       id: session.id,
       patientId: session.patient_id,
-      date: format(parseISO(session.start_time), 'MMM d, yyyy'),
-      time: format(parseISO(session.start_time), 'h:mm a'),
-      duration: session.duration,
-      score: Math.round((session.attention + session.memory + session.executive_function + session.behavioral) / 4),
-      environment: session.environment
+      date: formattedDate,
+      time: formattedTime,
+      duration: session.duration || 0,
+      score: averageScore,
+      environment: session.environment || 'Unknown'
     };
   });
 };
@@ -172,7 +198,6 @@ export const mapSessionFromDB = (dbSession: any): Session => {
     executive_function: dbSession.executive_function,
     behavioral: dbSession.behavioral,
     activities: dbSession.activities || [],
-    notes: dbSession.notes,
     created_at: dbSession.created_at
   };
 };
