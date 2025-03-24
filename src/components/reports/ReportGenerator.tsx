@@ -22,8 +22,8 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
   const patient = patients.find(p => p.id === patientId) as Patient;
   const metrics = patientId ? metricsMap[patientId] as PatientMetrics : null;
   
-  // Generate recommendations
-  const recommendations = generateRecommendations();
+  // Generate recommendations - passing the empty string as default patient type
+  const recommendations = generateRecommendations('');
   
   // If no patient is selected
   if (!patient || !metrics) {

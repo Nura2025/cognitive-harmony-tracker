@@ -28,11 +28,11 @@ const Dashboard = () => {
   );
   const totalMinutes = patientMetrics.reduce((sum, metric) => sum + metric.sessions_completed, 0);
   
-  // Generate domain trends for the dashboard chart
+  // Generate domain trends for the dashboard chart - matching the expected structure for DomainChart
   const domainTrendData = {
     attention: Array(10).fill(0).map((_, i) => 50 + Math.random() * 30),
     memory: Array(10).fill(0).map((_, i) => 55 + Math.random() * 25),
-    executive_function: Array(10).fill(0).map((_, i) => 45 + Math.random() * 35),
+    executiveFunction: Array(10).fill(0).map((_, i) => 45 + Math.random() * 35),
     behavioral: Array(10).fill(0).map((_, i) => 60 + Math.random() * 20),
   };
   

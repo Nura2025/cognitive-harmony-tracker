@@ -14,17 +14,8 @@ import { generateTrendData, generatePercentileData } from './generators/trendGen
 import { generateRecommendations } from './generators/recommendationGenerators';
 import { mockPatientData, mockNormativeData, mockSubtypeData } from './mockData/cognitiveDomainData';
 
-// Define a SessionData type that matches what the components expect
-export interface SessionData extends CognitiveDomain {
-  id: string;
-  patientId: string;
-  startTime: string;
-  endTime: string;
-  duration: number;
-  environment: 'Home' | 'School' | 'Clinic';
-  completionStatus: 'Completed' | 'Abandoned' | 'Interrupted';
-  overallScore: number;
-  device: string;
+// Define an interface that extends Session for frontend components
+export interface SessionData extends Session {
   domainScores: {
     attention: number;
     memory: number;
@@ -41,49 +32,22 @@ export interface SessionData extends CognitiveDomain {
 }
 
 // Initialize mock data - make sure we're creating properly structured data
-export const patients = generatePatients(12).map<Patient>(p => ({
-  id: p.id,
-  name: p.name,
-  age: p.age,
-  gender: p.gender as 'Male' | 'Female' | 'Other',
-  diagnosis_date: p.diagnosisDate,
-  adhd_subtype: p.adhdSubtype as 'Inattentive' | 'Hyperactive-Impulsive' | 'Combined',
-  created_at: new Date().toISOString()
-}));
+export const patients = generatePatients(12);
 
-export const patientMetrics = generatePatientMetrics(patients).map<PatientMetrics>(pm => ({
-  id: `PM-${pm.patientId}`,
-  patient_id: pm.patientId,
-  date: pm.date,
-  attention: pm.attention,
-  memory: pm.memory,
-  executive_function: pm.executiveFunction,
-  behavioral: pm.behavioral,
-  percentile: pm.percentile,
-  sessions_duration: pm.sessionsDuration,
-  sessions_completed: pm.sessionsCompleted,
-  progress: pm.progress,
-  clinical_concerns: pm.clinicalConcerns,
-  created_at: new Date().toISOString()
-}));
+export const patientMetrics = generatePatientMetrics(patients);
 
-export const sessionData = generateSessionData(patients).map<SessionData>(session => ({
-  id: session.id,
-  patientId: session.patientId,
-  startTime: session.startTime,
-  endTime: session.endTime,
-  duration: session.duration,
-  environment: session.environment,
-  completionStatus: session.completionStatus,
-  overallScore: session.overallScore,
-  device: session.device,
-  attention: session.domainScores.attention,
-  memory: session.domainScores.memory,
-  executive_function: session.domainScores.executiveFunction,
-  behavioral: session.domainScores.behavioral,
-  domainScores: session.domainScores,
-  activities: session.activities
-}));
+// Convert session data to what frontend components expect
+export const sessionData = generateSessionData(patients).map(session => {
+  return {
+    ...session,
+    domainScores: {
+      attention: session.attention,
+      memory: session.memory,
+      executiveFunction: session.executive_function,
+      behavioral: session.behavioral
+    }
+  } as SessionData;
+});
 
 // Export mock cognitive domain data
 export { mockPatientData, mockNormativeData, mockSubtypeData };
@@ -96,10 +60,10 @@ export const metricsMap = patientMetrics.reduce((acc, metrics) => {
 
 // For convenience, create a map of patient IDs to their sessions
 export const sessionsMap = sessionData.reduce((acc, session) => {
-  if (!acc[session.patientId]) {
-    acc[session.patientId] = [];
+  if (!acc[session.patient_id]) {
+    acc[session.patient_id] = [];
   }
-  acc[session.patientId].push(session);
+  acc[session.patient_id].push(session);
   return acc;
 }, {} as Record<string, SessionData[]>);
 

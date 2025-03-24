@@ -39,7 +39,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
             </div>
           </div>
           <Badge variant={getScoreBadgeVariant(metrics?.percentile || 0)}>
-            {formatPercentile(metrics?.percentile)} Percentile
+            {formatPercentile(metrics?.percentile || 0)} Percentile
           </Badge>
         </div>
         
@@ -69,7 +69,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
         <div className="mt-5">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs text-muted-foreground">Cognitive Score</span>
-            <span className={`text-xs font-medium ${getScoreColorClass(metrics?.percentile)}`}>
+            <span className={`text-xs font-medium ${getScoreColorClass(metrics?.percentile || 0)}`}>
               {metrics?.percentile || 0}%
             </span>
           </div>
