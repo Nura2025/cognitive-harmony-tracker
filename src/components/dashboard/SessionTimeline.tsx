@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Line,
@@ -12,7 +12,6 @@ import {
 } from 'recharts';
 import { Session } from '@/types/databaseTypes';
 import { formatDuration, processSessionsForTimeline } from '@/utils/dataProcessing';
-import { supabase } from '@/integrations/supabase/client';
 
 interface SessionTimelineProps {
   patientId?: string;
@@ -22,41 +21,9 @@ interface SessionTimelineProps {
 
 export const SessionTimeline: React.FC<SessionTimelineProps> = ({ 
   patientId,
-  sessions: propSessions, 
+  sessions = [], 
   title = 'Session Progress' 
 }) => {
-  const [sessions, setSessions] = useState<Session[]>(propSessions || []);
-  const [isLoading, setIsLoading] = useState(!propSessions && !!patientId);
-  
-  // Fetch sessions from database if not provided as props
-  useEffect(() => {
-    const fetchSessions = async () => {
-      if (!patientId || propSessions) return;
-      
-      try {
-        setIsLoading(true);
-        const { data, error } = await supabase
-          .from('sessions')
-          .select('*')
-          .eq('patient_id', patientId)
-          .order('start_time', { ascending: false });
-        
-        if (error) {
-          console.error('Error fetching sessions:', error);
-          return;
-        }
-        
-        setSessions(data || []);
-      } catch (err) {
-        console.error('Failed to fetch sessions:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchSessions();
-  }, [patientId, propSessions]);
-  
   // Process data for the chart with defensive programming
   const timelineData = processSessionsForTimeline(sessions);
   
@@ -66,6 +33,8 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = ({
   const averageScore = Math.round(
     sessions?.reduce((sum, session) => sum + (session.overall_score || 0), 0) / (sessions?.length || 1)
   ) || 0;
+  
+  const isLoading = patientId && sessions.length === 0;
   
   if (isLoading) {
     return (

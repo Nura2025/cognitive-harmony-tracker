@@ -1,82 +1,25 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shell } from "@/components/Shell";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
+import { toast } from '@/hooks/use-toast';
 import { DomainChart } from '@/components/dashboard/DomainChart';
 import { SessionTimeline } from '@/components/dashboard/SessionTimeline';
-import { Patient } from '@/types/databaseTypes';
+import { Patient, PatientMetrics, Session } from '@/types/databaseTypes';
 import { useSupabaseQuery } from '@/hooks/use-supabase-query';
-import { PatientMetrics, Session } from '@/types/databaseTypes';
+import { PatientCard } from '@/components/dashboard/PatientCard';
 
-interface PatientCardProps {
-  patient: Patient;
-  metrics?: PatientMetrics | null;
-  isSelected: boolean;
-  onClick: () => void;
-}
-
-const PatientCard: React.FC<PatientCardProps> = ({ patient, metrics, isSelected, onClick }) => {
-  const { name, adhd_subtype, age, gender } = patient;
-  
-  return (
-    <Card
-      className={`glass cursor-pointer ${isSelected ? 'border-2 border-primary' : ''}`}
-      onClick={onClick}
-    >
-      <CardHeader>
-        <CardTitle>{name}</CardTitle>
-        <CardDescription>
-          {age} years old, {gender}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-4">
-        <div className="flex items-center">
-          <Badge variant="secondary">{adhd_subtype}</Badge>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Avatar>
-            <AvatarImage src={`https://avatar.vercel.sh/${name}.png`} />
-            <AvatarFallback>{name.substring(0, 2)}</AvatarFallback>
-          </Avatar>
-          <span className="text-sm text-muted-foreground">
-            {metrics ? `Progress: ${metrics.progress}%` : 'No metrics available'}
-          </span>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-// Inside the Dashboard component
+// Dashboard Component
 const Dashboard = () => {
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
   
   // Fetch patients from database
   const { 
     data: patients, 
-    isLoading: isLoadingPatients 
+    isLoading: isLoadingPatients,
+    error: patientsError
   } = useSupabaseQuery<Patient[]>({
     table: 'patients',
     orderBy: { column: 'name' }
@@ -85,7 +28,8 @@ const Dashboard = () => {
   // Fetch sessions for selected patient
   const {
     data: patientSessions,
-    isLoading: isLoadingSessions
+    isLoading: isLoadingSessions,
+    error: sessionsError
   } = useSupabaseQuery<Session[]>({
     table: 'sessions',
     filter: (query) => selectedPatient ? query.eq('patient_id', selectedPatient) : query.limit(0),
@@ -97,7 +41,8 @@ const Dashboard = () => {
   // Fetch metrics for selected patient
   const {
     data: patientMetrics,
-    isLoading: isLoadingMetrics
+    isLoading: isLoadingMetrics,
+    error: metricsError
   } = useSupabaseQuery<PatientMetrics>({
     table: 'patient_metrics',
     filter: (query) => selectedPatient ? query.eq('patient_id', selectedPatient) : query.limit(0),
@@ -108,15 +53,48 @@ const Dashboard = () => {
     dependencies: [selectedPatient]
   });
   
+  // Show errors as toasts if they occur
+  useEffect(() => {
+    if (patientsError) {
+      toast({
+        title: "Error loading patients",
+        description: patientsError.message,
+        variant: "destructive"
+      });
+    }
+    
+    if (sessionsError) {
+      toast({
+        title: "Error loading sessions",
+        description: sessionsError.message,
+        variant: "destructive"
+      });
+    }
+    
+    if (metricsError) {
+      toast({
+        title: "Error loading metrics",
+        description: metricsError.message,
+        variant: "destructive"
+      });
+    }
+  }, [patientsError, sessionsError, metricsError]);
+  
   // Handle patient selection
   const handlePatientSelect = (patientId: string) => {
-    setSelectedPatient(patientId);
+    setSelectedPatient(patientId === selectedPatient ? null : patientId);
   };
   
-  // When rendering patient-specific components, pass the real data:
+  // Build metrics map for patient cards
+  const metricsMap: Record<string, PatientMetrics | null> = {};
+  
+  if (selectedPatient && patientMetrics) {
+    metricsMap[selectedPatient] = patientMetrics;
+  }
+  
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between space-y-2">
+      <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
           <p className="text-muted-foreground">
@@ -125,38 +103,54 @@ const Dashboard = () => {
         </div>
       </div>
       
-      {/* Update the components to use real data */}
+      {/* Patient cards grid */}
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {patients?.map(patient => (
-          <PatientCard
-            key={patient.id}
-            patient={patient}
-            metrics={patientMetrics}
-            isSelected={selectedPatient === patient.id}
-            onClick={() => handlePatientSelect(patient.id)}
-          />
-        ))}
-        {isLoadingPatients && (
-          <div className="col-span-full flex justify-center p-12">
-            <p>Loading patients...</p>
+        {isLoadingPatients ? (
+          Array(3).fill(0).map((_, i) => (
+            <Card key={i} className="glass">
+              <CardHeader>
+                <Skeleton className="h-5 w-1/2 mb-2" />
+                <Skeleton className="h-4 w-1/3" />
+              </CardHeader>
+              <CardContent className="grid gap-4">
+                <Skeleton className="h-4 w-16" />
+                <div className="flex items-center space-x-2">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        ) : patients?.length === 0 ? (
+          <div className="col-span-full p-8 text-center">
+            <p className="text-muted-foreground">No patients found</p>
           </div>
+        ) : (
+          patients?.map(patient => (
+            <PatientCard
+              key={patient.id}
+              patient={patient}
+              metrics={patientMetrics && selectedPatient === patient.id ? patientMetrics : null}
+              onClick={() => handlePatientSelect(patient.id)}
+              isSelected={selectedPatient === patient.id}
+            />
+          ))
         )}
       </div>
       
+      {/* Patient details section */}
       {selectedPatient && (
-        <>
-          <div className="grid gap-6 md:grid-cols-2">
-            <DomainChart
-              patient={selectedPatient}
-              isLoading={isLoadingMetrics}
-              metrics={patientMetrics}
-            />
-            <SessionTimeline
-              patientId={selectedPatient}
-              sessions={patientSessions}
-            />
-          </div>
-        </>
+        <div className="grid gap-6 md:grid-cols-2">
+          <DomainChart
+            patient={selectedPatient}
+            isLoading={isLoadingMetrics}
+            metrics={patientMetrics}
+          />
+          <SessionTimeline
+            patientId={selectedPatient}
+            sessions={patientSessions}
+          />
+        </div>
       )}
     </div>
   );

@@ -49,7 +49,7 @@ export const processSessionsForTimeline = (sessions: Session[] | undefined): { d
       let dateStr = '';
       try {
         if (session.start_time) {
-          // Handle both ISO string and timestamp with timezone
+          // Parse date from timestamp
           const date = new Date(session.start_time);
           if (!isNaN(date.getTime())) {
             dateStr = date.toISOString().split('T')[0];
@@ -63,7 +63,9 @@ export const processSessionsForTimeline = (sessions: Session[] | undefined): { d
         date: dateStr || 'Unknown',
         score: Math.round(session.overall_score) || 0
       };
-    }).filter(item => item.date !== 'Unknown');
+    })
+    .filter(item => item.date !== 'Unknown')
+    .sort((a, b) => a.date.localeCompare(b.date)); // Sort by date ascending
   } catch (err) {
     console.error('Error processing sessions for timeline:', err);
     return [];

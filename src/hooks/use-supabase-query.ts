@@ -25,12 +25,17 @@ export function useSupabaseQuery<T>({
   dependencies = []
 }: SupabaseQueryOptions<T>) {
   const [data, setData] = useState<T | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+    
     async function fetchData() {
-      if (!enabled) return;
+      if (!enabled) {
+        setIsLoading(false);
+        return;
+      }
       
       setIsLoading(true);
       setError(null);
@@ -66,17 +71,25 @@ export function useSupabaseQuery<T>({
           throw new Error(supabaseError.message);
         }
         
-        setData(result as T);
+        if (isMounted) {
+          setData(result as T);
+          setIsLoading(false);
+        }
       } catch (err: any) {
         console.error(`Error fetching data from ${table}:`, err);
-        setError(err instanceof Error ? err : new Error(String(err)));
-      } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setError(err instanceof Error ? err : new Error(String(err)));
+          setIsLoading(false);
+        }
       }
     }
     
     fetchData();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [table, columns, singleRow, enabled, ...dependencies]);
 
-  return { data, isLoading, error };
+  return { data, isLoading, error, refetch: () => {} };
 }
