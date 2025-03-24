@@ -38,45 +38,36 @@ export const formatDuration = (minutes: number): string => {
   return `${hours} hr${hours !== 1 ? 's' : ''} ${remainingMinutes > 0 ? `${remainingMinutes} min${remainingMinutes !== 1 ? 's' : ''}` : ''}`;
 };
 
-// Process session data for timeline visualization with null/undefined checks
-export const processSessionsForTimeline = (sessions: Session[]): any[] => {
-  if (!sessions || !Array.isArray(sessions)) {
-    console.warn("Invalid sessions data provided to processSessionsForTimeline:", sessions);
+// Process sessions for timeline chart
+export const processSessionsForTimeline = (sessions: Session[] | undefined): { date: string; score: number }[] => {
+  if (!sessions || sessions.length === 0) return [];
+  
+  try {
+    // Map sessions to timeline data points
+    return sessions.map(session => {
+      // Safely extract the date from start_time
+      let dateStr = '';
+      try {
+        if (session.start_time) {
+          // Handle both ISO string and timestamp with timezone
+          const date = new Date(session.start_time);
+          if (!isNaN(date.getTime())) {
+            dateStr = date.toISOString().split('T')[0];
+          }
+        }
+      } catch (err) {
+        console.error('Error parsing date:', err);
+      }
+      
+      return {
+        date: dateStr || 'Unknown',
+        score: Math.round(session.overall_score) || 0
+      };
+    }).filter(item => item.date !== 'Unknown');
+  } catch (err) {
+    console.error('Error processing sessions for timeline:', err);
     return [];
   }
-  
-  return sessions.map(session => {
-    // Add strong null checks for date values
-    const startTime = session.start_time || null;
-    let formattedDate = 'Unknown';
-    let formattedTime = 'Unknown';
-    
-    try {
-      if (startTime) {
-        formattedDate = format(parseISO(startTime), 'yyyy-MM-dd');
-        formattedTime = format(parseISO(startTime), 'h:mm a');
-      }
-    } catch (error) {
-      console.error("Error parsing date:", startTime, error);
-    }
-    
-    // Calculate average score with fallbacks for missing values
-    const attention = session.attention || 0;
-    const memory = session.memory || 0;
-    const executiveFunction = session.executive_function || 0;
-    const behavioral = session.behavioral || 0;
-    const averageScore = Math.round((attention + memory + executiveFunction + behavioral) / 4);
-    
-    return {
-      id: session.id,
-      patientId: session.patient_id,
-      date: formattedDate,
-      time: formattedTime,
-      duration: session.duration || 0,
-      score: averageScore,
-      environment: session.environment || 'Unknown'
-    };
-  });
 };
 
 // Get background class based on score for visualization
@@ -165,39 +156,21 @@ export const formatLastSession = (date?: string): string => {
 };
 
 // Map patient from database format to application format
-export const mapPatientFromDB = (dbPatient: any): Patient => {
-  if (!dbPatient) return null as unknown as Patient;
+export const mapPatientFromDB = (patient: any) => {
+  if (!patient) return null;
   
   return {
-    id: dbPatient.id,
-    name: dbPatient.name,
-    age: dbPatient.age,
-    gender: dbPatient.gender,
-    diagnosis_date: dbPatient.diagnosis_date,
-    adhd_subtype: dbPatient.adhd_subtype,
-    created_at: dbPatient.created_at
+    ...patient,
+    // Convert any snake_case fields to camelCase if needed
   };
 };
 
 // Map session from database format to application format
-export const mapSessionFromDB = (dbSession: any): Session => {
-  if (!dbSession) return null as unknown as Session;
+export const mapSessionFromDB = (session: any) => {
+  if (!session) return null;
   
   return {
-    id: dbSession.id,
-    patient_id: dbSession.patient_id,
-    start_time: dbSession.start_time,
-    end_time: dbSession.end_time,
-    duration: dbSession.duration,
-    environment: dbSession.environment,
-    completion_status: dbSession.completion_status,
-    overall_score: dbSession.overall_score,
-    device: dbSession.device,
-    attention: dbSession.attention,
-    memory: dbSession.memory,
-    executive_function: dbSession.executive_function,
-    behavioral: dbSession.behavioral,
-    activities: dbSession.activities || [],
-    created_at: dbSession.created_at
+    ...session,
+    // Convert any snake_case fields to camelCase if needed
   };
 };

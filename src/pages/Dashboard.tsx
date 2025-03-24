@@ -1,108 +1,163 @@
-
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Brain, Clock, LineChart, Users } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { 
-  patients, 
-  patientMetrics, 
-  metricsMap, 
-  sessionData
-} from '@/utils/mockData';
-import { PatientCard } from '@/components/dashboard/PatientCard';
-import { StatusCard } from '@/components/dashboard/StatusCard';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Shell } from "@/components/Shell";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import { DomainChart } from '@/components/dashboard/DomainChart';
 import { SessionTimeline } from '@/components/dashboard/SessionTimeline';
-import { Patient, PatientMetrics as DatabasePatientMetrics } from '@/types/databaseTypes';
+import { Patient } from '@/types/databaseTypes';
+import { useSupabaseQuery } from '@/hooks/use-supabase-query';
+import { PatientMetrics, Session } from '@/types/databaseTypes';
 
-const Dashboard = () => {
-  const navigate = useNavigate();
-  const [selectedPatients, setSelectedPatients] = useState(patients.slice(0, 4));
-  
-  // Calculate total metrics across all patients
-  const totalPatients = patients.length;
-  const totalSessions = sessionData.length;
-  const averagePercentile = Math.round(
-    patientMetrics.reduce((sum, metric) => sum + (metric.percentile || 0), 0) / patientMetrics.length
-  );
-  const totalMinutes = patientMetrics.reduce((sum, metric) => sum + metric.sessions_completed, 0);
-  
-  // Generate domain trends for the dashboard chart - matching the expected structure for DomainChart
-  const domainTrendData = {
-    attention: Array(10).fill(0).map((_, i) => 50 + Math.random() * 30),
-    memory: Array(10).fill(0).map((_, i) => 55 + Math.random() * 25),
-    executiveFunction: Array(10).fill(0).map((_, i) => 45 + Math.random() * 35),
-    behavioral: Array(10).fill(0).map((_, i) => 60 + Math.random() * 20),
-  };
-  
-  const handlePatientClick = (patientId: string) => {
-    navigate(`/analysis?patient=${patientId}`);
-  };
-  
-  const handleViewAllPatients = () => {
-    navigate('/patients');
-  };
+interface PatientCardProps {
+  patient: Patient;
+  metrics?: PatientMetrics | null;
+  isSelected: boolean;
+  onClick: () => void;
+}
+
+const PatientCard: React.FC<PatientCardProps> = ({ patient, metrics, isSelected, onClick }) => {
+  const { name, adhd_subtype, age, gender } = patient;
   
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div>
-        <h1 className="text-3xl font-bold mb-1">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Overview of cognitive assessment data and patient metrics
-        </p>
-      </div>
-      
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatusCard 
-          title="Total Patients"
-          value={totalPatients}
-          icon={<Users className="h-5 w-5" />}
-        />
-        <StatusCard 
-          title="Average Percentile"
-          value={averagePercentile}
-          isPercentile={true}
-          change={{ value: 12, isImprovement: true }}
-          icon={<Brain className="h-5 w-5" />}
-        />
-        <StatusCard 
-          title="Session Count"
-          value={totalSessions}
-          change={{ value: 8, isImprovement: true }}
-          icon={<LineChart className="h-5 w-5" />}
-        />
-        <StatusCard 
-          title="Total Assessment Time"
-          value={`${totalMinutes} mins`}
-          icon={<Clock className="h-5 w-5" />}
-        />
-      </div>
-      
-      <div className="grid gap-6 md:grid-cols-2">
-        <DomainChart domainData={domainTrendData} />
-        <SessionTimeline sessions={sessionData.slice(0, 10) as any} />
-      </div>
-      
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Recent Patients</h2>
-          <Button variant="outline" size="sm" onClick={handleViewAllPatients}>
-            View all patients
-          </Button>
+    <Card
+      className={`glass cursor-pointer ${isSelected ? 'border-2 border-primary' : ''}`}
+      onClick={onClick}
+    >
+      <CardHeader>
+        <CardTitle>{name}</CardTitle>
+        <CardDescription>
+          {age} years old, {gender}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="grid gap-4">
+        <div className="flex items-center">
+          <Badge variant="secondary">{adhd_subtype}</Badge>
         </div>
-        
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {selectedPatients.map(patient => (
-            <PatientCard 
-              key={patient.id} 
-              patient={patient} 
-              metrics={metricsMap[patient.id]}
-              onClick={handlePatientClick}
+        <div className="flex items-center space-x-2">
+          <Avatar>
+            <AvatarImage src={`https://avatar.vercel.sh/${name}.png`} />
+            <AvatarFallback>{name.substring(0, 2)}</AvatarFallback>
+          </Avatar>
+          <span className="text-sm text-muted-foreground">
+            {metrics ? `Progress: ${metrics.progress}%` : 'No metrics available'}
+          </span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Inside the Dashboard component
+const Dashboard = () => {
+  const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
+  
+  // Fetch patients from database
+  const { 
+    data: patients, 
+    isLoading: isLoadingPatients 
+  } = useSupabaseQuery<Patient[]>({
+    table: 'patients',
+    orderBy: { column: 'name' }
+  });
+  
+  // Fetch sessions for selected patient
+  const {
+    data: patientSessions,
+    isLoading: isLoadingSessions
+  } = useSupabaseQuery<Session[]>({
+    table: 'sessions',
+    filter: (query) => selectedPatient ? query.eq('patient_id', selectedPatient) : query.limit(0),
+    orderBy: { column: 'start_time', ascending: false },
+    enabled: !!selectedPatient,
+    dependencies: [selectedPatient]
+  });
+  
+  // Fetch metrics for selected patient
+  const {
+    data: patientMetrics,
+    isLoading: isLoadingMetrics
+  } = useSupabaseQuery<PatientMetrics>({
+    table: 'patient_metrics',
+    filter: (query) => selectedPatient ? query.eq('patient_id', selectedPatient) : query.limit(0),
+    orderBy: { column: 'date', ascending: false },
+    limit: 1,
+    singleRow: true,
+    enabled: !!selectedPatient,
+    dependencies: [selectedPatient]
+  });
+  
+  // Handle patient selection
+  const handlePatientSelect = (patientId: string) => {
+    setSelectedPatient(patientId);
+  };
+  
+  // When rendering patient-specific components, pass the real data:
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between space-y-2">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+          <p className="text-muted-foreground">
+            Track cognitive performance and patient progress.
+          </p>
+        </div>
+      </div>
+      
+      {/* Update the components to use real data */}
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        {patients?.map(patient => (
+          <PatientCard
+            key={patient.id}
+            patient={patient}
+            metrics={patientMetrics}
+            isSelected={selectedPatient === patient.id}
+            onClick={() => handlePatientSelect(patient.id)}
+          />
+        ))}
+        {isLoadingPatients && (
+          <div className="col-span-full flex justify-center p-12">
+            <p>Loading patients...</p>
+          </div>
+        )}
+      </div>
+      
+      {selectedPatient && (
+        <>
+          <div className="grid gap-6 md:grid-cols-2">
+            <DomainChart
+              patient={selectedPatient}
+              isLoading={isLoadingMetrics}
+              metrics={patientMetrics}
             />
-          ))}
-        </div>
-      </div>
+            <SessionTimeline
+              patientId={selectedPatient}
+              sessions={patientSessions}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 };
