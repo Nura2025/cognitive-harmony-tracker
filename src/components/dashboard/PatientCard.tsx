@@ -5,11 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { CalendarDays, Clock, User } from 'lucide-react';
 import { Patient, PatientMetrics } from '@/types/databaseTypes';
 import { formatDateDistance, formatPercentile, getScoreColorClass } from '@/utils/dataProcessing';
+import { useNavigate } from 'react-router-dom';
 
 interface PatientCardProps {
   patient: Patient;
   metrics?: PatientMetrics | null;
-  onClick: (id: string) => void;
+  onClick?: (id: string) => void;
 }
 
 export const PatientCard: React.FC<PatientCardProps> = ({ 
@@ -17,6 +18,8 @@ export const PatientCard: React.FC<PatientCardProps> = ({
   metrics,
   onClick
 }) => {
+  const navigate = useNavigate();
+  
   // Calculate assessment data - ensure we have default values when data is missing
   const assessmentCount = metrics?.sessions_completed || 0;
   const lastAssessment = metrics?.date || new Date().toISOString(); // Would come from database
@@ -25,10 +28,18 @@ export const PatientCard: React.FC<PatientCardProps> = ({
   const percentile = metrics?.percentile || 0;
   const progress = metrics?.progress || 0;
 
+  const handleClick = () => {
+    if (onClick) {
+      onClick(patient.id);
+    } else {
+      navigate(`/analysis?patientId=${patient.id}`);
+    }
+  };
+
   return (
     <Card 
       className="glass cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-md hover:translate-y-[-2px]"
-      onClick={() => onClick(patient.id)}
+      onClick={handleClick}
     >
       <div className="h-2 bg-gradient-to-r from-primary/80 to-primary"></div>
       <CardContent className="pt-5">
