@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -15,16 +14,70 @@ import { Eye, FileText } from 'lucide-react';
 import { Patient, PatientMetrics } from '@/types/databaseTypes';
 import { formatDateDistance, formatPercentile, getScoreColorClass } from '@/utils/dataProcessing';
 import { format, parseISO } from 'date-fns';
+import { useSupabaseQuery } from '@/hooks/use-supabase-query';
 
-interface PatientListProps {
-  patients: Patient[];
-  metrics: Record<string, PatientMetrics>;
-}
-
-export const PatientList: React.FC<PatientListProps> = ({ patients, metrics }) => {
+export const PatientList: React.FC = () => {
   const navigate = useNavigate();
+  const [patientsWithMetrics, setPatientsWithMetrics] = useState<{
+    patients: Patient[];
+    metrics: Record<string, PatientMetrics>;
+  }>({
+    patients: [],
+    metrics: {}
+  });
   
-  if (patients.length === 0) {
+  const { 
+    data: patientsData, 
+    isLoading: isPatientsLoading, 
+    error: patientsError
+  } = useSupabaseQuery<Patient[]>({
+    table: 'patients',
+    orderBy: { column: 'name' }
+  });
+  
+  const { 
+    data: metricsData, 
+    isLoading: isMetricsLoading
+  } = useSupabaseQuery<PatientMetrics[]>({
+    table: 'patient_metrics',
+    orderBy: { column: 'date', ascending: false },
+  });
+  
+  useEffect(() => {
+    if (patientsData && metricsData) {
+      const metricsMap: Record<string, PatientMetrics> = {};
+      
+      metricsData.forEach((metric) => {
+        if (!metricsMap[metric.patient_id] || 
+            new Date(metric.date) > new Date(metricsMap[metric.patient_id].date)) {
+          metricsMap[metric.patient_id] = metric;
+        }
+      });
+      
+      setPatientsWithMetrics({
+        patients: patientsData,
+        metrics: metricsMap
+      });
+    }
+  }, [patientsData, metricsData]);
+  
+  if (isPatientsLoading || isMetricsLoading) {
+    return (
+      <div className="glass rounded-md p-8 text-center border border-border">
+        <p className="text-muted-foreground">Loading patients data...</p>
+      </div>
+    );
+  }
+  
+  if (patientsError) {
+    return (
+      <div className="glass rounded-md p-8 text-center border border-border">
+        <p className="text-red-500">Error loading patients: {patientsError.message}</p>
+      </div>
+    );
+  }
+  
+  if (!patientsWithMetrics.patients || patientsWithMetrics.patients.length === 0) {
     return (
       <div className="glass rounded-md p-8 text-center border border-border">
         <p className="text-muted-foreground">No patients found</p>
@@ -46,7 +99,7 @@ export const PatientList: React.FC<PatientListProps> = ({ patients, metrics }) =
           </TableRow>
         </TableHeader>
         <TableBody>
-          {patients.map((patient) => (
+          {patientsWithMetrics.patients.map((patient) => (
             <TableRow 
               key={patient.id}
               className="hover:bg-muted/30 transition-colors"
@@ -60,11 +113,11 @@ export const PatientList: React.FC<PatientListProps> = ({ patients, metrics }) =
               </TableCell>
               <TableCell>{format(parseISO(patient.diagnosis_date), 'MMM d, yyyy')}</TableCell>
               <TableCell>
-                {metrics[patient.id] ? (
+                {patientsWithMetrics.metrics[patient.id] ? (
                   <span 
-                    className={`font-medium ${getScoreColorClass(metrics[patient.id]?.percentile)}`}
+                    className={`font-medium ${getScoreColorClass(patientsWithMetrics.metrics[patient.id]?.percentile || 0)}`}
                   >
-                    {formatPercentile(metrics[patient.id]?.percentile)}
+                    {formatPercentile(patientsWithMetrics.metrics[patient.id]?.percentile || 0)}
                   </span>
                 ) : (
                   <span className="text-muted-foreground">No data</span>

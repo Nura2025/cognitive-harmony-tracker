@@ -73,14 +73,14 @@ export const PatientCard: React.FC<PatientCardProps> = ({
         <div className="mt-5">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs text-muted-foreground">Cognitive Score</span>
-            <span className={`text-xs font-medium ${getScoreColorClass(percentile)}`}>
-              {percentile}%
+            <span className={`text-xs font-medium ${getScoreColorClass(percentile || 0)}`}>
+              {percentile || 0}%
             </span>
           </div>
           <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
             <div 
               className="h-full bg-primary rounded-full transition-all duration-500"
-              style={{ width: `${percentile}%` }}
+              style={{ width: `${percentile || 0}%` }}
             />
           </div>
         </div>
@@ -90,9 +90,11 @@ export const PatientCard: React.FC<PatientCardProps> = ({
 };
 
 // Helper function to determine badge variant based on percentile
-const getScoreBadgeVariant = (score: number): "default" | "destructive" | "outline" | "secondary" => {
+const getScoreBadgeVariant = (score: number | null | undefined): "default" | "destructive" | "outline" | "secondary" => {
+  if (score === null || score === undefined) return "outline";
   if (score < 40) return "destructive";
   if (score < 60) return "outline";
   if (score < 85) return "secondary";
   return "default";
 };
+
