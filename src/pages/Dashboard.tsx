@@ -85,13 +85,6 @@ const Dashboard = () => {
     setSelectedPatient(patientId === selectedPatient ? null : patientId);
   };
   
-  // Build metrics map for patient cards
-  const metricsMap: Record<string, PatientMetrics | null> = {};
-  
-  if (selectedPatient && patientMetrics) {
-    metricsMap[selectedPatient] = patientMetrics;
-  }
-  
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -132,7 +125,6 @@ const Dashboard = () => {
               patient={patient}
               metrics={patientMetrics && selectedPatient === patient.id ? patientMetrics : null}
               onClick={() => handlePatientSelect(patient.id)}
-              isSelected={selectedPatient === patient.id}
             />
           ))
         )}

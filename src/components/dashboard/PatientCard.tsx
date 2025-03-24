@@ -8,7 +8,7 @@ import { formatDateDistance, formatPercentile, getScoreColorClass } from '@/util
 
 interface PatientCardProps {
   patient: Patient;
-  metrics?: PatientMetrics;
+  metrics?: PatientMetrics | null;
   onClick: (id: string) => void;
 }
 
@@ -17,9 +17,13 @@ export const PatientCard: React.FC<PatientCardProps> = ({
   metrics,
   onClick
 }) => {
-  // Calculate assessment data - since this is coming from the database we wouldn't have these properties
+  // Calculate assessment data - ensure we have default values when data is missing
   const assessmentCount = metrics?.sessions_completed || 0;
-  const lastAssessment = new Date().toISOString(); // Would come from database
+  const lastAssessment = metrics?.date || new Date().toISOString(); // Would come from database
+
+  // Safely calculate percentile and progress
+  const percentile = metrics?.percentile || 0;
+  const progress = metrics?.progress || 0;
 
   return (
     <Card 
@@ -38,8 +42,8 @@ export const PatientCard: React.FC<PatientCardProps> = ({
               </span>
             </div>
           </div>
-          <Badge variant={getScoreBadgeVariant(metrics?.percentile || 0)}>
-            {formatPercentile(metrics?.percentile || 0)} Percentile
+          <Badge variant={getScoreBadgeVariant(percentile)}>
+            {formatPercentile(percentile)} Percentile
           </Badge>
         </div>
         
@@ -50,7 +54,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
           </div>
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">Progress</span>
-            <span className="font-medium">+{metrics?.progress || 0}% Last 30d</span>
+            <span className="font-medium">+{progress}% Last 30d</span>
           </div>
           <div className="flex items-center text-sm">
             <CalendarDays className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
@@ -69,14 +73,14 @@ export const PatientCard: React.FC<PatientCardProps> = ({
         <div className="mt-5">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs text-muted-foreground">Cognitive Score</span>
-            <span className={`text-xs font-medium ${getScoreColorClass(metrics?.percentile || 0)}`}>
-              {metrics?.percentile || 0}%
+            <span className={`text-xs font-medium ${getScoreColorClass(percentile)}`}>
+              {percentile}%
             </span>
           </div>
           <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
             <div 
               className="h-full bg-primary rounded-full transition-all duration-500"
-              style={{ width: `${metrics?.percentile || 0}%` }}
+              style={{ width: `${percentile}%` }}
             />
           </div>
         </div>

@@ -39,28 +39,28 @@ export const DomainChart: React.FC<DomainChartProps> = ({
     
     // For the first data point, use real data if available
     if (index === 0 && metrics) {
-      dataPoint.attention = metrics.attention;
-      dataPoint.memory = metrics.memory;
-      dataPoint.executiveFunction = metrics.executive_function;
-      dataPoint.behavioral = metrics.behavioral;
+      dataPoint.attention = metrics.attention || 0;
+      dataPoint.memory = metrics.memory || 0;
+      dataPoint.executiveFunction = metrics.executive_function || 0;
+      dataPoint.behavioral = metrics.behavioral || 0;
     } else {
       // For other points, use simulated trend data
       const randomFactor = 0.9 + Math.random() * 0.2; // Random factor between 0.9 and 1.1
       
       dataPoint.attention = metrics ? 
-        Math.min(100, Math.max(0, Math.round(metrics.attention * randomFactor))) : 
+        Math.min(100, Math.max(0, Math.round((metrics.attention || 50) * randomFactor))) : 
         50;
         
       dataPoint.memory = metrics ? 
-        Math.min(100, Math.max(0, Math.round(metrics.memory * randomFactor))) : 
+        Math.min(100, Math.max(0, Math.round((metrics.memory || 50) * randomFactor))) : 
         50;
         
       dataPoint.executiveFunction = metrics ? 
-        Math.min(100, Math.max(0, Math.round(metrics.executive_function * randomFactor))) : 
+        Math.min(100, Math.max(0, Math.round((metrics.executive_function || 50) * randomFactor))) : 
         50;
         
       dataPoint.behavioral = metrics ? 
-        Math.min(100, Math.max(0, Math.round(metrics.behavioral * randomFactor))) : 
+        Math.min(100, Math.max(0, Math.round((metrics.behavioral || 50) * randomFactor))) : 
         50;
     }
     
