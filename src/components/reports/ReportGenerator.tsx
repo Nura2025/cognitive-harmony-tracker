@@ -1,152 +1,200 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useSearchParams } from 'react-router-dom';
+import { Printer, Download, Book, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { 
-  Download, 
-  FileText, 
-  LayoutTemplate, 
-  Mail, 
-  Printer, 
-  Share2
-} from 'lucide-react';
-import { Patient, PatientMetrics } from '@/utils/mockData';
-import { format } from 'date-fns';
-import { toast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { patients, patientMetrics, metricsMap, generateRecommendations } from '@/utils/mockData';
+import { Patient, PatientMetrics } from '@/types/databaseTypes';
 
 interface ReportGeneratorProps {
-  patient: Patient;
-  metrics: PatientMetrics;
+  type?: 'cognitive' | 'progress' | 'clinical';
 }
 
-export const ReportGenerator: React.FC<ReportGeneratorProps> = ({ patient, metrics }) => {
-  const [reportType, setReportType] = useState('clinical');
-  const [includeSections, setIncludeSections] = useState({
-    overview: true,
-    domainAnalysis: true,
-    trends: true,
-    recommendations: true,
-    rawData: false,
-  });
+export const ReportGenerator: React.FC<ReportGeneratorProps> = ({ 
+  type = 'cognitive'
+}) => {
+  const [searchParams] = useSearchParams();
+  const patientId = searchParams.get('patient');
   
-  const today = format(new Date(), 'MMMM d, yyyy');
+  // Find patient data
+  const patient = patients.find(p => p.id === patientId) as Patient;
+  const metrics = patientId ? metricsMap[patientId] as PatientMetrics : null;
   
-  const handleCheckboxChange = (key: keyof typeof includeSections) => {
-    setIncludeSections(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
-  };
+  // Generate recommendations
+  const recommendations = generateRecommendations();
   
-  const handleGenerateReport = () => {
-    toast({
-      title: "Report Generated",
-      description: "The report has been generated successfully.",
-    });
-  };
+  // If no patient is selected
+  if (!patient || !metrics) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center py-8">
+            <FileText className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
+            <h3 className="mt-4 text-lg font-medium">No Patient Selected</h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Please select a patient to generate a report.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
   
   return (
-    <Card className="glass">
-      <CardHeader>
-        <CardTitle className="text-lg">Generate Report</CardTitle>
+    <Card className="glass" id="report-container">
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>Patient Report: {patient.name}</CardTitle>
+        <div className="flex space-x-2">
+          <Button variant="outline" size="sm">
+            <Printer className="mr-2 h-4 w-4" />
+            Print
+          </Button>
+          <Button variant="outline" size="sm">
+            <Download className="mr-2 h-4 w-4" />
+            Download PDF
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
-        <div className="mb-6">
-          <Label className="text-muted-foreground mb-2 block">Report Template</Label>
-          <Select value={reportType} onValueChange={setReportType}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select report type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="clinical">Clinical Report</SelectItem>
-              <SelectItem value="school">School Accommodation</SelectItem>
-              <SelectItem value="progress">Progress Summary</SelectItem>
-              <SelectItem value="detailed">Detailed Analysis</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div className="mb-6">
-          <Label className="text-muted-foreground mb-2 block">Include Sections</Label>
-          <div className="space-y-2.5">
-            {Object.entries(includeSections).map(([key, checked]) => (
-              <div key={key} className="flex items-center space-x-2">
-                <Checkbox 
-                  id={key} 
-                  checked={checked}
-                  onCheckedChange={() => handleCheckboxChange(key as keyof typeof includeSections)}
-                />
-                <Label htmlFor={key} className="text-sm cursor-pointer">
-                  {formatSectionName(key)}
-                </Label>
-              </div>
-            ))}
-          </div>
-        </div>
-        
-        <div className="p-4 bg-muted/30 rounded-lg border border-border mb-6">
-          <div className="flex items-center">
-            <div className="mr-4 p-3 rounded-full bg-primary/10">
-              <FileText className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h3 className="font-medium">Report Preview</h3>
-              <p className="text-sm text-muted-foreground">
-                {reportType.charAt(0).toUpperCase() + reportType.slice(1)} Report for {patient.name} - {today}
-              </p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="flex flex-col space-y-2">
-          <Button onClick={handleGenerateReport} className="w-full gap-2">
-            <LayoutTemplate className="h-4 w-4" />
-            Generate Report
-          </Button>
+        <Tabs defaultValue={type} className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="cognitive">Cognitive Assessment</TabsTrigger>
+            <TabsTrigger value="progress">Progress Report</TabsTrigger>
+            <TabsTrigger value="clinical">Clinical Insights</TabsTrigger>
+          </TabsList>
           
-          <div className="grid grid-cols-3 gap-2 mt-2">
-            <Button variant="outline" size="sm" className="gap-1">
-              <Download className="h-4 w-4" />
-              <span>Save</span>
-            </Button>
-            <Button variant="outline" size="sm" className="gap-1">
-              <Printer className="h-4 w-4" />
-              <span>Print</span>
-            </Button>
-            <Button variant="outline" size="sm" className="gap-1">
-              <Mail className="h-4 w-4" />
-              <span>Email</span>
-            </Button>
-          </div>
-        </div>
+          <TabsContent value="cognitive" className="space-y-4">
+            <div className="p-4 border rounded-md">
+              <h2 className="text-xl font-semibold mb-4">Patient Information</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p><strong>Name:</strong> {patient.name}</p>
+                  <p><strong>Age:</strong> {patient.age} years old</p>
+                  <p><strong>Gender:</strong> {patient.gender}</p>
+                </div>
+                <div>
+                  <p><strong>ADHD Subtype:</strong> {patient.adhd_subtype}</p>
+                  <p><strong>Diagnosis Date:</strong> {patient.diagnosis_date}</p>
+                  <p><strong>Percentile Rank:</strong> {metrics.percentile}th</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-4 border rounded-md">
+              <h2 className="text-xl font-semibold mb-4">Cognitive Domain Scores</h2>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span>Attention</span>
+                    <span>{metrics.attention}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-muted rounded-full">
+                    <div 
+                      className="h-full bg-blue-500 rounded-full" 
+                      style={{ width: `${metrics.attention}%` }}
+                    ></div>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span>Memory</span>
+                    <span>{metrics.memory}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-muted rounded-full">
+                    <div 
+                      className="h-full bg-green-500 rounded-full" 
+                      style={{ width: `${metrics.memory}%` }}
+                    ></div>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span>Executive Function</span>
+                    <span>{metrics.executive_function}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-muted rounded-full">
+                    <div 
+                      className="h-full bg-purple-500 rounded-full" 
+                      style={{ width: `${metrics.executive_function}%` }}
+                    ></div>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span>Behavioral Regulation</span>
+                    <span>{metrics.behavioral}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-muted rounded-full">
+                    <div 
+                      className="h-full bg-orange-500 rounded-full" 
+                      style={{ width: `${metrics.behavioral}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="progress" className="space-y-4">
+            <div className="p-4 border rounded-md">
+              <h2 className="text-xl font-semibold mb-4">Progress Summary</h2>
+              <p className="mb-4">
+                Overall, {patient.name} has shown a {metrics.progress}% improvement in the last 30 days
+                across all cognitive domains.
+              </p>
+              
+              <div className="mt-6">
+                <h3 className="text-lg font-medium mb-3">Sessions Completed</h3>
+                <div className="flex items-center">
+                  <div className="w-full bg-muted rounded-full h-4">
+                    <div 
+                      className="bg-primary h-4 rounded-full" 
+                      style={{ width: `${(metrics.sessions_completed / 10) * 100}%` }}
+                    ></div>
+                  </div>
+                  <span className="ml-4 font-medium">{metrics.sessions_completed}/10</span>
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {patient.name} has completed {metrics.sessions_completed} out of the recommended 10 sessions.
+                </p>
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="clinical" className="space-y-4">
+            <div className="p-4 border rounded-md">
+              <h2 className="text-xl font-semibold mb-4">Clinical Insights</h2>
+              
+              {metrics.clinical_concerns && metrics.clinical_concerns.length > 0 ? (
+                <div className="mb-6">
+                  <h3 className="text-lg font-medium mb-3">Areas of Concern</h3>
+                  <ul className="list-disc pl-5 space-y-1">
+                    {metrics.clinical_concerns.map((concern, index) => (
+                      <li key={index}>{concern}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <p className="mb-4">No specific clinical concerns identified at this time.</p>
+              )}
+              
+              <div>
+                <h3 className="text-lg font-medium mb-3">Recommendations</h3>
+                <ul className="list-disc pl-5 space-y-1">
+                  {recommendations.map((rec, index) => (
+                    <li key={index}>{rec}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );
-};
-
-// Helper function to format section names
-const formatSectionName = (key: string): string => {
-  switch (key) {
-    case 'overview':
-      return 'Patient Overview';
-    case 'domainAnalysis':
-      return 'Cognitive Domain Analysis';
-    case 'trends':
-      return 'Performance Trends';
-    case 'recommendations':
-      return 'Clinical Recommendations';
-    case 'rawData':
-      return 'Raw Assessment Data';
-    default:
-      return key;
-  }
 };

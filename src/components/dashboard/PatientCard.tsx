@@ -4,11 +4,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CalendarDays, Clock, User } from 'lucide-react';
 import { Patient, PatientMetrics } from '@/types/databaseTypes';
-import { formatLastSession, formatPercentile, getScoreColorClass } from '@/utils/dataProcessing';
+import { formatDateDistance, formatPercentile, getScoreColorClass } from '@/utils/dataProcessing';
 
 interface PatientCardProps {
   patient: Patient;
-  metrics: PatientMetrics;
+  metrics?: PatientMetrics;
   onClick: (id: string) => void;
 }
 
@@ -18,7 +18,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
   onClick
 }) => {
   // Calculate assessment data - since this is coming from the database we wouldn't have these properties
-  const assessmentCount = 5; // We would get this from the database in a real implementation
+  const assessmentCount = metrics?.sessions_completed || 0;
   const lastAssessment = new Date().toISOString(); // Would come from database
 
   return (
@@ -38,8 +38,8 @@ export const PatientCard: React.FC<PatientCardProps> = ({
               </span>
             </div>
           </div>
-          <Badge variant={getScoreBadgeVariant(metrics.percentile || 0)}>
-            {formatPercentile(metrics.percentile)} Percentile
+          <Badge variant={getScoreBadgeVariant(metrics?.percentile || 0)}>
+            {formatPercentile(metrics?.percentile)} Percentile
           </Badge>
         </div>
         
@@ -50,12 +50,12 @@ export const PatientCard: React.FC<PatientCardProps> = ({
           </div>
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">Progress</span>
-            <span className="font-medium">+{metrics.progress}% Last 30d</span>
+            <span className="font-medium">+{metrics?.progress || 0}% Last 30d</span>
           </div>
           <div className="flex items-center text-sm">
             <CalendarDays className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
             <span className="text-xs">
-              Last session: {formatLastSession(lastAssessment)}
+              Last session: {formatDateDistance(lastAssessment)}
             </span>
           </div>
           <div className="flex items-center text-sm">
@@ -69,14 +69,14 @@ export const PatientCard: React.FC<PatientCardProps> = ({
         <div className="mt-5">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs text-muted-foreground">Cognitive Score</span>
-            <span className={`text-xs font-medium ${getScoreColorClass(metrics.percentile)}`}>
-              {metrics.percentile}%
+            <span className={`text-xs font-medium ${getScoreColorClass(metrics?.percentile)}`}>
+              {metrics?.percentile || 0}%
             </span>
           </div>
           <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
             <div 
               className="h-full bg-primary rounded-full transition-all duration-500"
-              style={{ width: `${metrics.percentile || 0}%` }}
+              style={{ width: `${metrics?.percentile || 0}%` }}
             />
           </div>
         </div>

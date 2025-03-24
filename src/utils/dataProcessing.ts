@@ -67,6 +67,12 @@ export const getScoreStatus = (score: number | null | undefined): string => {
   }
 };
 
+// Convert between camelCase and snake_case property names
+export const convertToDatabaseKey = (key: string): string => {
+  if (key === 'executiveFunction') return 'executive_function';
+  return key.replace(/([A-Z])/g, '_$1').toLowerCase();
+};
+
 // Map snake_case domain keys to human-readable names
 export const getDomainName = (domain: string): string => {
   const domainNames: Record<string, string> = {
@@ -77,12 +83,6 @@ export const getDomainName = (domain: string): string => {
   };
   
   return domainNames[domain] || domain;
-};
-
-// Convert camelCase keys to snake_case (for database)
-export const convertToDatabaseKey = (key: string): string => {
-  if (key === 'executiveFunction') return 'executive_function';
-  return key;
 };
 
 // Get domain-specific background color

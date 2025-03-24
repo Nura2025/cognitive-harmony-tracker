@@ -1,179 +1,164 @@
 
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { Brain, TrendingUp, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { getPatients } from '@/services/patientService';
-import { getPatientMetrics } from '@/services/patientService';
-import { Patient, CognitiveDomain } from '@/types/databaseTypes';
-import { CognitiveDomain as DomainComponent } from '@/components/analysis/CognitiveDomain';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CognitiveDomain } from '@/components/analysis/CognitiveDomain';
 import { DomainComparison } from '@/components/analysis/DomainComparison';
 import { PerformanceTrend } from '@/components/analysis/PerformanceTrend';
-import { generatePercentileData, generateTrendData } from '@/utils/mockData';
+import { 
+  patients, 
+  patientMetrics,
+  metricsMap,
+  sessionsMap,
+  mockPatientData,
+  mockNormativeData,
+  mockSubtypeData,
+  generateTrendData,
+  generatePercentileData
+} from '@/utils/mockData';
+import { Patient, PatientMetrics, CognitiveDomain as CognitiveDomainType } from '@/types/databaseTypes';
 
 const Analysis = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [patientId, setPatientId] = useState<string | null>(null);
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [patientMetrics, setPatientMetrics] = useState<any>(null);
-  const [domainTrendData, setDomainTrendData] = useState<Record<string, any>>({});
-  const [isLoading, setIsLoading] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const patientParam = searchParams.get('patient');
   
-  // Fetch patients data
-  useEffect(() => {
-    const fetchPatients = async () => {
-      const data = await getPatients();
-      setPatients(data);
-      setIsLoading(false);
-    };
-    
-    fetchPatients();
-  }, []);
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(patientParam);
+  const [selectedDomain, setSelectedDomain] = useState<keyof CognitiveDomainType>('attention');
   
-  // Parse patient ID from URL query params
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const id = params.get('patient');
-    
-    if (id && patients.some(p => p.id === id)) {
-      setPatientId(id);
-    } else if (patients.length > 0) {
-      setPatientId(patients[0].id);
-    }
-  }, [location, patients]);
+  // Find the selected patient's info
+  const selectedPatient = patients.find(p => p.id === selectedPatientId);
+  const patientMetric = selectedPatientId ? metricsMap[selectedPatientId] : null;
+  const patientSessions = selectedPatientId ? sessionsMap[selectedPatientId] || [] : [];
   
-  // Fetch metrics when patient changes
-  useEffect(() => {
-    if (!patientId) return;
-    
-    const fetchMetrics = async () => {
-      const metrics = await getPatientMetrics(patientId);
-      setPatientMetrics(metrics);
-    };
-    
-    fetchMetrics();
-    
-    // Generate trend data for visualization
-    setDomainTrendData({
-      attention: generateTrendData('attention'),
-      memory: generateTrendData('memory'),
-      executive_function: generateTrendData('executive_function'),
-      behavioral: generateTrendData('behavioral')
-    });
-  }, [patientId]);
-  
-  const handlePatientChange = (id: string) => {
-    navigate(`/analysis?patient=${id}`);
-  };
-  
-  const handleBackToDashboard = () => {
-    navigate('/');
-  };
-  
-  // Generate percentile comparison data
+  // Generate mock trend data for the selected patient and domain
+  const trendData = generateTrendData(selectedDomain, 12);
   const percentileData = generatePercentileData();
   
-  // Generate performance trend data with validation
-  const performanceTrendData = generateTrendData('attention', 60)
-    .map(item => ({ 
-      date: item.date, 
-      score: typeof item.value === 'number' && !isNaN(item.value) ? item.value : 0
-    }));
+  // Navigate between patients
+  const navigateToPatient = (direction: 'prev' | 'next') => {
+    const currentIndex = patients.findIndex(p => p.id === selectedPatientId);
+    if (currentIndex === -1) return;
+    
+    let newIndex;
+    if (direction === 'prev') {
+      newIndex = currentIndex === 0 ? patients.length - 1 : currentIndex - 1;
+    } else {
+      newIndex = currentIndex === patients.length - 1 ? 0 : currentIndex + 1;
+    }
+    
+    const newPatientId = patients[newIndex].id;
+    setSelectedPatientId(newPatientId);
+    setSearchParams({ patient: newPatientId });
+  };
   
-  if (isLoading) {
-    return <div className="p-8 pixel-text">Loading patient data...</div>;
-  }
+  // Update URL if patient param changes
+  useEffect(() => {
+    if (patientParam && patientParam !== selectedPatientId) {
+      setSelectedPatientId(patientParam);
+    }
+  }, [patientParam]);
   
-  if (!patientId || !patientMetrics) {
-    return <div className="p-8 pixel-text">Select a patient to view analysis.</div>;
+  // If no patient is selected, show message
+  if (!selectedPatient || !patientMetric) {
+    return (
+      <div className="h-[80vh] flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Brain className="h-16 w-16 mx-auto text-primary/60" />
+          <h2 className="text-2xl font-semibold">No Patient Selected</h2>
+          <p className="text-muted-foreground max-w-md">
+            Select a patient from the dashboard or patients list to view their cognitive analysis.
+          </p>
+          {patients.length > 0 && (
+            <Button
+              onClick={() => {
+                const firstPatient = patients[0];
+                setSelectedPatientId(firstPatient.id);
+                setSearchParams({ patient: firstPatient.id });
+              }}
+            >
+              View First Patient
+            </Button>
+          )}
+        </div>
+      </div>
+    );
   }
   
   return (
     <div className="space-y-8 animate-fade-in">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="mb-2 -ml-2 text-muted-foreground"
-            onClick={handleBackToDashboard}
-          >
-            <ChevronLeft className="mr-1 h-4 w-4" />
-            Back to Dashboard
-          </Button>
-          <h1 className="text-3xl font-bold mb-1 nura-title">NURA Cognitive Analysis</h1>
+          <h1 className="text-3xl font-bold mb-1">Cognitive Analysis</h1>
           <p className="text-muted-foreground">
-            Detailed cognitive domain assessment and trends
+            Detailed assessment results for {selectedPatient.name}
           </p>
         </div>
         
-        <div className="min-w-[200px]">
-          <Select value={patientId || ''} onValueChange={handlePatientChange}>
-            <SelectTrigger className="pixel-border">
-              <SelectValue placeholder="Select a patient" />
-            </SelectTrigger>
-            <SelectContent>
-              {patients.map(patient => (
-                <SelectItem key={patient.id} value={patient.id}>
-                  {patient.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => navigateToPatient('prev')}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="sr-only">Previous Patient</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => navigateToPatient('next')}
+          >
+            <ArrowRight className="h-4 w-4" />
+            <span className="sr-only">Next Patient</span>
+          </Button>
         </div>
       </div>
       
-      <div className="grid gap-6 md:grid-cols-2">
-        <DomainComparison 
-          patientData={{
-            attention: patientMetrics.attention,
-            memory: patientMetrics.memory,
-            executive_function: patientMetrics.executive_function,
-            behavioral: patientMetrics.behavioral
-          }}
-          normativeData={percentileData.ageGroup}
-          subtypeData={percentileData.adhdSubtype}
-        />
-        <PerformanceTrend 
-          data={performanceTrendData}
-          title="Overall Performance Trend"
-          description="90-day progress tracking across all cognitive metrics"
-        />
-      </div>
-      
-      <div className="grid gap-6 md:grid-cols-2">
-        <DomainComponent 
-          domain="attention"
-          score={patientMetrics.attention}
-          trendData={domainTrendData.attention || []}
-        />
-        <DomainComponent 
-          domain="memory"
-          score={patientMetrics.memory}
-          trendData={domainTrendData.memory || []}
-        />
-      </div>
-      
-      <div className="grid gap-6 md:grid-cols-2">
-        <DomainComponent 
-          domain="executive_function"
-          score={patientMetrics.executive_function}
-          trendData={domainTrendData.executive_function || []}
-        />
-        <DomainComponent 
-          domain="behavioral"
-          score={patientMetrics.behavioral}
-          trendData={domainTrendData.behavioral || []}
-        />
-      </div>
+      <Tabs defaultValue="domains">
+        <TabsList className="grid w-full md:w-auto grid-cols-2 md:grid-cols-3">
+          <TabsTrigger value="domains">Cognitive Domains</TabsTrigger>
+          <TabsTrigger value="comparison">Domain Comparison</TabsTrigger>
+          <TabsTrigger value="trends">Performance Trends</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="domains" className="mt-6">
+          <CognitiveDomain
+            patient={selectedPatient}
+            metrics={patientMetric}
+            sessions={patientSessions}
+            domain={selectedDomain}
+            setDomain={setSelectedDomain}
+            patientData={mockPatientData}
+            normativeData={mockNormativeData}
+            subtypeData={mockSubtypeData}
+          />
+        </TabsContent>
+        
+        <TabsContent value="comparison" className="mt-6">
+          <DomainComparison
+            patient={selectedPatient}
+            metrics={patientMetric}
+            data={{
+              attention: patientMetric.attention,
+              memory: patientMetric.memory,
+              executive_function: patientMetric.executive_function,
+              behavioral: patientMetric.behavioral
+            }}
+          />
+        </TabsContent>
+        
+        <TabsContent value="trends" className="mt-6">
+          <PerformanceTrend
+            patient={selectedPatient}
+            domain={selectedDomain}
+            setDomain={setSelectedDomain}
+            trendData={trendData}
+            percentileData={percentileData}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

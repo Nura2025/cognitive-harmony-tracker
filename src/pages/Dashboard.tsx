@@ -8,13 +8,13 @@ import {
   patients, 
   patientMetrics, 
   metricsMap, 
-  sessionData, 
-  generateTrendData
+  sessionData
 } from '@/utils/mockData';
 import { PatientCard } from '@/components/dashboard/PatientCard';
 import { StatusCard } from '@/components/dashboard/StatusCard';
 import { DomainChart } from '@/components/dashboard/DomainChart';
 import { SessionTimeline } from '@/components/dashboard/SessionTimeline';
+import { Patient, PatientMetrics as DatabasePatientMetrics } from '@/types/databaseTypes';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -26,13 +26,13 @@ const Dashboard = () => {
   const averagePercentile = Math.round(
     patientMetrics.reduce((sum, metric) => sum + (metric.percentile || 0), 0) / patientMetrics.length
   );
-  const totalMinutes = patientMetrics.reduce((sum, metric) => sum + metric.sessions_duration, 0);
+  const totalMinutes = patientMetrics.reduce((sum, metric) => sum + metric.sessions_completed, 0);
   
   // Generate domain trends for the dashboard chart
   const domainTrendData = {
     attention: Array(10).fill(0).map((_, i) => 50 + Math.random() * 30),
     memory: Array(10).fill(0).map((_, i) => 55 + Math.random() * 25),
-    executiveFunction: Array(10).fill(0).map((_, i) => 45 + Math.random() * 35),
+    executive_function: Array(10).fill(0).map((_, i) => 45 + Math.random() * 35),
     behavioral: Array(10).fill(0).map((_, i) => 60 + Math.random() * 20),
   };
   

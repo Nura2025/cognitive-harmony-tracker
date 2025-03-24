@@ -5,7 +5,8 @@
 import { 
   Patient, 
   PatientMetrics, 
-  CognitiveDomain 
+  CognitiveDomain,
+  Session
 } from '@/types/databaseTypes';
 import { generatePatients, generatePatientMetrics } from './generators/patientGenerators';
 import { generateSessionData } from './generators/sessionGenerators';
@@ -14,7 +15,7 @@ import { generateRecommendations } from './generators/recommendationGenerators';
 import { mockPatientData, mockNormativeData, mockSubtypeData } from './mockData/cognitiveDomainData';
 
 // Define a SessionData type that matches what the components expect
-export interface SessionData {
+export interface SessionData extends CognitiveDomain {
   id: string;
   patientId: string;
   startTime: string;
@@ -24,10 +25,6 @@ export interface SessionData {
   completionStatus: 'Completed' | 'Abandoned' | 'Interrupted';
   overallScore: number;
   device: string;
-  attention: number;
-  memory: number;
-  executive_function: number;
-  behavioral: number;
   domainScores: {
     attention: number;
     memory: number;
@@ -43,10 +40,50 @@ export interface SessionData {
   }>;
 }
 
-// Initialize mock data
-export const patients = generatePatients(12);
-export const patientMetrics = generatePatientMetrics(patients);
-export const sessionData = generateSessionData(patients);
+// Initialize mock data - make sure we're creating properly structured data
+export const patients = generatePatients(12).map<Patient>(p => ({
+  id: p.id,
+  name: p.name,
+  age: p.age,
+  gender: p.gender as 'Male' | 'Female' | 'Other',
+  diagnosis_date: p.diagnosisDate,
+  adhd_subtype: p.adhdSubtype as 'Inattentive' | 'Hyperactive-Impulsive' | 'Combined',
+  created_at: new Date().toISOString()
+}));
+
+export const patientMetrics = generatePatientMetrics(patients).map<PatientMetrics>(pm => ({
+  id: `PM-${pm.patientId}`,
+  patient_id: pm.patientId,
+  date: pm.date,
+  attention: pm.attention,
+  memory: pm.memory,
+  executive_function: pm.executiveFunction,
+  behavioral: pm.behavioral,
+  percentile: pm.percentile,
+  sessions_duration: pm.sessionsDuration,
+  sessions_completed: pm.sessionsCompleted,
+  progress: pm.progress,
+  clinical_concerns: pm.clinicalConcerns,
+  created_at: new Date().toISOString()
+}));
+
+export const sessionData = generateSessionData(patients).map<SessionData>(session => ({
+  id: session.id,
+  patientId: session.patientId,
+  startTime: session.startTime,
+  endTime: session.endTime,
+  duration: session.duration,
+  environment: session.environment,
+  completionStatus: session.completionStatus,
+  overallScore: session.overallScore,
+  device: session.device,
+  attention: session.domainScores.attention,
+  memory: session.domainScores.memory,
+  executive_function: session.domainScores.executiveFunction,
+  behavioral: session.domainScores.behavioral,
+  domainScores: session.domainScores,
+  activities: session.activities
+}));
 
 // Export mock cognitive domain data
 export { mockPatientData, mockNormativeData, mockSubtypeData };
