@@ -24,9 +24,9 @@ const Dashboard = () => {
   const totalPatients = patients.length;
   const totalSessions = sessionData.length;
   const averagePercentile = Math.round(
-    patientMetrics.reduce((sum, metric) => sum + metric.percentile, 0) / patientMetrics.length
+    patientMetrics.reduce((sum, metric) => sum + (metric.percentile || 0), 0) / patientMetrics.length
   );
-  const totalMinutes = patientMetrics.reduce((sum, metric) => sum + metric.sessionsDuration, 0);
+  const totalMinutes = patientMetrics.reduce((sum, metric) => sum + metric.sessions_duration, 0);
   
   // Generate domain trends for the dashboard chart
   const domainTrendData = {

@@ -84,20 +84,21 @@ export const SessionAnalysis: React.FC<SessionAnalysisProps> = ({ session }) => 
         <div>
           <h3 className="font-medium mb-3">Domain Breakdown</h3>
           <div className="space-y-4">
-            {(Object.keys(session.domainScores) as (keyof typeof session.domainScores)[]).map(domain => {
-              const score = session.domainScores[domain];
+            {Object.entries(session.domainScores).map(([domainKey, score]) => {
+              const formattedDomain = domainKey === "executiveFunction" 
+                ? "Executive Function" 
+                : domainKey.charAt(0).toUpperCase() + domainKey.slice(1);
+              
               return (
-                <div key={domain} className="flex items-center justify-between">
+                <div key={domainKey} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full bg-cognitive-${domain}`} />
-                    <span className="text-sm">
-                      {domain === 'executiveFunction' ? 'Executive Function' : domain.charAt(0).toUpperCase() + domain.slice(1)}
-                    </span>
+                    <div className={`w-3 h-3 rounded-full bg-cognitive-${domainKey}`} />
+                    <span className="text-sm">{formattedDomain}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                       <div 
-                        className={`h-full bg-cognitive-${domain} rounded-full`}
+                        className={`h-full bg-cognitive-${domainKey} rounded-full`}
                         style={{ width: `${score}%` }}
                       />
                     </div>

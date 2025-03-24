@@ -29,7 +29,7 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = ({
   const totalSessions = sessions.length;
   const totalDuration = sessions.reduce((sum, session) => sum + session.duration, 0);
   const averageScore = Math.round(
-    sessions.reduce((sum, session) => sum + session.overallScore, 0) / sessions.length
+    sessions.reduce((sum, session) => sum + session.overallScore, 0) / (sessions.length || 1)
   );
   
   return (

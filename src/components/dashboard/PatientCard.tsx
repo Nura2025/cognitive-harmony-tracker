@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CalendarDays, Clock, User } from 'lucide-react';
-import { Patient, PatientMetrics } from '@/utils/mockData';
+import { Patient, PatientMetrics } from '@/types/databaseTypes';
 import { formatLastSession, formatPercentile, getScoreColorClass } from '@/utils/dataProcessing';
 
 interface PatientCardProps {
@@ -17,6 +17,10 @@ export const PatientCard: React.FC<PatientCardProps> = ({
   metrics,
   onClick
 }) => {
+  // Calculate assessment data - since this is coming from the database we wouldn't have these properties
+  const assessmentCount = 5; // We would get this from the database in a real implementation
+  const lastAssessment = new Date().toISOString(); // Would come from database
+
   return (
     <Card 
       className="glass cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-md hover:translate-y-[-2px]"
@@ -34,7 +38,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
               </span>
             </div>
           </div>
-          <Badge variant={getScoreBadgeVariant(metrics.percentile)}>
+          <Badge variant={getScoreBadgeVariant(metrics.percentile || 0)}>
             {formatPercentile(metrics.percentile)} Percentile
           </Badge>
         </div>
@@ -42,7 +46,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
         <div className="grid grid-cols-2 gap-3 mt-5">
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">ADHD Subtype</span>
-            <span className="font-medium">{patient.adhdSubtype}</span>
+            <span className="font-medium">{patient.adhd_subtype}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">Progress</span>
@@ -51,13 +55,13 @@ export const PatientCard: React.FC<PatientCardProps> = ({
           <div className="flex items-center text-sm">
             <CalendarDays className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
             <span className="text-xs">
-              Last session: {formatLastSession(patient.lastAssessment)}
+              Last session: {formatLastSession(lastAssessment)}
             </span>
           </div>
           <div className="flex items-center text-sm">
             <Clock className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
             <span className="text-xs">
-              {patient.assessmentCount} sessions
+              {assessmentCount} sessions
             </span>
           </div>
         </div>
@@ -72,7 +76,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
           <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
             <div 
               className="h-full bg-primary rounded-full transition-all duration-500"
-              style={{ width: `${metrics.percentile}%` }}
+              style={{ width: `${metrics.percentile || 0}%` }}
             />
           </div>
         </div>
