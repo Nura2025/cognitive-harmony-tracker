@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
@@ -16,6 +15,16 @@ import { useSupabaseQuery } from '@/hooks/use-supabase-query';
 import { Patient, Session, Activity } from '@/types/databaseTypes';
 import { supabase } from '@/integrations/supabase/client';
 
+interface SessionWithActivities extends Session {
+  activities: Activity[];
+  domainScores: {
+    attention: number;
+    memory: number;
+    executiveFunction: number;
+    behavioral: number;
+  };
+}
+
 const Sessions = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -23,13 +32,11 @@ const Sessions = () => {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   
-  // Fetch all patients
   const { data: patients, isLoading: isLoadingPatients } = useSupabaseQuery<Patient[]>({
     table: 'patients',
     orderBy: { column: 'name' }
   });
   
-  // Fetch sessions for selected patient
   const { data: patientSessions, isLoading: isLoadingSessions } = useSupabaseQuery<Session[]>({
     table: 'sessions',
     filter: (query) => patientId ? query.eq('patient_id', patientId) : query.limit(0),
@@ -38,7 +45,6 @@ const Sessions = () => {
     dependencies: [patientId]
   });
   
-  // Fetch selected session
   const { data: currentSession, isLoading: isLoadingSession } = useSupabaseQuery<Session>({
     table: 'sessions',
     filter: (query) => sessionId ? query.eq('id', sessionId) : query.limit(0),
@@ -47,7 +53,6 @@ const Sessions = () => {
     dependencies: [sessionId]
   });
   
-  // Fetch activities for selected session
   useEffect(() => {
     const fetchActivities = async () => {
       if (!sessionId) {
@@ -71,7 +76,6 @@ const Sessions = () => {
     fetchActivities();
   }, [sessionId]);
   
-  // Parse patient ID and session ID from URL query params
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const pId = params.get('patient');
@@ -86,7 +90,6 @@ const Sessions = () => {
     }
   }, [location]);
   
-  // Set default session when patient changes and sessions are loaded
   useEffect(() => {
     if (patientSessions && patientSessions.length > 0 && !sessionId) {
       const defaultSessionId = patientSessions[0].id;
@@ -106,9 +109,17 @@ const Sessions = () => {
     navigate('/');
   };
   
-  // Combine session with activities
-  const sessionWithActivities = currentSession 
-    ? { ...currentSession, activities: activities } 
+  const sessionWithActivities: SessionWithActivities | null = currentSession 
+    ? { 
+        ...currentSession, 
+        activities: activities,
+        domainScores: {
+          attention: currentSession.attention,
+          memory: currentSession.memory,
+          executiveFunction: currentSession.executive_function,
+          behavioral: currentSession.behavioral
+        }
+      } 
     : null;
   
   const isLoading = isLoadingPatients || isLoadingSessions || isLoadingSession;

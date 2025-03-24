@@ -11,65 +11,99 @@ import {
 } from '@/types/databaseTypes';
 import { generatePatients, generatePatientMetrics } from './generators/patientGenerators';
 import { generateSessionData } from './generators/sessionGenerators';
-import { generateTrendData, generatePercentileData } from './generators/trendGenerators';
-import { generateRecommendations } from './generators/recommendationGenerators';
 import { mockPatientData, mockNormativeData, mockSubtypeData } from './mockData/cognitiveDomainData';
 
-// Define an interface that extends Session for frontend components
-export interface SessionData extends Session {
+// Define a mapping interface for frontend components
+export interface SessionWithDomainScores extends Session {
   domainScores: {
     attention: number;
     memory: number;
     executiveFunction: number;
     behavioral: number;
   };
-  activities: Activity[];
 }
 
-// Initialize mock data - make sure we're creating properly structured data
-export const patients = generatePatients(12);
+/**
+ * Generate trend data for visualization from sessions
+ */
+export const generateTrendData = (sessions: Session[] | any[]): any[] => {
+  if (!sessions || sessions.length === 0) return [];
 
-export const patientMetrics = generatePatientMetrics(patients);
+  return sessions.map(session => ({
+    date: session.start_time ? new Date(session.start_time).toISOString().split('T')[0] : '',
+    score: session.overall_score || 0
+  }))
+  .filter(item => item.date)
+  .sort((a, b) => a.date.localeCompare(b.date));
+};
 
-// Convert session data to SessionData format
-export const sessionData: SessionData[] = generateSessionData(patients).map(session => {
-  return {
-    ...session,
-    domainScores: {
-      attention: session.attention,
-      memory: session.memory,
-      executiveFunction: session.executive_function,
-      behavioral: session.behavioral
-    }
-  } as SessionData;
-});
+/**
+ * Generate percentile data for visualization
+ */
+export const generatePercentileData = (metrics: PatientMetrics | any): any[] => {
+  if (!metrics) return [];
 
-// Export mock cognitive domain data
-export { mockPatientData, mockNormativeData, mockSubtypeData };
+  return [
+    { domain: 'Attention', value: metrics.attention || 0 },
+    { domain: 'Memory', value: metrics.memory || 0 },
+    { domain: 'Executive Function', value: metrics.executive_function || 0 },
+    { domain: 'Behavioral', value: metrics.behavioral || 0 }
+  ];
+};
 
-// For convenience, create a map of patient IDs to their metrics
-export const metricsMap = patientMetrics.reduce((acc, metrics) => {
-  if (!acc[metrics.patient_id]) {
-    acc[metrics.patient_id] = metrics;
+/**
+ * Generate recommendations based on ADHD subtype
+ */
+export const generateRecommendations = (adhdSubtype: string): string[] => {
+  const baseRecommendations = [
+    "Establish a structured daily routine with clear schedules",
+    "Break tasks into smaller, manageable chunks",
+    "Use timers and alarms for time management",
+    "Create a dedicated, distraction-free workspace"
+  ];
+
+  switch (adhdSubtype.toLowerCase()) {
+    case 'inattentive':
+      return [
+        ...baseRecommendations,
+        "Implement visual reminders and checklists",
+        "Use color-coding and visual organization systems",
+        "Practice mindfulness techniques to improve focus",
+        "Consider environmental modifications to reduce sensory distractions"
+      ];
+    case 'hyperactive-impulsive':
+      return [
+        ...baseRecommendations,
+        "Incorporate regular movement breaks throughout the day",
+        "Engage in physical exercise before focused work sessions",
+        "Practice self-regulation techniques like deep breathing",
+        "Use fidget tools appropriately during seated activities"
+      ];
+    case 'combined':
+    default:
+      return [
+        ...baseRecommendations,
+        "Balance physical activity with focused attention tasks",
+        "Implement both visual organization systems and movement opportunities",
+        "Practice both mindfulness and self-regulation techniques",
+        "Consider a multimodal approach to intervention"
+      ];
   }
-  return acc;
-}, {} as Record<string, PatientMetrics>);
+};
 
-// For convenience, create a map of patient IDs to their sessions
-export const sessionsMap = sessionData.reduce((acc, session) => {
-  if (!acc[session.patient_id]) {
-    acc[session.patient_id] = [];
-  }
-  acc[session.patient_id].push(session);
-  return acc;
-}, {} as Record<string, SessionData[]>);
+// For convenience, export dummy functions for backward compatibility
+export const patients: Patient[] = [];
+export const patientMetrics: PatientMetrics[] = [];
+export const sessionData: Session[] = [];
+export const metricsMap: Record<string, PatientMetrics> = {};
+export const sessionsMap: Record<string, Session[]> = {};
 
-// Re-export all types and generator functions
+// Export all types and generator functions
 export { 
   generatePatients, 
   generatePatientMetrics, 
-  generateSessionData, 
-  generateTrendData, 
-  generatePercentileData,
-  generateRecommendations 
+  generateSessionData,
+  mockPatientData,
+  mockNormativeData,
+  mockSubtypeData
 };

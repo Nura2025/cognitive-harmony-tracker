@@ -2,11 +2,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Patient, PatientMetrics, Session, CognitiveDomain } from '@/types/databaseTypes';
-import { 
-  generateTrendData, 
-  generateRecommendations, 
-  generatePercentileData 
-} from '@/utils/mockData';
 
 export function usePatientAnalysis(patientId: string | null) {
   const [isLoading, setIsLoading] = useState(true);
@@ -82,6 +77,10 @@ export function usePatientAnalysis(patientId: string | null) {
         
         // Generate recommendations based on patient data
         const subtypeValue = patientData?.adhd_subtype || 'Combined';
+        
+        // Import these functions dynamically to avoid type conflicts
+        const { generateRecommendations, generatePercentileData, generateTrendData } = await import('@/utils/mockData');
+        
         const generatedRecommendations = generateRecommendations(subtypeValue);
         setRecommendations(generatedRecommendations);
         

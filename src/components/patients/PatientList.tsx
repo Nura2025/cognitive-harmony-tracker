@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { PatientCard } from '@/components/dashboard/PatientCard';
 import { useSupabaseQuery } from '@/hooks/use-supabase-query';
 import { Patient, PatientMetrics } from '@/types/databaseTypes';
+import { Button } from '@/components/ui/button';
 
 interface PatientListProps {
   searchTerm: string;
