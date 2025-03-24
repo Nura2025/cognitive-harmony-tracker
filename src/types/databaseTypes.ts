@@ -58,3 +58,22 @@ export interface ClinicalConcern {
   concern: string;
   created_at: string;
 }
+
+// New interfaces for doctor data
+export interface Doctor {
+  id: string;
+  name: string;
+  specialty: string;
+  license_number: string;
+  email: string;
+  phone: string | null;
+  created_at: string;
+}
+
+export interface DoctorPatient {
+  id: string;
+  doctor_id: string;
+  patient_id: string;
+  assigned_date: string;
+  created_at: string;
+}

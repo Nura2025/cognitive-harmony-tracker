@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { PatientForm } from '@/components/data-entry/PatientForm';
 import { SessionForm } from '@/components/data-entry/SessionForm';
 import { MetricsForm } from '@/components/data-entry/MetricsForm';
+import { DoctorForm } from '@/components/data-entry/DoctorForm';
 
 const DataEntry = () => {
   return (
@@ -12,15 +13,16 @@ const DataEntry = () => {
       <div>
         <h1 className="text-3xl font-bold mb-1">Data Entry</h1>
         <p className="text-muted-foreground">
-          Add new patients, sessions, and assessment metrics to the system
+          Add new patients, sessions, assessment metrics, and doctors to the system
         </p>
       </div>
       
       <Tabs defaultValue="patient" className="w-full">
-        <TabsList className="grid grid-cols-3 w-full max-w-md">
+        <TabsList className="grid grid-cols-4 w-full max-w-xl">
           <TabsTrigger value="patient">Patient</TabsTrigger>
           <TabsTrigger value="session">Session</TabsTrigger>
           <TabsTrigger value="metrics">Metrics</TabsTrigger>
+          <TabsTrigger value="doctor">Doctor</TabsTrigger>
         </TabsList>
         
         <TabsContent value="patient" className="mt-6">
@@ -61,6 +63,20 @@ const DataEntry = () => {
             </CardHeader>
             <CardContent>
               <MetricsForm />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="doctor" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>New Doctor</CardTitle>
+              <CardDescription>
+                Add a new doctor to the system
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DoctorForm />
             </CardContent>
           </Card>
         </TabsContent>

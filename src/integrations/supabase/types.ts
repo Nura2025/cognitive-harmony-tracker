@@ -76,6 +76,75 @@ export type Database = {
           },
         ]
       }
+      doctor_patients: {
+        Row: {
+          assigned_date: string
+          created_at: string
+          doctor_id: string
+          id: string
+          patient_id: string
+        }
+        Insert: {
+          assigned_date?: string
+          created_at?: string
+          doctor_id: string
+          id?: string
+          patient_id: string
+        }
+        Update: {
+          assigned_date?: string
+          created_at?: string
+          doctor_id?: string
+          id?: string
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doctor_patients_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doctor_patients_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      doctors: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          license_number: string
+          name: string
+          phone: string | null
+          specialty: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          license_number: string
+          name: string
+          phone?: string | null
+          specialty: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          license_number?: string
+          name?: string
+          phone?: string | null
+          specialty?: string
+        }
+        Relationships: []
+      }
       patient_metrics: {
         Row: {
           attention: number

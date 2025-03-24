@@ -60,6 +60,17 @@ export interface SessionData {
   };
 }
 
+// New Doctor interface for frontend
+export interface Doctor {
+  id: string;
+  name: string;
+  specialty: string;
+  licenseNumber: string;
+  email: string;
+  phone: string | null;
+  patientCount: number;
+}
+
 // Helper function to map database types to frontend types
 export const mapDbSessionToSessionData = (dbSession: any, activities: any[] = []): SessionData => {
   return {
