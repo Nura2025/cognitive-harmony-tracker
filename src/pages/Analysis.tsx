@@ -1,95 +1,82 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
-import { Calendar, CalendarClock, CheckCircle2, FileBarChart, History, UserRound } from 'lucide-react';
+import { 
+  Calendar, 
+  CalendarClock, 
+  CheckCircle2, 
+  FileBarChart, 
+  History, 
+  UserRound 
+} from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { 
-  patients, 
-  metricsMap, 
-  sessionsMap,
-  mockNormativeData,
-  mockSubtypeData,
-  generateTrendData,
-  generatePercentileData,
-  generateRecommendations
-} from '@/utils/mockData';
 import { DomainComparison } from '@/components/analysis/DomainComparison';
 import { PerformanceTrend } from '@/components/analysis/PerformanceTrend';
-import { CognitiveDomain } from '@/types/databaseTypes';
 import { SessionTimeline } from '@/components/dashboard/SessionTimeline';
+import { usePatientAnalysis } from '@/hooks/use-patient-analysis';
+import { useToast } from '@/hooks/use-toast';
 
 const Analysis = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const patientId = searchParams.get('patientId');
+  const { toast } = useToast();
 
-  const [patient, setPatient] = useState<any>(null);
-  const [metrics, setMetrics] = useState<any>(null);
-  const [sessions, setSessions] = useState<any[]>([]);
-  const [recommendations, setRecommendations] = useState<string[]>([]);
-  const [percentileData, setPercentileData] = useState<any[]>([]);
-  const [trendData, setTrendData] = useState<any[]>([]);
+  const { 
+    isLoading, 
+    error, 
+    patient, 
+    metrics, 
+    sessions, 
+    recommendations, 
+    percentileData, 
+    trendData,
+    normativeData,
+    subtypeData
+  } = usePatientAnalysis(patientId);
 
-  useEffect(() => {
-    if (!patientId) {
+  // Show error toast if there's an error
+  React.useEffect(() => {
+    if (error) {
+      toast({
+        title: 'Error loading analysis data',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  }, [error, toast]);
+
+  // Redirect if no patient ID is provided
+  React.useEffect(() => {
+    if (!patientId && !isLoading) {
       navigate('/patients');
-      return;
     }
+  }, [patientId, isLoading, navigate]);
 
-    // Find the selected patient
-    const selectedPatient = patients.find(p => p.id === patientId);
-    if (!selectedPatient) {
-      navigate('/patients');
-      return;
-    }
-
-    setPatient(selectedPatient);
-
-    // Get metrics for this patient
-    const patientMetrics = metricsMap[patientId];
-    setMetrics(patientMetrics || {});
-
-    // Get sessions for this patient
-    const patientSessions = sessionsMap[patientId] || [];
-    setSessions(patientSessions);
-
-    // Generate recommendations based on patient metrics
-    try {
-      const subtypeValue = selectedPatient.adhd_subtype || 'Combined';
-      const recs = generateRecommendations(subtypeValue);
-      setRecommendations(recs);
-    } catch (error) {
-      console.error("Error generating recommendations:", error);
-      setRecommendations(generateRecommendations());
-    }
-
-    // Generate percentile and trend data with error handling
-    try {
-      if (patientMetrics) {
-        setPercentileData(generatePercentileData(patientMetrics));
-      }
-    } catch (error) {
-      console.error("Error generating percentile data:", error);
-      setPercentileData([]);
-    }
-
-    try {
-      if (patientSessions && patientSessions.length > 0) {
-        setTrendData(generateTrendData(patientSessions));
-      }
-    } catch (error) {
-      console.error("Error generating trend data:", error);
-      setTrendData([]);
-    }
-  }, [patientId, navigate]);
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full p-8">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading patient analysis...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!patient) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <p>Loading patient data...</p>
+      <div className="flex items-center justify-center h-full p-8">
+        <div className="text-center">
+          <p className="text-lg font-medium mb-2">Patient not found</p>
+          <p className="text-muted-foreground mb-4">The requested patient could not be found.</p>
+          <Button onClick={() => navigate('/patients')}>
+            Return to Patients
+          </Button>
+        </div>
       </div>
     );
   }
@@ -101,7 +88,7 @@ const Analysis = () => {
           <h1 className="text-2xl font-bold mb-2">Cognitive Analysis</h1>
           <div className="flex items-center text-sm text-muted-foreground">
             <UserRound className="h-4 w-4 mr-1" />
-            <span>{patient.name || `${patient.first_name || ''} ${patient.last_name || ''}`}</span>
+            <span>{patient.name}</span>
             <span className="mx-2">•</span>
             <Calendar className="h-4 w-4 mr-1" />
             <span>Age: {patient.age || 'Unknown'}</span>
@@ -139,7 +126,9 @@ const Analysis = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {metrics?.severity_level || "Not Assessed"}
+              {metrics?.percentile && metrics.percentile < 40 ? "Severe" : 
+               metrics?.percentile && metrics.percentile < 70 ? "Moderate" : 
+               metrics?.percentile ? "Mild" : "Not Assessed"}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               Overall condition severity
@@ -170,9 +159,14 @@ const Analysis = () => {
           </CardHeader>
           <CardContent>
             <DomainComparison 
-              patientData={metrics} 
-              normativeData={mockNormativeData}
-              subtypeData={mockSubtypeData}
+              patientData={metrics || {
+                attention: 0,
+                memory: 0,
+                executive_function: 0,
+                behavioral: 0
+              }}
+              normativeData={normativeData}
+              subtypeData={subtypeData}
             />
           </CardContent>
         </Card>
@@ -182,7 +176,7 @@ const Analysis = () => {
           </CardHeader>
           <CardContent>
             <PerformanceTrend 
-              data={trendData} 
+              data={trendData || []} 
               title="Performance Over Time"
             />
           </CardContent>
@@ -195,7 +189,7 @@ const Analysis = () => {
             <CardTitle>Session Timeline</CardTitle>
           </CardHeader>
           <CardContent>
-            {sessions.length > 0 ? (
+            {sessions && sessions.length > 0 ? (
               <SessionTimeline sessions={sessions} />
             ) : (
               <div className="flex flex-col items-center justify-center py-8 text-center">
@@ -247,17 +241,19 @@ const Analysis = () => {
                   <div className="w-full bg-gray-200 rounded-full h-4 mr-2">
                     <div 
                       className="bg-blue-600 h-4 rounded-full" 
-                      style={{ width: `${metrics?.attention_percentile || 0}%` }}
+                      style={{ width: `${metrics?.attention || 0}%` }}
                     ></div>
                   </div>
-                  <span className="text-sm font-medium">{metrics?.attention_percentile || 0}%</span>
+                  <span className="text-sm font-medium">{metrics?.attention || 0}%</span>
                 </div>
               </div>
               <Separator className="my-4" />
               <div>
                 <h4 className="font-medium mb-2">Key Observations</h4>
                 <p className="text-sm text-muted-foreground">
-                  {metrics?.attention_notes || "No specific observations recorded for attention domain."}
+                  {metrics?.attention < 50 ? 
+                    "Shows difficulty maintaining sustained attention during tasks requiring focus." :
+                    "Demonstrates good ability to maintain focus during attention-demanding tasks."}
                 </p>
               </div>
             </CardContent>
@@ -274,17 +270,19 @@ const Analysis = () => {
                   <div className="w-full bg-gray-200 rounded-full h-4 mr-2">
                     <div 
                       className="bg-purple-600 h-4 rounded-full" 
-                      style={{ width: `${metrics?.memory_percentile || 0}%` }}
+                      style={{ width: `${metrics?.memory || 0}%` }}
                     ></div>
                   </div>
-                  <span className="text-sm font-medium">{metrics?.memory_percentile || 0}%</span>
+                  <span className="text-sm font-medium">{metrics?.memory || 0}%</span>
                 </div>
               </div>
               <Separator className="my-4" />
               <div>
                 <h4 className="font-medium mb-2">Key Observations</h4>
                 <p className="text-sm text-muted-foreground">
-                  {metrics?.memory_notes || "No specific observations recorded for memory domain."}
+                  {metrics?.memory < 50 ? 
+                    "Experiences challenges with working memory tasks requiring information retention." :
+                    "Shows strong working memory capabilities across varied memory tasks."}
                 </p>
               </div>
             </CardContent>
@@ -301,17 +299,19 @@ const Analysis = () => {
                   <div className="w-full bg-gray-200 rounded-full h-4 mr-2">
                     <div 
                       className="bg-green-600 h-4 rounded-full" 
-                      style={{ width: `${metrics?.executive_function_percentile || 0}%` }}
+                      style={{ width: `${metrics?.executive_function || 0}%` }}
                     ></div>
                   </div>
-                  <span className="text-sm font-medium">{metrics?.executive_function_percentile || 0}%</span>
+                  <span className="text-sm font-medium">{metrics?.executive_function || 0}%</span>
                 </div>
               </div>
               <Separator className="my-4" />
               <div>
                 <h4 className="font-medium mb-2">Key Observations</h4>
                 <p className="text-sm text-muted-foreground">
-                  {metrics?.executive_function_notes || "No specific observations recorded for executive function domain."}
+                  {metrics?.executive_function < 50 ? 
+                    "Struggles with planning and organizing multi-step activities." :
+                    "Demonstrates effective planning and organizational skills."}
                 </p>
               </div>
             </CardContent>
@@ -328,17 +328,19 @@ const Analysis = () => {
                   <div className="w-full bg-gray-200 rounded-full h-4 mr-2">
                     <div 
                       className="bg-red-600 h-4 rounded-full" 
-                      style={{ width: `${metrics?.behavioral_percentile || 0}%` }}
+                      style={{ width: `${metrics?.behavioral || 0}%` }}
                     ></div>
                   </div>
-                  <span className="text-sm font-medium">{metrics?.behavioral_percentile || 0}%</span>
+                  <span className="text-sm font-medium">{metrics?.behavioral || 0}%</span>
                 </div>
               </div>
               <Separator className="my-4" />
               <div>
                 <h4 className="font-medium mb-2">Key Observations</h4>
                 <p className="text-sm text-muted-foreground">
-                  {metrics?.behavioral_notes || "No specific observations recorded for behavioral domain."}
+                  {metrics?.behavioral < 50 ? 
+                    "Exhibits impulsive responses and difficulty managing frustration during tasks." :
+                    "Maintains appropriate response control and manages frustration effectively."}
                 </p>
               </div>
             </CardContent>
