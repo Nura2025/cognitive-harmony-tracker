@@ -1,4 +1,3 @@
-
 // This file serves as the entry point for mock data
 // It initializes and exports all generated mock data
 
@@ -10,7 +9,7 @@ import {
   Activity
 } from '@/types/databaseTypes';
 import { generatePatients, generatePatientMetrics } from './generators/patientGenerators';
-import { generateSessionData } from './generators/sessionGenerators';
+import { generateSession } from './generators/sessionGenerators';
 import { mockPatientData, mockNormativeData, mockSubtypeData } from './mockData/cognitiveDomainData';
 
 // Define a mapping interface for frontend components
@@ -91,6 +90,11 @@ export const generateRecommendations = (adhdSubtype: string): string[] => {
   }
 };
 
+// Generate some session data for mock usage
+export const generateSessionData = (patientId: string, count: number = 5): Session[] => {
+  return Array(count).fill(null).map(() => generateSession(patientId));
+};
+
 // For convenience, export dummy functions for backward compatibility
 export const patients: Patient[] = [];
 export const patientMetrics: PatientMetrics[] = [];
@@ -102,7 +106,7 @@ export const sessionsMap: Record<string, Session[]> = {};
 export { 
   generatePatients, 
   generatePatientMetrics, 
-  generateSessionData,
+  generateSession,
   mockPatientData,
   mockNormativeData,
   mockSubtypeData
