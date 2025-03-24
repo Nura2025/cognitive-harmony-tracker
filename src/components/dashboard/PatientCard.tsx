@@ -32,7 +32,9 @@ export const PatientCard: React.FC<PatientCardProps> = ({
     if (onClick) {
       onClick(patient.id);
     } else {
+      // Make sure we're using the correct URL format for the analysis page
       navigate(`/analysis?patientId=${patient.id}`);
+      console.log(`Navigating to analysis for patient: ${patient.id}`);
     }
   };
 
@@ -108,4 +110,3 @@ const getScoreBadgeVariant = (score: number | null | undefined): "default" | "de
   if (score < 85) return "secondary";
   return "default";
 };
-
