@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Brain, Clock, LineChart, Users } from 'lucide-react';
@@ -9,20 +8,20 @@ import { StatusCard } from '@/components/dashboard/StatusCard';
 import { DomainChart } from '@/components/dashboard/DomainChart';
 import { SessionTimeline } from '@/components/dashboard/SessionTimeline';
 import { Patient, PatientMetrics, Session } from '@/types/databaseTypes';
-import { useSupabaseQuery } from '@/hooks/use-supabase-query';
+import { useApiQuery } from '@/hooks/use-api-query';
+import { patientAPI, sessionAPI, patientMetricsAPI } from '@/api/apiClient';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
   
-  // Fetch patients from database
+  // Fetch patients from API
   const { 
     data: patients, 
     isLoading: isLoadingPatients,
     error: patientsError
-  } = useSupabaseQuery<Patient[]>({
-    table: 'patients',
-    orderBy: { column: 'name' }
+  } = useApiQuery<Patient[]>({
+    queryFn: () => patientAPI.getAll(),
   });
   
   // Fetch all patient metrics
@@ -30,9 +29,8 @@ const Dashboard = () => {
     data: allPatientMetrics,
     isLoading: isLoadingAllMetrics,
     error: allMetricsError
-  } = useSupabaseQuery<PatientMetrics[]>({
-    table: 'patient_metrics',
-    orderBy: { column: 'date', ascending: false }
+  } = useApiQuery<PatientMetrics[]>({
+    queryFn: () => patientMetricsAPI.getAll(),
   });
   
   // Fetch all sessions
@@ -40,10 +38,8 @@ const Dashboard = () => {
     data: allSessions,
     isLoading: isLoadingAllSessions,
     error: allSessionsError
-  } = useSupabaseQuery<Session[]>({
-    table: 'sessions',
-    orderBy: { column: 'start_time', ascending: false },
-    limit: 10
+  } = useApiQuery<Session[]>({
+    queryFn: () => sessionAPI.getAll(),
   });
   
   // Fetch metrics for selected patient
@@ -51,12 +47,8 @@ const Dashboard = () => {
     data: patientMetrics,
     isLoading: isLoadingMetrics,
     error: metricsError
-  } = useSupabaseQuery<PatientMetrics>({
-    table: 'patient_metrics',
-    filter: (query) => selectedPatient ? query.eq('patient_id', selectedPatient) : query.limit(0),
-    orderBy: { column: 'date', ascending: false },
-    limit: 1,
-    singleRow: true,
+  } = useApiQuery<PatientMetrics>({
+    queryFn: () => selectedPatient ? patientMetricsAPI.getAll({ patient_id: selectedPatient }).then(data => data[0]) : Promise.resolve(null as any),
     enabled: !!selectedPatient,
     dependencies: [selectedPatient]
   });
@@ -254,7 +246,7 @@ const Dashboard = () => {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">Recent Patients</h2>
-          <Button variant="outline" size="sm" onClick={handleViewAllPatients}>
+          <Button variant="outline" size="sm" onClick={() => navigate('/patients')}>
             View all patients
           </Button>
         </div>
@@ -281,7 +273,6 @@ const Dashboard = () => {
         </div>
       </div>
       
-      {/* Patient details section - show if a patient is selected */}
       {selectedPatient && (
         <div className="grid gap-6 md:grid-cols-2">
           <DomainChart
@@ -289,7 +280,6 @@ const Dashboard = () => {
             isLoading={isLoadingMetrics}
             metrics={patientMetrics}
           />
-          {/* Sessions for the selected patient would go here */}
         </div>
       )}
     </div>

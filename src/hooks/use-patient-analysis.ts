@@ -1,7 +1,7 @@
 
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from 'react';
 import { Patient, PatientMetrics, Session, CognitiveDomain } from '@/types/databaseTypes';
+import { patientAPI, sessionAPI, patientMetricsAPI } from '@/api/apiClient';
 
 export function usePatientAnalysis(patientId: string | null) {
   const [isLoading, setIsLoading] = useState(true);
@@ -40,39 +40,17 @@ export function usePatientAnalysis(patientId: string | null) {
       setError(null);
       
       try {
-        // Fetch patient data
-        const { data: patientData, error: patientError } = await supabase
-          .from('patients')
-          .select('*')
-          .eq('id', patientId)
-          .single();
-        
-        if (patientError) throw patientError;
+        // Fetch patient data from FastAPI
+        const patientData = await patientAPI.getById(patientId);
         setPatient(patientData as Patient);
         
-        // Fetch patient metrics
-        const { data: metricsData, error: metricsError } = await supabase
-          .from('patient_metrics')
-          .select('*')
-          .eq('patient_id', patientId)
-          .order('date', { ascending: false })
-          .limit(1)
-          .single();
+        // Fetch patient metrics from FastAPI
+        const metricsData = await patientMetricsAPI.getAll({ patient_id: patientId });
+        // Assuming the API returns the most recent metrics first
+        setMetrics(metricsData.length > 0 ? metricsData[0] as PatientMetrics : null);
         
-        if (metricsError && metricsError.code !== 'PGRST116') {
-          throw metricsError;
-        }
-        
-        setMetrics(metricsData as PatientMetrics || null);
-        
-        // Fetch sessions
-        const { data: sessionsData, error: sessionsError } = await supabase
-          .from('sessions')
-          .select('*, activities(*)')
-          .eq('patient_id', patientId)
-          .order('start_time', { ascending: true });
-        
-        if (sessionsError) throw sessionsError;
+        // Fetch sessions from FastAPI
+        const sessionsData = await sessionAPI.getAll({ patient_id: patientId });
         setSessions(sessionsData as Session[] || []);
         
         // Generate recommendations based on patient data
@@ -85,8 +63,8 @@ export function usePatientAnalysis(patientId: string | null) {
         setRecommendations(generatedRecommendations);
         
         // Generate percentile data
-        if (metricsData) {
-          const generatedPercentileData = generatePercentileData(metricsData);
+        if (metricsData.length > 0) {
+          const generatedPercentileData = generatePercentileData(metricsData[0]);
           setPercentileData(generatedPercentileData);
         }
         
