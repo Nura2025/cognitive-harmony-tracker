@@ -48,3 +48,27 @@ export interface SessionData {
   }>;
   domainScores: CognitiveDomain;
 }
+
+export interface ReportType {
+  id: string;
+  patientId: string;
+  title: string;
+  type: 'clinical' | 'school' | 'progress' | 'detailed';
+  createdDate: string;
+  sections: {
+    overview: boolean;
+    domainAnalysis: boolean;
+    trends: boolean;
+    recommendations: boolean;
+    rawData: boolean;
+  };
+  status: 'draft' | 'generated' | 'shared';
+}
+
+// Define relationships between entities
+export interface PatientData {
+  patient: Patient;
+  metrics: PatientMetrics;
+  sessions: SessionData[];
+  reports: ReportType[];
+}

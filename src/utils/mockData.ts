@@ -6,18 +6,21 @@ import {
   Patient, 
   PatientMetrics, 
   SessionData, 
-  CognitiveDomain 
+  CognitiveDomain,
+  ReportType 
 } from './types/patientTypes';
 import { generatePatients, generatePatientMetrics } from './generators/patientGenerators';
 import { generateSessionData } from './generators/sessionGenerators';
 import { generateTrendData, generatePercentileData } from './generators/trendGenerators';
 import { generateRecommendations } from './generators/recommendationGenerators';
 import { mockPatientData, mockNormativeData, mockSubtypeData } from './mockData/cognitiveDomainData';
+import { generateReports, mockReports } from './mockData/reportData';
 
 // Initialize mock data
 export const patients = generatePatients(12);
 export const patientMetrics = generatePatientMetrics(patients);
 export const sessionData = generateSessionData(patients);
+export const reports = generateReports(patients.map(p => p.id));
 
 // Export mock cognitive domain data
 export { mockPatientData, mockNormativeData, mockSubtypeData };
@@ -37,13 +40,23 @@ export const sessionsMap = sessionData.reduce((acc, session) => {
   return acc;
 }, {} as Record<string, SessionData[]>);
 
+// For convenience, create a map of patient IDs to their reports
+export const reportsMap = reports.reduce((acc, report) => {
+  if (!acc[report.patientId]) {
+    acc[report.patientId] = [];
+  }
+  acc[report.patientId].push(report);
+  return acc;
+}, {} as Record<string, ReportType[]>);
+
 // Re-export all types and generator functions
-export type { Patient, PatientMetrics, SessionData, CognitiveDomain };
+export type { Patient, PatientMetrics, SessionData, CognitiveDomain, ReportType };
 export { 
   generatePatients, 
   generatePatientMetrics, 
   generateSessionData, 
   generateTrendData, 
   generatePercentileData,
-  generateRecommendations 
+  generateRecommendations,
+  mockReports
 };

@@ -19,17 +19,23 @@ import {
   Printer, 
   Share2
 } from 'lucide-react';
-import { Patient, PatientMetrics } from '@/utils/mockData';
+import { Patient, PatientMetrics, ReportType } from '@/utils/types/patientTypes';
 import { format } from 'date-fns';
 import { toast } from "@/hooks/use-toast";
+import { v4 as uuidv4 } from 'uuid';
 
 interface ReportGeneratorProps {
   patient: Patient;
   metrics: PatientMetrics;
+  onReportGenerate?: (report: ReportType) => void;
 }
 
-export const ReportGenerator: React.FC<ReportGeneratorProps> = ({ patient, metrics }) => {
-  const [reportType, setReportType] = useState('clinical');
+export const ReportGenerator: React.FC<ReportGeneratorProps> = ({ 
+  patient, 
+  metrics,
+  onReportGenerate
+}) => {
+  const [reportType, setReportType] = useState<ReportType['type']>('clinical');
   const [includeSections, setIncludeSections] = useState({
     overview: true,
     domainAnalysis: true,
@@ -48,6 +54,22 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({ patient, metri
   };
   
   const handleGenerateReport = () => {
+    // Create a new report object
+    const newReport: ReportType = {
+      id: uuidv4(),
+      patientId: patient.id,
+      title: `${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Report`,
+      type: reportType,
+      createdDate: format(new Date(), 'yyyy-MM-dd'),
+      sections: {...includeSections},
+      status: 'generated'
+    };
+    
+    // Call the callback if provided
+    if (onReportGenerate) {
+      onReportGenerate(newReport);
+    }
+    
     toast({
       title: "Report Generated",
       description: "The report has been generated successfully.",
@@ -62,7 +84,7 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({ patient, metri
       <CardContent>
         <div className="mb-6">
           <Label className="text-muted-foreground mb-2 block">Report Template</Label>
-          <Select value={reportType} onValueChange={setReportType}>
+          <Select value={reportType} onValueChange={(value: ReportType['type']) => setReportType(value)}>
             <SelectTrigger>
               <SelectValue placeholder="Select report type" />
             </SelectTrigger>
