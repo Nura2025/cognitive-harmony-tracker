@@ -7,7 +7,6 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { ChevronLeft, FileText, Calendar, Clock, User, ArrowUp } from 'lucide-react';
-import { SessionTimeline } from '@/components/dashboard/SessionTimeline';
 import { SessionAnalysis } from '@/components/sessions/SessionAnalysis';
 import { DomainComparison } from '@/components/analysis/DomainComparison';
 import { PatientReports } from '@/components/reports/PatientReports';
@@ -23,6 +22,8 @@ import {
 } from '@/utils/mockData';
 import { formatPercentile, getScoreColorClass } from '@/utils/dataProcessing';
 import { format, parseISO } from 'date-fns';
+import { DomainChart } from '@/components/dashboard/DomainChart';
+import { generateTrendData } from '@/utils/generators/trendGenerators';
 
 const PatientDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -74,6 +75,13 @@ const PatientDetail = () => {
   }
   
   const { patient, metrics, sessions, reports } = patientData;
+  
+  const domainTrendData = {
+    attention: generateTrendData('attention', 10).map(item => item.value),
+    memory: generateTrendData('memory', 10).map(item => item.value),
+    executiveFunction: generateTrendData('executiveFunction', 10).map(item => item.value),
+    behavioral: generateTrendData('behavioral', 10).map(item => item.value)
+  };
   
   const firstSession = sessions.length > 0 
     ? sessions.reduce((earliest, session) => {
@@ -272,15 +280,10 @@ const PatientDetail = () => {
                   </div>
                 </div>
                 
-                {sessions.length > 0 && (
-                  <div className="mt-8">
-                    <h3 className="text-lg font-medium mb-4">Session Timeline</h3>
-                    <SessionTimeline 
-                      sessions={sessions} 
-                      title="" 
-                    />
-                  </div>
-                )}
+                <div className="mt-8">
+                  <h3 className="text-lg font-medium mb-4">Cognitive Domain Trends</h3>
+                  <DomainChart domainData={domainTrendData} />
+                </div>
               </CardContent>
             </Card>
           </div>
