@@ -49,6 +49,7 @@ import {
   TableCell, 
   TableHead 
 } from '@/components/ui/table';
+import { MetricTooltip } from '@/components/reports/MetricTooltip';
 
 const Reports: React.FC = () => {
   const location = useLocation();
@@ -227,6 +228,23 @@ const Reports: React.FC = () => {
     return <div className="p-8">Loading patient data...</div>;
   }
   
+  const getMetricExplanation = (metric: string): string => {
+    const explanations: Record<string, string> = {
+      attention: "Measures ability to focus on relevant tasks and ignore distractions. Higher scores indicate better sustained attention and selective focus.",
+      memory: "Evaluates capacity to encode, store and retrieve information. Includes working memory, visual memory and sequence recall.",
+      executiveFunction: "Assesses higher-order cognitive processes including planning, decision-making, cognitive flexibility and problem solving.",
+      behavioral: "Measures impulse control, emotional regulation and appropriate response to environmental cues.",
+      responseTime: "Average time taken to respond to stimuli. Lower times typically indicate better processing speed and attention.",
+      commissionErrors: "Errors made by responding when should have withheld response - indicates impulsivity issues.",
+      omissionErrors: "Missed responses when should have responded - indicates inattention issues.",
+      cognitive: "Overall measurement of cognitive performance across all domains, weighted by relevance to daily functioning.",
+      percentile: "Performance compared to normative data for same age and demographic group.",
+      progress: "Percentage improvement across all cognitive domains over the specified time period."
+    };
+    
+    return explanations[metric] || "No explanation available for this metric.";
+  };
+  
   return (
     <div className="container mx-auto p-4 max-w-6xl">
       <div className="mb-8">
@@ -322,7 +340,9 @@ const Reports: React.FC = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <Label>Attention</Label>
+                    <MetricTooltip explanation={getMetricExplanation('attention')}>
+                      <Label>Attention</Label>
+                    </MetricTooltip>
                     <span className="text-sm">{patientMetrics.attention}%</span>
                   </div>
                   <Progress value={patientMetrics.attention} className="h-2" />
@@ -330,7 +350,9 @@ const Reports: React.FC = () => {
                 
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <Label>Memory</Label>
+                    <MetricTooltip explanation={getMetricExplanation('memory')}>
+                      <Label>Memory</Label>
+                    </MetricTooltip>
                     <span className="text-sm">{patientMetrics.memory}%</span>
                   </div>
                   <Progress value={patientMetrics.memory} className="h-2" />
@@ -338,7 +360,9 @@ const Reports: React.FC = () => {
                 
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <Label>Executive Function</Label>
+                    <MetricTooltip explanation={getMetricExplanation('executiveFunction')}>
+                      <Label>Executive Function</Label>
+                    </MetricTooltip>
                     <span className="text-sm">{patientMetrics.executiveFunction}%</span>
                   </div>
                   <Progress value={patientMetrics.executiveFunction} className="h-2" />
@@ -346,7 +370,9 @@ const Reports: React.FC = () => {
                 
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <Label>Behavioral Regulation</Label>
+                    <MetricTooltip explanation={getMetricExplanation('behavioral')}>
+                      <Label>Behavioral Regulation</Label>
+                    </MetricTooltip>
                     <span className="text-sm">{patientMetrics.behavioral}%</span>
                   </div>
                   <Progress value={patientMetrics.behavioral} className="h-2" />
@@ -477,14 +503,22 @@ const Reports: React.FC = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card className="glass">
                   <CardHeader>
-                    <CardTitle className="text-lg">Individual Metrics Over Time</CardTitle>
+                    <CardTitle className="text-lg">
+                      <MetricTooltip explanation="These charts track progress over time in specific cognitive domains, showing trends and changes through sessions.">
+                        Individual Metrics Over Time
+                      </MetricTooltip>
+                    </CardTitle>
                     <p className="text-sm text-muted-foreground">
                       Tracking progress across key cognitive domains
                     </p>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     <div>
-                      <h3 className="text-sm font-medium mb-2">Memory Progress</h3>
+                      <h3 className="text-sm font-medium mb-2">
+                        <MetricTooltip explanation={getMetricExplanation('memory')}>
+                          Memory Progress
+                        </MetricTooltip>
+                      </h3>
                       <PerformanceTrend 
                         data={memoryTrendData}
                         title=""
@@ -495,7 +529,11 @@ const Reports: React.FC = () => {
                     <Separator />
                     
                     <div>
-                      <h3 className="text-sm font-medium mb-2">Attention Span & Response Time</h3>
+                      <h3 className="text-sm font-medium mb-2">
+                        <MetricTooltip explanation={getMetricExplanation('responseTime')}>
+                          Attention Span & Response Time
+                        </MetricTooltip>
+                      </h3>
                       <PerformanceTrend 
                         data={responseTimeData.map(item => ({
                           date: item.date,
@@ -510,7 +548,11 @@ const Reports: React.FC = () => {
                     <Separator />
                     
                     <div>
-                      <h3 className="text-sm font-medium mb-2">Impulsivity (Error Rates)</h3>
+                      <h3 className="text-sm font-medium mb-2">
+                        <MetricTooltip explanation="This chart shows two types of errors: commission errors (acting when shouldn't - impulsivity) and omission errors (not acting when should - inattention).">
+                          Impulsivity (Error Rates)
+                        </MetricTooltip>
+                      </h3>
                       <div className="h-[250px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
                           <AreaChart
@@ -591,7 +633,11 @@ const Reports: React.FC = () => {
                 <div className="space-y-6">
                   <Card className="glass">
                     <CardHeader>
-                      <CardTitle className="text-lg">Before vs. After Performance Comparison</CardTitle>
+                      <CardTitle className="text-lg">
+                        <MetricTooltip explanation="Direct comparison of scores from first session to most recent, showing percentage change. Positive values indicate improvement.">
+                          Before vs. After Performance Comparison
+                        </MetricTooltip>
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       {sessionComparison ? (
@@ -602,13 +648,21 @@ const Reports: React.FC = () => {
                                 <TableHead>Metric</TableHead>
                                 <TableHead>First Session</TableHead>
                                 <TableHead>Latest Session</TableHead>
-                                <TableHead>% Change</TableHead>
+                                <TableHead>
+                                  <MetricTooltip explanation="Percentage change between first and latest session. Positive values indicate improvement.">
+                                    % Change
+                                  </MetricTooltip>
+                                </TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
                               {sessionComparison.map((item, index) => (
                                 <TableRow key={index}>
-                                  <TableCell className="font-medium">{item.metric}</TableCell>
+                                  <TableCell className="font-medium">
+                                    <MetricTooltip explanation={getMetricExplanation(item.metric.toLowerCase().replace(' ', ''))}>
+                                      {item.metric}
+                                    </MetricTooltip>
+                                  </TableCell>
                                   <TableCell>{item.first.toFixed(1)}</TableCell>
                                   <TableCell>{item.last.toFixed(1)}</TableCell>
                                   <TableCell className={Number(item.change) > 0 ? 'text-green-600' : Number(item.change) < 0 ? 'text-red-600' : ''}>
@@ -629,14 +683,22 @@ const Reports: React.FC = () => {
                   
                   <Card className="glass">
                     <CardHeader>
-                      <CardTitle className="text-lg">Comparative Analysis</CardTitle>
+                      <CardTitle className="text-lg">
+                        <MetricTooltip explanation="Analysis comparing patient performance to peers and across different cognitive activities.">
+                          Comparative Analysis
+                        </MetricTooltip>
+                      </CardTitle>
                       <p className="text-sm text-muted-foreground">
                         Cross-game performance insights and peer benchmarking
                       </p>
                     </CardHeader>
                     <CardContent>
                       <div className="mb-4">
-                        <h3 className="text-sm font-medium mb-2">Cross-Game Cognitive Performance</h3>
+                        <h3 className="text-sm font-medium mb-2">
+                          <MetricTooltip explanation="This radar chart shows performance across different games, broken down by key cognitive skills. Higher values indicate better performance.">
+                            Cross-Game Cognitive Performance
+                          </MetricTooltip>
+                        </h3>
                         <p className="text-sm text-muted-foreground mb-4">
                           This radar chart shows {currentPatient.name}'s performance across different games, broken down by key cognitive skills. 
                           Each axis represents a cognitive domain, and higher values (further from center) indicate better performance.
