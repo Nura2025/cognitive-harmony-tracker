@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartLegend } from '@/components/ui/chart';
@@ -15,7 +14,7 @@ import {
 import { CognitiveDomain } from '@/utils/types/patientTypes';
 import { SessionData } from '@/utils/mockData';
 import { getDomainName } from '@/utils/dataProcessing';
-import { ChartRadar } from 'lucide-react';
+import { BarChart } from 'lucide-react';
 
 interface DomainComparisonProps {
   patientData: CognitiveDomain;
@@ -30,17 +29,13 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
   subtypeData,
   sessions = []
 }) => {
-  // Process the data for the radar chart
   const domains = Object.keys(patientData) as (keyof CognitiveDomain)[];
   
-  // Validate that all patient data is numeric and not NaN
   const isValidData = domains.every(domain => 
     typeof patientData[domain] === 'number' && !isNaN(patientData[domain])
   );
   
-  // Create safe chart data with fallbacks for missing or invalid values
   const normativeChartData = domains.map(domain => {
-    // Ensure all values are valid numbers
     const patientValue = typeof patientData[domain] === 'number' && !isNaN(patientData[domain]) 
       ? patientData[domain] 
       : 0;
@@ -61,13 +56,11 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
     };
   });
   
-  // Find first and last session if they exist
   const firstAndLastSession = useMemo(() => {
     if (!sessions || sessions.length < 2) {
       return null;
     }
     
-    // Sort sessions by date
     const sortedSessions = [...sessions].sort((a, b) => 
       new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
     );
@@ -78,7 +71,6 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
     return { firstSession, lastSession };
   }, [sessions]);
   
-  // Create chart data for first and last session comparison
   const sessionComparisonData = useMemo(() => {
     if (!firstAndLastSession) return [];
     
@@ -255,4 +247,3 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
     </Tabs>
   );
 };
-
