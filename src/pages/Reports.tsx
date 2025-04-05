@@ -25,14 +25,30 @@ import {
   mockSubtypeData,
   ReportType,
   SessionData,
-  sessions as mockSessions
+  sessionsMap
 } from '@/utils/mockData';
 import { randomInt } from '@/utils/helpers/randomUtils';
 import { ReportGenerator } from '@/components/reports/ReportGenerator';
 import { PatientReports } from '@/components/reports/PatientReports';
 import { toast } from "@/hooks/use-toast";
 import { format, parseISO, subDays } from 'date-fns';
-import { ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, Table, TableRow, TableHeader, TableBody, TableCell } from 'recharts';
+import { 
+  ResponsiveContainer, 
+  AreaChart, 
+  Area, 
+  CartesianGrid, 
+  XAxis, 
+  YAxis, 
+  Tooltip 
+} from 'recharts';
+import { 
+  Table, 
+  TableRow, 
+  TableHeader, 
+  TableBody, 
+  TableCell, 
+  TableHead 
+} from '@/components/ui/table';
 
 const Reports: React.FC = () => {
   const location = useLocation();
@@ -84,7 +100,7 @@ const Reports: React.FC = () => {
   };
   
   const generatePatientTrendData = (patientId: string, domain: string) => {
-    const patientSessions = mockSessions.filter(s => s.patientId === patientId);
+    const patientSessions = sessionsMap[patientId] || [];
     
     const sortedSessions = [...patientSessions].sort((a, b) => 
       new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
@@ -101,7 +117,7 @@ const Reports: React.FC = () => {
   };
   
   const generateSessionComparison = (patientId: string) => {
-    const patientSessions = mockSessions.filter(s => s.patientId === patientId);
+    const patientSessions = sessionsMap[patientId] || [];
     
     if (patientSessions.length < 2) return null;
     
@@ -154,7 +170,7 @@ const Reports: React.FC = () => {
   };
   
   const generateImpulsivityData = (patientId: string) => {
-    const patientSessions = mockSessions.filter(s => s.patientId === patientId);
+    const patientSessions = sessionsMap[patientId] || [];
     
     const sortedSessions = [...patientSessions].sort((a, b) => 
       new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
@@ -170,7 +186,7 @@ const Reports: React.FC = () => {
   };
   
   const generateResponseTimeData = (patientId: string) => {
-    const patientSessions = mockSessions.filter(s => s.patientId === patientId);
+    const patientSessions = sessionsMap[patientId] || [];
     
     const sortedSessions = [...patientSessions].sort((a, b) => 
       new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
@@ -203,9 +219,8 @@ const Reports: React.FC = () => {
   const impulsivityData = patientId ? generateImpulsivityData(patientId) : [];
   const sessionComparison = patientId ? generateSessionComparison(patientId) : [];
   
-  const patientSessions = patientId ? 
-    mockSessions.filter(s => s.patientId === patientId)
-      .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()) 
+  const patientSessions = patientId && sessionsMap[patientId] ? 
+    [...sessionsMap[patientId]].sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()) 
     : [];
   
   if (!currentPatient || !patientMetrics) {
