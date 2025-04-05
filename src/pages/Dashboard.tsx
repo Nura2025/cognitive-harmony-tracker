@@ -1,205 +1,53 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Brain, Clock, LineChart, Users } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/hooks/use-toast';
+import { 
+  patients, 
+  patientMetrics, 
+  metricsMap, 
+  sessionData, 
+  generateTrendData
+} from '@/utils/mockData';
 import { PatientCard } from '@/components/dashboard/PatientCard';
 import { StatusCard } from '@/components/dashboard/StatusCard';
 import { DomainChart } from '@/components/dashboard/DomainChart';
 import { SessionTimeline } from '@/components/dashboard/SessionTimeline';
-import { Patient, PatientMetrics, Session } from '@/types/databaseTypes';
-import { useApiQuery } from '@/hooks/use-api-query';
-import { patientAPI, sessionAPI, patientMetricsAPI } from '@/api/apiClient';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
+  const [selectedPatients, setSelectedPatients] = useState(patients.slice(0, 4));
   
-  // Fetch patients from API
-  const { 
-    data: patients, 
-    isLoading: isLoadingPatients,
-    error: patientsError
-  } = useApiQuery<Patient[]>({
-    queryFn: () => patientAPI.getAll(),
-  });
+  // Calculate total metrics across all patients
+  const totalPatients = patients.length;
+  const totalSessions = sessionData.length;
+  const averagePercentile = Math.round(
+    patientMetrics.reduce((sum, metric) => sum + metric.percentile, 0) / patientMetrics.length
+  );
+  const totalMinutes = patientMetrics.reduce((sum, metric) => sum + metric.sessionsDuration, 0);
   
-  // Fetch all patient metrics
-  const {
-    data: allPatientMetrics,
-    isLoading: isLoadingAllMetrics,
-    error: allMetricsError
-  } = useApiQuery<PatientMetrics[]>({
-    queryFn: () => patientMetricsAPI.getAll(),
-  });
-  
-  // Fetch all sessions
-  const {
-    data: allSessions,
-    isLoading: isLoadingAllSessions,
-    error: allSessionsError
-  } = useApiQuery<Session[]>({
-    queryFn: () => sessionAPI.getAll(),
-  });
-  
-  // Fetch metrics for selected patient
-  const {
-    data: patientMetrics,
-    isLoading: isLoadingMetrics,
-    error: metricsError
-  } = useApiQuery<PatientMetrics>({
-    queryFn: () => selectedPatient ? patientMetricsAPI.getAll({ patient_id: selectedPatient }).then(data => data[0]) : Promise.resolve(null as any),
-    enabled: !!selectedPatient,
-    dependencies: [selectedPatient]
-  });
-  
-  // Show errors as toasts if they occur
-  useEffect(() => {
-    if (patientsError) {
-      toast({
-        title: "Error loading patients",
-        description: patientsError.message,
-        variant: "destructive"
-      });
-    }
-    
-    if (allMetricsError) {
-      toast({
-        title: "Error loading metrics",
-        description: allMetricsError.message,
-        variant: "destructive"
-      });
-    }
-    
-    if (allSessionsError) {
-      toast({
-        title: "Error loading sessions",
-        description: allSessionsError.message,
-        variant: "destructive"
-      });
-    }
-  }, [patientsError, allMetricsError, allSessionsError]);
-  
-  // Calculate dashboard statistics
-  const totalPatients = patients?.length || 0;
-  const totalSessions = allSessions?.length || 0;
-  
-  // Safely calculate average percentile
-  const averagePercentile = React.useMemo(() => {
-    if (!allPatientMetrics || allPatientMetrics.length === 0) return 0;
-    
-    const validMetrics = allPatientMetrics.filter(metric => 
-      metric.percentile !== null && metric.percentile !== undefined
-    );
-    
-    if (validMetrics.length === 0) return 0;
-    
-    const sum = validMetrics.reduce((acc, metric) => 
-      acc + (metric.percentile || 0), 0
-    );
-    
-    return Math.round(sum / validMetrics.length);
-  }, [allPatientMetrics]);
-  
-  // Calculate total assessment time in minutes
-  const totalMinutes = React.useMemo(() => {
-    if (!allPatientMetrics || allPatientMetrics.length === 0) return 0;
-    
-    return allPatientMetrics.reduce((sum, metric) => 
-      sum + (metric.sessions_duration || 0), 0
-    );
-  }, [allPatientMetrics]);
-  
-  // Generate domain trend data for the chart
-  const domainTrendData = React.useMemo(() => {
-    // If we have metrics data, use it to create more realistic trend data
-    const baseValues = {
-      attention: 50,
-      memory: 50,
-      executiveFunction: 50,
-      behavioral: 50
-    };
-    
-    if (allPatientMetrics && allPatientMetrics.length > 0) {
-      // Calculate average domain scores
-      let attentionSum = 0;
-      let memorySum = 0;
-      let execFuncSum = 0;
-      let behavioralSum = 0;
-      let count = 0;
-      
-      allPatientMetrics.forEach(metric => {
-        attentionSum += metric.attention;
-        memorySum += metric.memory;
-        execFuncSum += metric.executive_function;
-        behavioralSum += metric.behavioral;
-        count++;
-      });
-      
-      if (count > 0) {
-        baseValues.attention = attentionSum / count;
-        baseValues.memory = memorySum / count;
-        baseValues.executiveFunction = execFuncSum / count;
-        baseValues.behavioral = behavioralSum / count;
-      }
-    }
-    
-    // Generate trend data based on actual averages
-    return {
-      attention: Array(10).fill(0).map((_, i) => 
-        Math.min(100, Math.max(0, baseValues.attention * (0.9 + Math.random() * 0.2)))
-      ),
-      memory: Array(10).fill(0).map((_, i) => 
-        Math.min(100, Math.max(0, baseValues.memory * (0.9 + Math.random() * 0.2)))
-      ),
-      executiveFunction: Array(10).fill(0).map((_, i) => 
-        Math.min(100, Math.max(0, baseValues.executiveFunction * (0.9 + Math.random() * 0.2)))
-      ),
-      behavioral: Array(10).fill(0).map((_, i) => 
-        Math.min(100, Math.max(0, baseValues.behavioral * (0.9 + Math.random() * 0.2)))
-      ),
-    };
-  }, [allPatientMetrics]);
-  
-  // Handle patient selection for analysis
-  const handlePatientClick = (patientId: string) => {
-    if (patientId === selectedPatient) {
-      setSelectedPatient(null);
-    } else {
-      setSelectedPatient(patientId);
-      // Can also navigate to analysis page if that's the preferred behavior
-      // navigate(`/analysis?patient=${patientId}`);
-    }
+  // Generate domain trends for the dashboard chart
+  const domainTrendData = {
+    attention: Array(10).fill(0).map((_, i) => 50 + Math.random() * 30),
+    memory: Array(10).fill(0).map((_, i) => 55 + Math.random() * 25),
+    executiveFunction: Array(10).fill(0).map((_, i) => 45 + Math.random() * 35),
+    behavioral: Array(10).fill(0).map((_, i) => 60 + Math.random() * 20),
   };
   
-  // Navigate to patients page
+  const handlePatientClick = (patientId: string) => {
+    navigate(`/analysis?patient=${patientId}`);
+  };
+  
   const handleViewAllPatients = () => {
     navigate('/patients');
   };
   
-  // Create a metrics map for patient cards
-  const metricsMap = React.useMemo(() => {
-    if (!allPatientMetrics) return {};
-    
-    const map: Record<string, PatientMetrics> = {};
-    
-    // Group by patient and take the most recent metric for each
-    allPatientMetrics.forEach(metric => {
-      if (!map[metric.patient_id] || new Date(map[metric.patient_id].date) < new Date(metric.date)) {
-        map[metric.patient_id] = metric;
-      }
-    });
-    
-    return map;
-  }, [allPatientMetrics]);
-  
-  // Handle loading states
-  const isLoading = isLoadingPatients || isLoadingAllMetrics || isLoadingAllSessions;
-  
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
-        <h2 className="text-3xl font-bold tracking-tight mb-1">Dashboard</h2>
+        <h1 className="text-3xl font-bold mb-1">Dashboard</h1>
         <p className="text-muted-foreground">
           Overview of cognitive assessment data and patient metrics
         </p>
@@ -210,7 +58,6 @@ const Dashboard = () => {
           title="Total Patients"
           value={totalPatients}
           icon={<Users className="h-5 w-5" />}
-          isLoading={isLoading}
         />
         <StatusCard 
           title="Average Percentile"
@@ -218,70 +65,44 @@ const Dashboard = () => {
           isPercentile={true}
           change={{ value: 12, isImprovement: true }}
           icon={<Brain className="h-5 w-5" />}
-          isLoading={isLoading}
         />
         <StatusCard 
           title="Session Count"
           value={totalSessions}
           change={{ value: 8, isImprovement: true }}
           icon={<LineChart className="h-5 w-5" />}
-          isLoading={isLoading}
         />
         <StatusCard 
           title="Total Assessment Time"
           value={`${totalMinutes} mins`}
           icon={<Clock className="h-5 w-5" />}
-          isLoading={isLoading}
         />
       </div>
       
       <div className="grid gap-6 md:grid-cols-2">
-        <DomainChart 
-          isLoading={isLoading}
-          metrics={allPatientMetrics && allPatientMetrics.length > 0 ? allPatientMetrics[0] : null}
-        />
-        <SessionTimeline sessions={allSessions || []} />
+        <DomainChart domainData={domainTrendData} />
+        <SessionTimeline sessions={sessionData.slice(0, 10)} />
       </div>
       
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">Recent Patients</h2>
-          <Button variant="outline" size="sm" onClick={() => navigate('/patients')}>
+          <Button variant="outline" size="sm" onClick={handleViewAllPatients}>
             View all patients
           </Button>
         </div>
         
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {isLoadingPatients ? (
-            Array(4).fill(0).map((_, i) => (
-              <div key={i} className="h-40 bg-muted rounded-lg animate-pulse"></div>
-            ))
-          ) : patients && patients.length > 0 ? (
-            patients.slice(0, 8).map(patient => (
-              <PatientCard 
-                key={patient.id} 
-                patient={patient} 
-                metrics={metricsMap[patient.id] || null}
-                onClick={handlePatientClick}
-              />
-            ))
-          ) : (
-            <div className="col-span-full p-4 text-center text-muted-foreground">
-              No patients found. Add some patients to get started.
-            </div>
-          )}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {selectedPatients.map(patient => (
+            <PatientCard 
+              key={patient.id} 
+              patient={patient} 
+              metrics={metricsMap[patient.id]}
+              onClick={handlePatientClick}
+            />
+          ))}
         </div>
       </div>
-      
-      {selectedPatient && (
-        <div className="grid gap-6 md:grid-cols-2">
-          <DomainChart
-            patient={selectedPatient}
-            isLoading={isLoadingMetrics}
-            metrics={patientMetrics}
-          />
-        </div>
-      )}
     </div>
   );
 };

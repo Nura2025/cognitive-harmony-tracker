@@ -9,7 +9,7 @@ import {
   PolarRadiusAxis,
   ResponsiveContainer
 } from 'recharts';
-import { CognitiveDomain } from '@/types/databaseTypes';
+import { CognitiveDomain } from '@/utils/mockData';
 import { getDomainName } from '@/utils/dataProcessing';
 
 interface DomainComparisonProps {

@@ -11,59 +11,27 @@ import {
   CartesianGrid,
   ReferenceLine
 } from 'recharts';
-import { CognitiveDomain, PatientMetrics } from '@/types/databaseTypes';
-import { getDomainName, convertToDatabaseKey } from '@/utils/dataProcessing';
+import { CognitiveDomain } from '@/utils/mockData';
+import { getDomainName } from '@/utils/dataProcessing';
 
 interface DomainChartProps {
-  patient?: string;
-  isLoading?: boolean;
-  metrics?: PatientMetrics | null;
+  domainData: {
+    attention: number[];
+    memory: number[];
+    executiveFunction: number[];
+    behavioral: number[];
+  };
 }
 
-export const DomainChart: React.FC<DomainChartProps> = ({ 
-  patient, 
-  isLoading = false,
-  metrics 
-}) => {
-  // Create domain data structure from metrics if available
-  const domainData = {
-    attention: metrics ? [metrics.attention] : [],
-    memory: metrics ? [metrics.memory] : [],
-    executiveFunction: metrics ? [metrics.executive_function] : [],
-    behavioral: metrics ? [metrics.behavioral] : [],
-  };
-
-  // Generate chart data from domain data
+export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
+  // Convert domain data to a format suitable for the chart
   const chartData = Array(10).fill(0).map((_, index) => {
     const dataPoint: Record<string, number | string> = { day: index + 1 };
-    
-    // For the first data point, use real data if available
-    if (index === 0 && metrics) {
-      dataPoint.attention = metrics.attention || 0;
-      dataPoint.memory = metrics.memory || 0;
-      dataPoint.executiveFunction = metrics.executive_function || 0;
-      dataPoint.behavioral = metrics.behavioral || 0;
-    } else {
-      // For other points, use simulated trend data
-      const randomFactor = 0.9 + Math.random() * 0.2; // Random factor between 0.9 and 1.1
-      
-      dataPoint.attention = metrics ? 
-        Math.min(100, Math.max(0, Math.round((metrics.attention || 50) * randomFactor))) : 
-        50;
-        
-      dataPoint.memory = metrics ? 
-        Math.min(100, Math.max(0, Math.round((metrics.memory || 50) * randomFactor))) : 
-        50;
-        
-      dataPoint.executiveFunction = metrics ? 
-        Math.min(100, Math.max(0, Math.round((metrics.executive_function || 50) * randomFactor))) : 
-        50;
-        
-      dataPoint.behavioral = metrics ? 
-        Math.min(100, Math.max(0, Math.round((metrics.behavioral || 50) * randomFactor))) : 
-        50;
-    }
-    
+    (Object.keys(domainData) as (keyof typeof domainData)[]).forEach(domain => {
+      // Ensure we have valid numbers in the dataset
+      const value = domainData[domain][index];
+      dataPoint[domain] = typeof value === 'number' && !isNaN(value) ? value : 0;
+    });
     return dataPoint;
   });
 
@@ -75,21 +43,6 @@ export const DomainChart: React.FC<DomainChartProps> = ({
     behavioral: 'hsl(var(--cognitive-behavioral))'
   };
 
-  if (isLoading) {
-    return (
-      <Card className="glass">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">Cognitive Domain Trends</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center h-[300px]">
-            <p className="text-muted-foreground">Loading domain data...</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <Card className="glass">
       <CardHeader className="pb-2">
@@ -97,18 +50,15 @@ export const DomainChart: React.FC<DomainChartProps> = ({
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-3 mb-3">
-          {(Object.keys(domainData) as (keyof typeof domainData)[]).map(domain => {
-            const dbKey = convertToDatabaseKey(domain as string);
-            return (
-              <div key={domain} className="flex items-center">
-                <div 
-                  className="w-3 h-3 rounded-full mr-1.5" 
-                  style={{ backgroundColor: domainColors[domain] }}
-                />
-                <span className="text-xs">{getDomainName(dbKey as keyof CognitiveDomain)}</span>
-              </div>
-            );
-          })}
+          {(Object.keys(domainData) as (keyof typeof domainData)[]).map(domain => (
+            <div key={domain} className="flex items-center">
+              <div 
+                className="w-3 h-3 rounded-full mr-1.5" 
+                style={{ backgroundColor: domainColors[domain] }}
+              />
+              <span className="text-xs">{getDomainName(domain as keyof CognitiveDomain)}</span>
+            </div>
+          ))}
         </div>
         
         <div className="h-[300px] w-full pt-4">
@@ -152,6 +102,7 @@ export const DomainChart: React.FC<DomainChartProps> = ({
                 formatter={(value: number) => [`${value}%`, '']}
                 labelFormatter={(day) => `Day ${day}`}
               />
+              {/* Use a fixed numeric value instead of a variable for ReferenceLine */}
               <ReferenceLine y={60} stroke="hsl(var(--muted))" strokeDasharray="3 3" />
               
               {(Object.keys(domainData) as (keyof typeof domainData)[]).map(domain => (

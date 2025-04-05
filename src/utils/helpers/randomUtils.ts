@@ -1,35 +1,20 @@
 
-/**
- * Generate a random date between two dates
- */
-export function randomDate(start: Date, end: Date): Date {
-  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-}
-
-/**
- * Generate a random domain score between 0-100
- */
-export function randomDomainScore(): number {
-  return Math.floor(Math.random() * 100);
-}
+// Utility functions for generating random data
 
 /**
  * Generate a random integer between min and max (inclusive)
  */
-export function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+export const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min);
 
 /**
- * Generate a random float between min and max
+ * Generate a random float between min and max with fixed decimal places
  */
-export function randomFloat(min: number, max: number): number {
-  return min + Math.random() * (max - min);
-}
+export const randomFloat = (min: number, max: number, decimals: number = 2) => {
+  const num = Math.random() * (max - min) + min;
+  return parseFloat(num.toFixed(decimals));
+};
 
 /**
- * Choose a random element from an array
+ * Randomly select an item from an array
  */
-export function randomChoice<T>(items: T[]): T {
-  return items[Math.floor(Math.random() * items.length)];
-}
+export const randomChoice = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];

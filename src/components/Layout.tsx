@@ -11,7 +11,7 @@ import {
 import { Navbar } from '@/components/Navbar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Link } from 'react-router-dom';
-import { LayoutDashboard, Users, BarChart, Calendar, FileText, Database } from 'lucide-react';
+import { LayoutDashboard, Users, BarChart, Calendar, FileText } from 'lucide-react';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -68,14 +68,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <Link to="/reports">
                       <FileText />
                       <span>Reports</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Data Entry">
-                    <Link to="/data-entry">
-                      <Database />
-                      <span>Data Entry</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

@@ -1,7 +1,7 @@
 
 import { format, subDays, addMinutes, subMonths } from 'date-fns';
+import { Patient, PatientMetrics } from '../types/patientTypes';
 import { randomInt, randomFloat, randomChoice } from '../helpers/randomUtils';
-import { Patient, PatientMetrics } from '@/types/databaseTypes';
 
 /**
  * Generate mock patient data
@@ -13,14 +13,18 @@ export const generatePatients = (count: number = 10): Patient[] => {
   const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Miller', 'Davis', 'Garcia', 'Rodriguez', 'Martinez'];
   
   return Array.from({ length: count }, (_, i) => {
+    const assessmentCount = randomInt(1, 15);
+    const lastAssessmentDays = randomInt(1, 30);
+    
     return {
       id: `P${1000 + i}`,
       name: `${randomChoice(firstNames)} ${randomChoice(lastNames)}`,
       age: randomInt(6, 17),
       gender: randomChoice(genders),
-      diagnosis_date: format(subMonths(new Date(), randomInt(1, 24)), 'yyyy-MM-dd'),
-      adhd_subtype: randomChoice(subtypes),
-      created_at: new Date().toISOString()
+      diagnosisDate: format(subMonths(new Date(), randomInt(1, 24)), 'yyyy-MM-dd'),
+      adhdSubtype: randomChoice(subtypes),
+      assessmentCount,
+      lastAssessment: format(subDays(new Date(), lastAssessmentDays), 'yyyy-MM-dd')
     };
   });
 };
@@ -33,32 +37,30 @@ export const generatePatientMetrics = (patients: Patient[]): PatientMetrics[] =>
     const concerns: string[] = [];
     const attention = randomFloat(40, 95);
     const memory = randomFloat(40, 95);
-    const executive_function = randomFloat(40, 95);
+    const executiveFunction = randomFloat(40, 95);
     const behavioral = randomFloat(40, 95);
     
     // Add clinical concerns based on scores
     if (attention < 60) concerns.push('Low sustained attention');
     if (memory < 60) concerns.push('Memory retention difficulties');
-    if (executive_function < 60) concerns.push('Poor planning abilities');
+    if (executiveFunction < 60) concerns.push('Poor planning abilities');
     if (behavioral < 60) concerns.push('High impulsivity');
     
     // Calculate average percentile
-    const percentile = Math.round((attention + memory + executive_function + behavioral) / 4);
+    const percentile = Math.round((attention + memory + executiveFunction + behavioral) / 4);
     
     return {
-      id: `PM-${patient.id}`,
-      patient_id: patient.id,
+      patientId: patient.id,
       date: format(new Date(), 'yyyy-MM-dd'),
       attention,
       memory,
-      executive_function,
+      executiveFunction,
       behavioral,
       percentile,
-      sessions_duration: randomInt(20, 200),
-      sessions_completed: randomInt(5, 15),
+      sessionsDuration: randomInt(20, 200),
+      sessionsCompleted: patient.assessmentCount,
       progress: randomInt(5, 25),
-      clinical_concerns: concerns,
-      created_at: new Date().toISOString()
+      clinicalConcerns: concerns
     };
   });
 };
