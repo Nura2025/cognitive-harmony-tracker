@@ -23,6 +23,10 @@ interface PatientListProps {
 export const PatientList: React.FC<PatientListProps> = ({ patients, metrics }) => {
   const navigate = useNavigate();
   
+  const handlePatientClick = (patientId: string) => {
+    navigate(`/patient/${patientId}`);
+  };
+  
   return (
     <div className="glass rounded-md overflow-hidden border border-border">
       <Table>
@@ -41,7 +45,8 @@ export const PatientList: React.FC<PatientListProps> = ({ patients, metrics }) =
           {patients.map((patient) => (
             <TableRow 
               key={patient.id}
-              className="hover:bg-muted/30 transition-colors"
+              className="hover:bg-muted/30 transition-colors cursor-pointer"
+              onClick={() => handlePatientClick(patient.id)}
             >
               <TableCell className="font-medium">{patient.name}</TableCell>
               <TableCell>{patient.age}</TableCell>
@@ -60,12 +65,15 @@ export const PatientList: React.FC<PatientListProps> = ({ patients, metrics }) =
                 </span>
               </TableCell>
               <TableCell className="text-right">
-                <div className="flex items-center justify-end space-x-2">
+                <div className="flex items-center justify-end space-x-2" onClick={e => e.stopPropagation()}>
                   <Button 
                     variant="outline" 
                     size="sm" 
                     className="h-8 w-8 p-0"
-                    onClick={() => navigate(`/analysis?patient=${patient.id}`)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/analysis?patient=${patient.id}`);
+                    }}
                   >
                     <Eye className="h-4 w-4" />
                     <span className="sr-only">View analysis</span>
@@ -74,7 +82,10 @@ export const PatientList: React.FC<PatientListProps> = ({ patients, metrics }) =
                     variant="outline" 
                     size="sm" 
                     className="h-8 w-8 p-0"
-                    onClick={() => navigate(`/reports?patient=${patient.id}`)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/reports?patient=${patient.id}`);
+                    }}
                   >
                     <FileText className="h-4 w-4" />
                     <span className="sr-only">View reports</span>
