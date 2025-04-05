@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -34,7 +33,6 @@ const PatientDetail = () => {
   const [selectedSessionIndex, setSelectedSessionIndex] = useState(0);
   
   useEffect(() => {
-    // Find the patient and their associated data
     const patient = patients.find(p => p.id === id);
     
     if (patient) {
@@ -49,12 +47,10 @@ const PatientDetail = () => {
         reports
       });
       
-      // Default to the most recent session
       if (sessions.length > 0) {
         setSelectedSessionIndex(0);
       }
     } else {
-      // Redirect if patient not found
       navigate('/patients');
     }
   }, [id, navigate]);
@@ -78,6 +74,7 @@ const PatientDetail = () => {
   }
   
   const { patient, metrics, sessions, reports } = patientData;
+  
   const firstSession = sessions.length > 0 
     ? sessions.reduce((earliest, session) => {
         return new Date(session.startTime) < new Date(earliest.startTime) 
@@ -104,7 +101,6 @@ const PatientDetail = () => {
         Back to Patients
       </Button>
       
-      {/* Patient Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold mb-1">{patient.name}</h1>
@@ -125,7 +121,6 @@ const PatientDetail = () => {
         </div>
       </div>
       
-      {/* Tabs Navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-4 mb-8">
           <TabsTrigger value="profile">Profile</TabsTrigger>
@@ -134,10 +129,8 @@ const PatientDetail = () => {
           <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
         
-        {/* Profile Tab */}
         <TabsContent value="profile" className="animate-fade-in">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Patient Information */}
             <Card className="glass md:col-span-1">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-center mb-6">
@@ -216,7 +209,6 @@ const PatientDetail = () => {
               </CardContent>
             </Card>
             
-            {/* Recent Activity & Overview */}
             <Card className="glass md:col-span-2">
               <CardContent className="pt-6">
                 <h3 className="text-lg font-medium mb-4">Recent Activity</h3>
@@ -294,10 +286,8 @@ const PatientDetail = () => {
           </div>
         </TabsContent>
         
-        {/* Sessions Tab */}
         <TabsContent value="sessions" className="animate-fade-in">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-            {/* Session List */}
             <Card className="glass md:col-span-2">
               <CardContent className="pt-6">
                 <h3 className="text-lg font-medium mb-4">Session History</h3>
@@ -342,7 +332,6 @@ const PatientDetail = () => {
               </CardContent>
             </Card>
             
-            {/* Session Details */}
             <Card className="glass md:col-span-3">
               <CardContent className="pt-6">
                 {sessions.length === 0 ? (
@@ -357,7 +346,6 @@ const PatientDetail = () => {
           </div>
         </TabsContent>
         
-        {/* Analysis Tab */}
         <TabsContent value="analysis" className="animate-fade-in space-y-6">
           <Card className="glass">
             <CardContent className="pt-6">
@@ -366,12 +354,12 @@ const PatientDetail = () => {
                 patientData={metrics}
                 normativeData={mockNormativeData}
                 subtypeData={mockSubtypeData}
+                sessions={sessions}
               />
             </CardContent>
           </Card>
         </TabsContent>
         
-        {/* Reports Tab */}
         <TabsContent value="reports" className="animate-fade-in space-y-6">
           <PatientReports 
             reports={reports}
@@ -379,7 +367,6 @@ const PatientDetail = () => {
           />
         </TabsContent>
         
-        {/* Generate Report Tab */}
         <TabsContent value="generate" className="animate-fade-in space-y-6">
           <ReportGenerator 
             patient={patient}
