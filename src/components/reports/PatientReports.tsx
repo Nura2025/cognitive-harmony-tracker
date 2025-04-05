@@ -10,10 +10,11 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Eye, Download, Share2 } from 'lucide-react';
+import { Eye, Download, Share2, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { ReportType } from '@/utils/types/patientTypes';
 import { format, parseISO } from 'date-fns';
+import { toast } from "@/hooks/use-toast";
 
 interface PatientReportsProps {
   reports: ReportType[];
@@ -50,6 +51,20 @@ export const PatientReports: React.FC<PatientReportsProps> = ({
       default:
         return 'Unknown';
     }
+  };
+
+  const handleDownload = (report: ReportType) => {
+    toast({
+      title: "Download started",
+      description: `${report.title} will download shortly.`,
+    });
+  };
+
+  const handleShare = (report: ReportType) => {
+    toast({
+      title: "Share report",
+      description: "Sharing options will be available soon.",
+    });
   };
 
   return (
@@ -91,15 +106,26 @@ export const PatientReports: React.FC<PatientReportsProps> = ({
                     <div className="flex justify-end space-x-2">
                       <Button 
                         variant="ghost" 
-                        size="icon" 
+                        size="icon"
+                        title="View Report"
                         onClick={() => onViewReport && onViewReport(report)}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        title="Download Report"
+                        onClick={() => handleDownload(report)}
+                      >
                         <Download className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        title="Share Report"
+                        onClick={() => handleShare(report)}
+                      >
                         <Share2 className="h-4 w-4" />
                       </Button>
                     </div>

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { DomainComparison } from '@/components/analysis/DomainComparison';
+import { PerformanceTrend } from '@/components/analysis/PerformanceTrend';
 import {
   Select,
   SelectContent,
@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, FileText, Download } from 'lucide-react';
 import { 
   patients, 
   metricsMap, 
@@ -23,80 +23,16 @@ import {
   mockPatientData, 
   mockNormativeData, 
   mockSubtypeData,
-  ReportType
+  ReportType,
+  SessionData,
+  sessions as mockSessions
 } from '@/utils/mockData';
 import { randomInt } from '@/utils/helpers/randomUtils';
 import { ReportGenerator } from '@/components/reports/ReportGenerator';
 import { PatientReports } from '@/components/reports/PatientReports';
 import { toast } from "@/hooks/use-toast";
-
-// Mock data for test scores
-const testScores = {
-  attention: {
-    sustainedAttention: randomInt(60, 95),
-    selectiveAttention: randomInt(55, 90),
-    dividedAttention: randomInt(50, 85),
-    attentionalSwitching: randomInt(45, 80),
-  },
-  memory: {
-    workingMemory: randomInt(55, 90),
-    shortTermMemory: randomInt(60, 95),
-    longTermMemory: randomInt(65, 95),
-    visualMemory: randomInt(50, 85),
-  },
-  executiveFunction: {
-    inhibition: randomInt(40, 75),
-    planning: randomInt(45, 80),
-    problemSolving: randomInt(50, 85),
-    decisionMaking: randomInt(55, 90),
-  },
-  behavioral: {
-    emotionalRegulation: randomInt(35, 70),
-    impulseControl: randomInt(30, 65),
-    socialCognition: randomInt(45, 80),
-    selfMonitoring: randomInt(40, 75),
-  }
-};
-
-// Mock recommendations
-const recommendations = [
-  {
-    domain: 'Attention',
-    strategies: [
-      'Daily mindfulness meditation practice (10-15 minutes)',
-      'Use of external timers and reminders for task management',
-      'Implementation of the Pomodoro technique for focused work periods',
-      'Regular physical exercise to improve overall attentional capacity'
-    ]
-  },
-  {
-    domain: 'Memory',
-    strategies: [
-      'Spaced repetition techniques for important information',
-      'Use of visual organizers and mind maps',
-      'Implementation of memory palace techniques for complex information',
-      'Regular sleep hygiene practices to support memory consolidation'
-    ]
-  },
-  {
-    domain: 'Executive Function',
-    strategies: [
-      'Breaking complex tasks into smaller, manageable steps',
-      'Use of structured planning tools and digital organizers',
-      'Regular review and reflection on completed tasks',
-      'Implementation of if-then planning for anticipated challenges'
-    ]
-  },
-  {
-    domain: 'Behavioral Regulation',
-    strategies: [
-      'Regular practice of emotional awareness techniques',
-      'Use of structured response delay strategies for emotional situations',
-      'Implementation of regular self-monitoring practices',
-      'Development of specific social scripts for challenging interactions'
-    ]
-  }
-];
+import { format, parseISO, subDays } from 'date-fns';
+import { ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip, Table, TableRow, TableHeader, TableBody, TableCell } from 'recharts';
 
 const Reports: React.FC = () => {
   const location = useLocation();
@@ -106,7 +42,6 @@ const Reports: React.FC = () => {
   const [patientReports, setPatientReports] = useState<ReportType[]>([]);
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   
-  // Parse patient ID from URL query params
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const id = params.get('patient');
@@ -118,7 +53,6 @@ const Reports: React.FC = () => {
     }
   }, [location]);
   
-  // Update patient reports when patient changes
   useEffect(() => {
     if (patientId) {
       const reports = reportsMap[patientId] || [];
@@ -149,10 +83,130 @@ const Reports: React.FC = () => {
     setActiveTab('viewReport');
   };
   
-  // Find the current patient
+  const generatePatientTrendData = (patientId: string, domain: string) => {
+    const patientSessions = mockSessions.filter(s => s.patientId === patientId);
+    
+    const sortedSessions = [...patientSessions].sort((a, b) => 
+      new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+    );
+    
+    return sortedSessions.map(session => {
+      const domainKey = domain as keyof typeof session.domainScores;
+      return {
+        date: format(parseISO(session.startTime), 'yyyy-MM-dd'),
+        score: session.domainScores[domainKey],
+        duration: session.duration
+      };
+    });
+  };
+  
+  const generateSessionComparison = (patientId: string) => {
+    const patientSessions = mockSessions.filter(s => s.patientId === patientId);
+    
+    if (patientSessions.length < 2) return null;
+    
+    const sortedSessions = [...patientSessions].sort((a, b) => 
+      new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+    );
+    
+    const firstSession = sortedSessions[0];
+    const lastSession = sortedSessions[sortedSessions.length - 1];
+    
+    return [
+      {
+        metric: 'Attention',
+        first: firstSession.domainScores.attention,
+        last: lastSession.domainScores.attention,
+        change: ((lastSession.domainScores.attention - firstSession.domainScores.attention) / firstSession.domainScores.attention * 100).toFixed(0)
+      },
+      {
+        metric: 'Memory',
+        first: firstSession.domainScores.memory,
+        last: lastSession.domainScores.memory,
+        change: ((lastSession.domainScores.memory - firstSession.domainScores.memory) / firstSession.domainScores.memory * 100).toFixed(0)
+      },
+      {
+        metric: 'Executive Function',
+        first: firstSession.domainScores.executiveFunction,
+        last: lastSession.domainScores.executiveFunction,
+        change: ((lastSession.domainScores.executiveFunction - firstSession.domainScores.executiveFunction) / firstSession.domainScores.executiveFunction * 100).toFixed(0)
+      },
+      {
+        metric: 'Behavioral Regulation',
+        first: firstSession.domainScores.behavioral,
+        last: lastSession.domainScores.behavioral,
+        change: ((lastSession.domainScores.behavioral - firstSession.domainScores.behavioral) / firstSession.domainScores.behavioral * 100).toFixed(0)
+      },
+      {
+        metric: 'Overall',
+        first: (firstSession.domainScores.attention + firstSession.domainScores.memory + 
+                firstSession.domainScores.executiveFunction + firstSession.domainScores.behavioral) / 4,
+        last: (lastSession.domainScores.attention + lastSession.domainScores.memory + 
+              lastSession.domainScores.executiveFunction + lastSession.domainScores.behavioral) / 4,
+        change: ((((lastSession.domainScores.attention + lastSession.domainScores.memory + 
+                  lastSession.domainScores.executiveFunction + lastSession.domainScores.behavioral) / 4) - 
+                ((firstSession.domainScores.attention + firstSession.domainScores.memory + 
+                  firstSession.domainScores.executiveFunction + firstSession.domainScores.behavioral) / 4)) / 
+                ((firstSession.domainScores.attention + firstSession.domainScores.memory + 
+                  firstSession.domainScores.executiveFunction + firstSession.domainScores.behavioral) / 4) * 100).toFixed(0)
+      }
+    ];
+  };
+  
+  const generateImpulsivityData = (patientId: string) => {
+    const patientSessions = mockSessions.filter(s => s.patientId === patientId);
+    
+    const sortedSessions = [...patientSessions].sort((a, b) => 
+      new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+    );
+    
+    return sortedSessions.map(session => {
+      return {
+        date: format(parseISO(session.startTime), 'yyyy-MM-dd'),
+        commissionErrors: Math.floor(Math.random() * 8),
+        omissionErrors: Math.floor(Math.random() * 7)
+      };
+    });
+  };
+  
+  const generateResponseTimeData = (patientId: string) => {
+    const patientSessions = mockSessions.filter(s => s.patientId === patientId);
+    
+    const sortedSessions = [...patientSessions].sort((a, b) => 
+      new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+    );
+    
+    return sortedSessions.map(session => {
+      return {
+        date: format(parseISO(session.startTime), 'yyyy-MM-dd'),
+        responseTime: 0.5 + Math.random() * 2.5
+      };
+    });
+  };
+  
+  const handleDownloadPDF = () => {
+    toast({
+      title: "Download started",
+      description: "Your report PDF will download shortly.",
+    });
+  };
+  
   const currentPatient = patients.find(p => p.id === patientId);
   const patientMetrics = patientId ? metricsMap[patientId] : null;
   const selectedReport = patientReports.find(r => r.id === selectedReportId);
+  
+  const memoryTrendData = patientId ? generatePatientTrendData(patientId, 'memory') : [];
+  const attentionTrendData = patientId ? generatePatientTrendData(patientId, 'attention') : [];
+  const executiveTrendData = patientId ? generatePatientTrendData(patientId, 'executiveFunction') : [];
+  const behavioralTrendData = patientId ? generatePatientTrendData(patientId, 'behavioral') : [];
+  const responseTimeData = patientId ? generateResponseTimeData(patientId) : [];
+  const impulsivityData = patientId ? generateImpulsivityData(patientId) : [];
+  const sessionComparison = patientId ? generateSessionComparison(patientId) : [];
+  
+  const patientSessions = patientId ? 
+    mockSessions.filter(s => s.patientId === patientId)
+      .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()) 
+    : [];
   
   if (!currentPatient || !patientMetrics) {
     return <div className="p-8">Loading patient data...</div>;
@@ -226,7 +280,6 @@ const Reports: React.FC = () => {
           </TabsTrigger>
         </TabsList>
         
-        {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="glass">
@@ -293,7 +346,6 @@ const Reports: React.FC = () => {
           />
         </TabsContent>
         
-        {/* Generate Report Tab */}
         <TabsContent value="generate" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <ReportGenerator 
@@ -344,7 +396,6 @@ const Reports: React.FC = () => {
           </div>
         </TabsContent>
         
-        {/* Patient Reports Tab */}
         <TabsContent value="reports" className="space-y-6">
           <PatientReports 
             reports={patientReports}
@@ -352,67 +403,247 @@ const Reports: React.FC = () => {
           />
         </TabsContent>
         
-        {/* View Report Tab */}
         <TabsContent value="viewReport" className="space-y-6">
           {selectedReport ? (
             <>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold">Clinical Assessment Report</h2>
+                  <p className="text-muted-foreground">
+                    {selectedReport.title} - Generated on {format(parseISO(selectedReport.createdDate), 'MMMM d, yyyy')}
+                  </p>
+                </div>
+                <Button onClick={handleDownloadPDF} className="flex items-center gap-2">
+                  <Download className="h-4 w-4" />
+                  Download PDF Report
+                </Button>
+              </div>
+              
               <Card className="glass">
                 <CardHeader>
-                  <CardTitle>{selectedReport.title}</CardTitle>
+                  <CardTitle>Executive Summary</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-6">
-                    {selectedReport.sections.overview && (
-                      <div>
-                        <h3 className="text-lg font-medium mb-4">Patient Overview</h3>
-                        <p>
-                          {currentPatient.name} is a {currentPatient.age}-year-old {currentPatient.gender.toLowerCase()} 
-                          diagnosed with {currentPatient.adhdSubtype} ADHD on {currentPatient.diagnosisDate}. The patient 
-                          has completed {patientMetrics.sessionsCompleted} cognitive assessment sessions.
-                        </p>
-                      </div>
-                    )}
-                    
-                    {selectedReport.sections.domainAnalysis && (
-                      <div>
-                        <h3 className="text-lg font-medium mb-4">Cognitive Domain Analysis</h3>
-                        <DomainComparison 
-                          patientData={patientMetrics} 
-                          normativeData={mockNormativeData}
-                          subtypeData={mockSubtypeData}
-                        />
-                      </div>
-                    )}
-                    
-                    {selectedReport.sections.recommendations && (
-                      <div>
-                        <h3 className="text-lg font-medium mb-4">Recommendations</h3>
-                        <div className="space-y-4">
-                          {recommendations.map((rec) => (
-                            <div key={rec.domain}>
-                              <h4 className="font-medium mb-2">{rec.domain}</h4>
-                              <ul className="list-disc pl-5 space-y-1">
-                                {rec.strategies.map((strategy, index) => (
-                                  <li key={index} className="text-muted-foreground">{strategy}</li>
-                                ))}
-                              </ul>
-                              {rec.domain !== recommendations[recommendations.length - 1].domain && (
-                                <Separator className="my-3" />
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                  <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                    Overall assessment of {currentPatient.name}'s cognitive performance and progress
+                  </h3>
+                  
+                  <p className="mb-4">
+                    {currentPatient.name} has shown fluctuations in cognitive performance over {patientSessions.length} weeks of assessment. 
+                    Key improvements include a {sessionComparison?.[1]?.change || '0'}% increase in sequence recall accuracy and 
+                    {sessionComparison?.[0]?.change || '0'}% improvement in sustained attention.
+                  </p>
+                  
+                  <p>
+                    The most significant growth has been observed in memory tasks, while executive function shows
+                    room for further development.
+                  </p>
+                  
+                  <div className="mt-6">
+                    <h3 className="font-medium mb-2">Recommendations</h3>
+                    <ul className="list-disc pl-5 space-y-1">
+                      <li className="text-muted-foreground">
+                        Focus on executive function games to improve cognitive flexibility
+                      </li>
+                      <li className="text-muted-foreground">
+                        Continue with memory enhancement exercises to build on current progress
+                      </li>
+                      <li className="text-muted-foreground">
+                        Consider increasing difficulty levels gradually to maintain engagement
+                      </li>
+                      <li className="text-muted-foreground">
+                        Implement short, frequent sessions rather than longer, less frequent ones
+                      </li>
+                    </ul>
                   </div>
                 </CardContent>
               </Card>
               
-              <div className="flex justify-end space-x-3">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="glass">
+                  <CardHeader>
+                    <CardTitle className="text-lg">Individual Metrics Over Time</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Tracking progress across key cognitive domains
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div>
+                      <h3 className="text-sm font-medium mb-2">Memory Progress</h3>
+                      <PerformanceTrend 
+                        data={memoryTrendData}
+                        title=""
+                        showDuration={false}
+                      />
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div>
+                      <h3 className="text-sm font-medium mb-2">Attention Span & Response Time</h3>
+                      <PerformanceTrend 
+                        data={responseTimeData.map(item => ({
+                          date: item.date,
+                          score: attentionTrendData.find(a => a.date === item.date)?.score || 0,
+                          duration: item.responseTime * 1000
+                        }))}
+                        title=""
+                        showDuration={true}
+                      />
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div>
+                      <h3 className="text-sm font-medium mb-2">Impulsivity (Error Rates)</h3>
+                      <div className="h-[250px] w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart
+                            data={impulsivityData}
+                            margin={{ top: 20, right: 5, left: 0, bottom: 0 }}
+                          >
+                            <defs>
+                              <linearGradient id="colorCommission" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="hsl(var(--destructive))" stopOpacity={0.2} />
+                                <stop offset="95%" stopColor="hsl(var(--destructive))" stopOpacity={0} />
+                              </linearGradient>
+                              <linearGradient id="colorOmission" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="hsl(var(--amber-500))" stopOpacity={0.2} />
+                                <stop offset="95%" stopColor="hsl(var(--amber-500))" stopOpacity={0} />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                            <XAxis
+                              dataKey="date"
+                              axisLine={false}
+                              tickLine={false}
+                              tickFormatter={(date) => {
+                                const parts = date.split('-');
+                                return `${parts[1]}/${parts[2]}`;
+                              }}
+                              stroke="hsl(var(--muted-foreground))"
+                              tickMargin={10}
+                            />
+                            <YAxis
+                              axisLine={false}
+                              tickLine={false}
+                              stroke="hsl(var(--muted-foreground))"
+                              tickMargin={10}
+                            />
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: 'hsl(var(--background))',
+                                borderColor: 'hsl(var(--border))',
+                                boxShadow: 'var(--shadow)',
+                                borderRadius: 'var(--radius)',
+                                color: 'hsl(var(--foreground))'
+                              }}
+                              formatter={(value: number, name: string) => {
+                                if (name === 'commissionErrors') return [value, 'Commission Errors (Impulsivity)'];
+                                if (name === 'omissionErrors') return [value, 'Omission Errors (Inattention)'];
+                                return [value, name];
+                              }}
+                            />
+                            <Area
+                              type="monotone"
+                              dataKey="commissionErrors"
+                              name="commissionErrors"
+                              stroke="hsl(var(--destructive))"
+                              fillOpacity={1}
+                              fill="url(#colorCommission)"
+                              strokeWidth={2}
+                              dot={{ r: 0 }}
+                              activeDot={{ r: 6, strokeWidth: 2, stroke: 'hsl(var(--background))' }}
+                            />
+                            <Area
+                              type="monotone"
+                              dataKey="omissionErrors"
+                              name="omissionErrors"
+                              stroke="hsl(var(--amber-500))"
+                              fillOpacity={1}
+                              fill="url(#colorOmission)"
+                              strokeWidth={2}
+                              dot={{ r: 0 }}
+                              activeDot={{ r: 6, strokeWidth: 2, stroke: 'hsl(var(--background))' }}
+                            />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <div className="space-y-6">
+                  <Card className="glass">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Before vs. After Performance Comparison</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {sessionComparison ? (
+                        <div className="overflow-x-auto">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Metric</TableHead>
+                                <TableHead>First Session</TableHead>
+                                <TableHead>Latest Session</TableHead>
+                                <TableHead>% Change</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {sessionComparison.map((item, index) => (
+                                <TableRow key={index}>
+                                  <TableCell className="font-medium">{item.metric}</TableCell>
+                                  <TableCell>{item.first.toFixed(1)}</TableCell>
+                                  <TableCell>{item.last.toFixed(1)}</TableCell>
+                                  <TableCell className={Number(item.change) > 0 ? 'text-green-600' : Number(item.change) < 0 ? 'text-red-600' : ''}>
+                                    {Number(item.change) > 0 ? `+${item.change}%` : `${item.change}%`}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      ) : (
+                        <div className="text-center py-4">
+                          <p className="text-muted-foreground">Not enough session data available for comparison</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="glass">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Comparative Analysis</CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        Cross-game performance insights and peer benchmarking
+                      </p>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="mb-4">
+                        <h3 className="text-sm font-medium mb-2">Cross-Game Cognitive Performance</h3>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          This radar chart shows {currentPatient.name}'s performance across different games, broken down by key cognitive skills. 
+                          Each axis represents a cognitive domain, and higher values (further from center) indicate better performance.
+                        </p>
+                      </div>
+                      
+                      <DomainComparison 
+                        patientData={patientMetrics} 
+                        normativeData={mockNormativeData}
+                        subtypeData={mockSubtypeData}
+                        sessions={patientSessions}
+                      />
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-3 mt-6">
                 <Button variant="outline" onClick={() => setActiveTab('reports')}>
                   Back to Reports
                 </Button>
-                <Button>Download PDF</Button>
+                <Button onClick={handleDownloadPDF}>Download PDF</Button>
               </div>
             </>
           ) : (
