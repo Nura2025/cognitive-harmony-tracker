@@ -27,8 +27,9 @@ export const MetricTooltip: React.FC<MetricTooltipProps> = ({ explanation, trans
           className="max-w-sm" 
           dir={language === 'ar' ? 'rtl' : 'ltr'}
           align={language === 'ar' ? 'end' : 'start'}
+          side={language === 'ar' ? 'right' : 'left'}
         >
-          <p className="text-sm">{tooltipText}</p>
+          <p className={`text-sm ${language === 'ar' ? 'text-right' : 'text-left'}`}>{tooltipText}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

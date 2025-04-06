@@ -9,7 +9,7 @@ interface LanguageContextType {
   t: (key: string) => string;
 }
 
-// Translation dictionary
+// Translation dictionary with improved Arabic translations
 const translations: Record<Language, Record<string, string>> = {
   en: {
     dashboard: 'Dashboard',
@@ -61,7 +61,7 @@ const translations: Record<Language, Record<string, string>> = {
     analysis: 'التحليل',
     sessions: 'الجلسات',
     reports: 'التقارير',
-    darkMode: 'الوضع الداكن',
+    darkMode: 'الوضع المظلم',
     connected: 'متصل',
     search: 'بحث عن المرضى، الجلسات...',
     settings: 'الإعدادات',
@@ -70,34 +70,34 @@ const translations: Record<Language, Record<string, string>> = {
     notifications: 'الإشعارات',
     account: 'حسابي',
     accountSettings: 'إعدادات الحساب',
-    support: 'الدعم',
+    support: 'الدعم الفني',
     logout: 'تسجيل الخروج',
-    // Reports related translations
+    // Reports related translations - improved translations
     clinicalReport: 'تقرير التقييم السريري',
     downloadPdf: 'تحميل التقرير بصيغة PDF',
     executiveSummary: 'الملخص التنفيذي',
     recommendations: 'التوصيات',
-    metricsOverTime: 'المقاييس الفردية عبر الزمن',
+    metricsOverTime: 'المقاييس الفردية على مدار الوقت',
     performanceComparison: 'مقارنة الأداء قبل وبعد',
     comparativeAnalysis: 'التحليل المقارن',
     firstSession: 'الجلسة الأولى',
     latestSession: 'الجلسة الأخيرة',
-    change: 'نسبة التغيير',
+    change: 'نسبة التغيير %',
     attention: 'الانتباه',
     memory: 'الذاكرة',
     processingSpeed: 'سرعة المعالجة',
     executiveFunction: 'الوظائف التنفيذية',
-    overall: 'الإجمالي',
-    // Tooltip explanations
-    attentionExplanation: 'يقيس القدرة على التركيز على مثيرات محددة مع فلترة المشتتات',
-    memoryExplanation: 'يقيم القدرة على تخزين واسترجاع المعلومات',
-    processingSpeedExplanation: 'يقيم مدى سرعة تنفيذ المهام المعرفية',
-    executiveFunctionExplanation: 'يقيس المهارات المعرفية العليا بما في ذلك التخطيط وحل المشكلات والمرونة المعرفية',
-    overallExplanation: 'تقييم مشترك لجميع المجالات المعرفية',
+    overall: 'التقييم العام',
+    // Tooltip explanations - improved Arabic translations
+    attentionExplanation: 'يقيس القدرة على التركيز على المثيرات المحددة مع تصفية المشتتات',
+    memoryExplanation: 'تقييم القدرة على تخزين واسترجاع المعلومات والاحتفاظ بها',
+    processingSpeedExplanation: 'تقييم مدى سرعة إنجاز المهام المعرفية',
+    executiveFunctionExplanation: 'يقيس المهارات المعرفية العليا بما في ذلك التخطيط وحل المشكلات والمرونة الإدراكية',
+    overallExplanation: 'التقييم الشامل لجميع المجالات المعرفية',
     responseTimeExplanation: 'متوسط الوقت المستغرق للاستجابة للمثيرات، مقاس بالثواني',
-    impulsivityExplanation: 'عدد أخطاء اللجنة الناتجة عن الاستجابة دون معالجة كافية',
-    inattentionExplanation: 'عدد أخطاء الإغفال بسبب عدم الاستجابة للمثيرات المستهدفة',
-    crossGameExplanation: 'مقارنة الأداء عبر تمارين معرفية مختلفة',
+    impulsivityExplanation: 'عدد أخطاء الاستجابة الناتجة عن الرد دون معالجة كافية',
+    inattentionExplanation: 'عدد أخطاء الإغفال بسبب الفشل في الاستجابة للمثيرات المستهدفة',
+    crossGameExplanation: 'مقارنة الأداء عبر التمارين المعرفية المختلفة',
   }
 };
 
@@ -116,7 +116,25 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // Set document direction based on language
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = language;
+    
+    // Add special class for RTL layout
+    if (language === 'ar') {
+      document.body.classList.add('rtl');
+    } else {
+      document.body.classList.remove('rtl');
+    }
+    
+    // Store language preference
+    localStorage.setItem('language', language);
   }, [language]);
+  
+  // Load preferred language on initial render
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem('language') as Language;
+    if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'ar')) {
+      setLanguage(savedLanguage);
+    }
+  }, []);
 
   const t = (key: string): string => {
     return translations[language][key] || key;
