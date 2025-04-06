@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type Language = 'en' | 'ar';
@@ -28,7 +27,7 @@ const translations: Record<Language, Record<string, string>> = {
     accountSettings: 'Account Settings',
     support: 'Support',
     logout: 'Log out',
-    // Reports related translations
+    
     clinicalReport: 'Clinical Assessment Report',
     downloadPdf: 'Download PDF Report',
     executiveSummary: 'Executive Summary',
@@ -44,7 +43,7 @@ const translations: Record<Language, Record<string, string>> = {
     processingSpeed: 'Processing Speed',
     executiveFunction: 'Executive Function',
     overall: 'Overall',
-    // Tooltip explanations
+    
     attentionExplanation: 'Measures the ability to focus on specific stimuli while filtering out distractions',
     memoryExplanation: 'Evaluates the capacity to store, retain, and recall information',
     processingSpeedExplanation: 'Assesses how quickly cognitive tasks can be performed',
@@ -54,6 +53,27 @@ const translations: Record<Language, Record<string, string>> = {
     impulsivityExplanation: 'Number of commission errors due to responding without adequate processing',
     inattentionExplanation: 'Number of omission errors due to failure to respond to target stimuli',
     crossGameExplanation: 'Performance comparison across different cognitive exercises',
+    
+    managePatientProfiles: 'Manage patient profiles and assessment data',
+    addPatient: 'Add Patient',
+    searchPatientsByName: 'Search patients by name...',
+    patientName: 'Patient Name',
+    age: 'Age',
+    adhdSubtype: 'ADHD Subtype',
+    lastSession: 'Last Session',
+    sessions: 'Sessions',
+    percentile: 'Percentile',
+    actions: 'Actions',
+    viewAnalysis: 'View analysis',
+    viewReports: 'View reports',
+    filters: 'Filters',
+    resetFilters: 'Reset filters',
+    adhdSubtypes: 'ADHD Subtypes',
+    ageRange: 'Age Range',
+    years: 'years',
+    inattentive: 'Inattentive',
+    hyperactive: 'Hyperactive-Impulsive',
+    combined: 'Combined',
   },
   ar: {
     dashboard: 'لوحة المعلومات',
@@ -72,7 +92,7 @@ const translations: Record<Language, Record<string, string>> = {
     accountSettings: 'إعدادات الحساب',
     support: 'الدعم الفني',
     logout: 'تسجيل الخروج',
-    // Reports related translations - improved translations
+    
     clinicalReport: 'تقرير التقييم السريري',
     downloadPdf: 'تحميل التقرير بصيغة PDF',
     executiveSummary: 'الملخص التنفيذي',
@@ -88,7 +108,7 @@ const translations: Record<Language, Record<string, string>> = {
     processingSpeed: 'سرعة المعالجة',
     executiveFunction: 'الوظائف التنفيذية',
     overall: 'التقييم العام',
-    // Tooltip explanations - improved Arabic translations
+    
     attentionExplanation: 'يقيس القدرة على التركيز على المثيرات المحددة مع تصفية المشتتات',
     memoryExplanation: 'تقييم القدرة على تخزين واسترجاع المعلومات والاحتفاظ بها',
     processingSpeedExplanation: 'تقييم مدى سرعة إنجاز المهام المعرفية',
@@ -98,6 +118,27 @@ const translations: Record<Language, Record<string, string>> = {
     impulsivityExplanation: 'عدد أخطاء الاستجابة الناتجة عن الرد دون معالجة كافية',
     inattentionExplanation: 'عدد أخطاء الإغفال بسبب الفشل في الاستجابة للمثيرات المستهدفة',
     crossGameExplanation: 'مقارنة الأداء عبر التمارين المعرفية المختلفة',
+    
+    managePatientProfiles: 'إدارة ملفات المرضى وبيانات التقييم',
+    addPatient: 'إضافة مريض',
+    searchPatientsByName: 'البحث عن المرضى بالاسم...',
+    patientName: 'اسم المريض',
+    age: 'العمر',
+    adhdSubtype: 'نوع اضطراب فرط الحركة ونقص الانتباه',
+    lastSession: 'آخر جلسة',
+    sessions: 'الجلسات',
+    percentile: 'النسبة المئوية',
+    actions: 'الإجراءات',
+    viewAnalysis: 'عرض التحليل',
+    viewReports: 'عرض التقارير',
+    filters: 'الفلاتر',
+    resetFilters: 'إعادة تعيين الفلاتر',
+    adhdSubtypes: 'أنواع اضطراب فرط الحركة ونقص الانتباه',
+    ageRange: 'الفئة العمرية',
+    years: 'سنوات',
+    inattentive: 'نقص الانتباه',
+    hyperactive: 'فرط الحركة والاندفاع',
+    combined: 'مشترك',
   }
 };
 

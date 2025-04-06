@@ -5,11 +5,13 @@ import { Button } from '@/components/ui/button';
 import { patients, metricsMap } from '@/utils/mockData';
 import { PatientFilters } from '@/components/patients/PatientFilters';
 import { PatientList } from '@/components/patients/PatientList';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const Patients = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilters, setActiveFilters] = useState<Record<string, boolean>>({});
   const [filteredPatients, setFilteredPatients] = useState(patients);
+  const { t, language } = useLanguage();
   
   // Filter patients based on search term and active filters
   useEffect(() => {
@@ -67,17 +69,17 @@ const Patients = () => {
   
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold mb-1">Patients</h1>
+      <div className={`flex items-center justify-between ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+        <div className={language === 'ar' ? 'text-right' : 'text-left'}>
+          <h1 className="text-3xl font-bold mb-1">{t('patients')}</h1>
           <p className="text-muted-foreground">
-            Manage patient profiles and assessment data
+            {t('managePatientProfiles')}
           </p>
         </div>
         
-        <Button className="gap-1.5">
+        <Button className={`gap-1.5 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
           <PlusCircle className="h-4 w-4" />
-          <span>Add Patient</span>
+          <span>{t('addPatient')}</span>
         </Button>
       </div>
       

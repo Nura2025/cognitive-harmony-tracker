@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { FilterX, Search, SlidersHorizontal } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PatientFiltersProps {
   searchTerm: string;
@@ -27,54 +28,56 @@ export const PatientFilters: React.FC<PatientFiltersProps> = ({
   onFilterChange,
   onResetFilters
 }) => {
+  const { t, language } = useLanguage();
   const adhdSubtypes = ['Inattentive', 'Hyperactive-Impulsive', 'Combined'];
   const ageRanges = ['6-8', '9-12', '13-17'];
   
   const hasActiveFilters = Object.values(activeFilters).some(value => value);
   
   return (
-    <div className="flex items-center space-x-4 mb-6">
+    <div className={`flex items-center mb-6 ${language === 'ar' ? 'flex-row-reverse space-x-reverse' : 'space-x-4'}`}>
       <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className={`absolute ${language === 'ar' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground`} />
         <Input
-          placeholder="Search patients by name..."
+          placeholder={t('searchPatientsByName')}
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-9 bg-background/80 border-muted h-10"
+          className={`${language === 'ar' ? 'pr-9 text-right' : 'pl-9'} bg-background/80 border-muted h-10`}
+          dir={language === 'ar' ? 'rtl' : 'ltr'}
         />
       </div>
       
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="h-10 gap-1.5">
+          <Button variant="outline" className={`h-10 gap-1.5 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
             <SlidersHorizontal className="h-4 w-4" />
-            <span>Filters</span>
+            <span>{t('filters')}</span>
             {hasActiveFilters && (
               <span className="flex h-2 w-2 bg-primary rounded-full" />
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel>ADHD Subtypes</DropdownMenuLabel>
+        <DropdownMenuContent align={language === 'ar' ? 'start' : 'end'} className="w-56" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+          <DropdownMenuLabel>{t('adhdSubtypes')}</DropdownMenuLabel>
           {adhdSubtypes.map(subtype => (
             <DropdownMenuCheckboxItem
               key={subtype}
               checked={activeFilters[`subtype-${subtype}`] || false}
               onCheckedChange={(checked) => onFilterChange(`subtype-${subtype}`, !!checked)}
             >
-              {subtype}
+              {t(subtype.toLowerCase())}
             </DropdownMenuCheckboxItem>
           ))}
           
           <DropdownMenuSeparator />
-          <DropdownMenuLabel>Age Range</DropdownMenuLabel>
+          <DropdownMenuLabel>{t('ageRange')}</DropdownMenuLabel>
           {ageRanges.map(range => (
             <DropdownMenuCheckboxItem
               key={range}
               checked={activeFilters[`age-${range}`] || false}
               onCheckedChange={(checked) => onFilterChange(`age-${range}`, !!checked)}
             >
-              {range} years
+              {range} {t('years')}
             </DropdownMenuCheckboxItem>
           ))}
           
@@ -83,12 +86,12 @@ export const PatientFilters: React.FC<PatientFiltersProps> = ({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-start font-normal"
+              className={`w-full justify-start font-normal ${language === 'ar' ? 'flex-row-reverse' : ''}`}
               onClick={onResetFilters}
               disabled={!hasActiveFilters}
             >
-              <FilterX className="mr-2 h-4 w-4" />
-              Reset filters
+              <FilterX className={language === 'ar' ? 'ml-2 h-4 w-4' : 'mr-2 h-4 w-4'} />
+              {t('resetFilters')}
             </Button>
           </div>
         </DropdownMenuContent>

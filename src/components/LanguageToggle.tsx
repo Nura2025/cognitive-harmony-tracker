@@ -7,11 +7,15 @@ import { Globe } from 'lucide-react';
 export function LanguageToggle() {
   const { language, setLanguage } = useLanguage();
 
+  const toggleLanguage = () => {
+    setLanguage(language === 'en' ? 'ar' : 'en');
+  };
+
   return (
     <Button
       variant="ghost"
       size="sm"
-      onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
+      onClick={toggleLanguage}
       className="text-sm font-medium flex items-center gap-1.5"
       title={language === 'en' ? 'العربية' : 'English'}
     >

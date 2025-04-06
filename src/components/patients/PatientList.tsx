@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Eye, FileText } from 'lucide-react';
 import { Patient, PatientMetrics } from '@/utils/mockData';
 import { formatLastSession, formatPercentile, getScoreColorClass } from '@/utils/dataProcessing';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PatientListProps {
   patients: Patient[];
@@ -22,6 +23,7 @@ interface PatientListProps {
 
 export const PatientList: React.FC<PatientListProps> = ({ patients, metrics }) => {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
   
   const handlePatientClick = (patientId: string) => {
     navigate(`/patient/${patientId}`);
@@ -29,16 +31,16 @@ export const PatientList: React.FC<PatientListProps> = ({ patients, metrics }) =
   
   return (
     <div className="glass rounded-md overflow-hidden border border-border">
-      <Table>
+      <Table dir={language === 'ar' ? 'rtl' : 'ltr'}>
         <TableHeader>
           <TableRow>
-            <TableHead>Patient Name</TableHead>
-            <TableHead>Age</TableHead>
-            <TableHead>ADHD Subtype</TableHead>
-            <TableHead>Last Session</TableHead>
-            <TableHead>Sessions</TableHead>
-            <TableHead>Percentile</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead className={language === 'ar' ? 'text-right' : ''}>{t('patientName')}</TableHead>
+            <TableHead>{t('age')}</TableHead>
+            <TableHead>{t('adhdSubtype')}</TableHead>
+            <TableHead>{t('lastSession')}</TableHead>
+            <TableHead>{t('sessions')}</TableHead>
+            <TableHead>{t('percentile')}</TableHead>
+            <TableHead className={language === 'ar' ? 'text-left' : 'text-right'}>{t('actions')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -48,11 +50,11 @@ export const PatientList: React.FC<PatientListProps> = ({ patients, metrics }) =
               className="hover:bg-muted/30 transition-colors cursor-pointer"
               onClick={() => handlePatientClick(patient.id)}
             >
-              <TableCell className="font-medium">{patient.name}</TableCell>
+              <TableCell className={`font-medium ${language === 'ar' ? 'text-right' : ''}`}>{patient.name}</TableCell>
               <TableCell>{patient.age}</TableCell>
               <TableCell>
                 <Badge variant="outline" className="font-normal">
-                  {patient.adhdSubtype}
+                  {language === 'ar' ? t(patient.adhdSubtype.toLowerCase()) : patient.adhdSubtype}
                 </Badge>
               </TableCell>
               <TableCell>{formatLastSession(patient.lastAssessment)}</TableCell>
@@ -64,8 +66,8 @@ export const PatientList: React.FC<PatientListProps> = ({ patients, metrics }) =
                   {formatPercentile(metrics[patient.id]?.percentile)}
                 </span>
               </TableCell>
-              <TableCell className="text-right">
-                <div className="flex items-center justify-end space-x-2" onClick={e => e.stopPropagation()}>
+              <TableCell className={language === 'ar' ? 'text-left' : 'text-right'}>
+                <div className={`flex items-center ${language === 'ar' ? 'justify-start space-x-reverse' : 'justify-end space-x-2'}`} onClick={e => e.stopPropagation()}>
                   <Button 
                     variant="outline" 
                     size="sm" 
@@ -74,9 +76,10 @@ export const PatientList: React.FC<PatientListProps> = ({ patients, metrics }) =
                       e.stopPropagation();
                       navigate(`/analysis?patient=${patient.id}`);
                     }}
+                    title={t('viewAnalysis')}
                   >
                     <Eye className="h-4 w-4" />
-                    <span className="sr-only">View analysis</span>
+                    <span className="sr-only">{t('viewAnalysis')}</span>
                   </Button>
                   <Button 
                     variant="outline" 
@@ -86,9 +89,10 @@ export const PatientList: React.FC<PatientListProps> = ({ patients, metrics }) =
                       e.stopPropagation();
                       navigate(`/reports?patient=${patient.id}`);
                     }}
+                    title={t('viewReports')}
                   >
                     <FileText className="h-4 w-4" />
-                    <span className="sr-only">View reports</span>
+                    <span className="sr-only">{t('viewReports')}</span>
                   </Button>
                 </div>
               </TableCell>
