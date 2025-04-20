@@ -15,7 +15,7 @@ export const mockSubtypeData: CognitiveDomain = {
   impulseControl: 43
 };
 
-// Mock metrics data
+// Update metricsMap with complete data
 export const metricsMap: Record<string, PatientMetrics> = {
   "p1": {
     patientId: "p1",
@@ -45,6 +45,93 @@ export const metricsMap: Record<string, PatientMetrics> = {
     progress: 12,
     clinicalConcerns: ["Emotional regulation"]
   }
+};
+
+// Update sessionsMap with sample sessions
+export const sessionsMap: Record<string, SessionData[]> = {
+  "p1": [
+    {
+      id: "s1",
+      patientId: "p1",
+      startTime: "2024-03-01T10:00:00Z",
+      endTime: "2024-03-01T11:00:00Z",
+      completionStatus: "completed",
+      overallScore: 78,
+      domainScores: {
+        attention: 75,
+        memory: 82,
+        executiveFunction: 68,
+        behavioral: 70,
+        impulseControl: 65
+      },
+      activities: [
+        {
+          id: "a1",
+          name: "Memory Task",
+          type: "memory",
+          score: 82,
+          duration: 600,
+          difficulty: 2,
+          completionStatus: "completed"
+        }
+      ]
+    },
+    {
+      id: "s2",
+      patientId: "p1",
+      startTime: "2024-03-15T14:00:00Z",
+      endTime: "2024-03-15T15:00:00Z",
+      completionStatus: "completed",
+      overallScore: 80,
+      domainScores: {
+        attention: 78,
+        memory: 85,
+        executiveFunction: 72,
+        behavioral: 75,
+        impulseControl: 70
+      },
+      activities: [
+        {
+          id: "a2",
+          name: "Attention Task",
+          type: "attention",
+          score: 78,
+          duration: 600,
+          difficulty: 3,
+          completionStatus: "completed"
+        }
+      ]
+    }
+  ],
+  "p2": []
+};
+
+// Update reportsMap with sample reports
+export const reportsMap: Record<string, ReportType[]> = {
+  "p1": [
+    {
+      id: "r1",
+      patientId: "p1",
+      title: "Clinical Assessment Report",
+      date: "2024-04-10",
+      type: "clinical",
+      metrics: {
+        attention: 75,
+        memory: 82,
+        executiveFunction: 68,
+        behavioral: 70,
+        impulseControl: 65
+      },
+      notes: "Patient shows improvement in memory tasks",
+      recommendations: [
+        "Continue memory exercises",
+        "Focus on executive function tasks"
+      ],
+      status: "generated",
+      createdDate: "2024-04-10"
+    }
+  ],
+  "p2": []
 };
 
 // Mock patients data

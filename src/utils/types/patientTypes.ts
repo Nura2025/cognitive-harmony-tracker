@@ -118,6 +118,7 @@ export interface PatientMetrics {
   sessionsCompleted: number;
   progress: number;
   clinicalConcerns: string[];
+  [key: string]: string | number | string[] | undefined;
 }
 
 export interface SessionData {
