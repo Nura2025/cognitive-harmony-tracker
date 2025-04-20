@@ -83,10 +83,11 @@ export interface CognitiveDomain {
   executiveFunction: number;
   impulseControl: number;
   behavioral?: number; // For backwards compatibility
+  [key: string]: number | undefined; // Add string indexing to resolve type errors
 }
 
 export interface CognitiveDomainMetrics {
-  [key: string]: number | string;
+  [key: string]: number | string | undefined; // Add string indexing to resolve type errors
   attention: number;
   memory: number;
   executiveFunction: number;
@@ -118,6 +119,7 @@ export interface PatientMetrics {
   sessionsCompleted: number;
   progress: number;
   clinicalConcerns: string[];
+  [key: string]: string | number | string[] | undefined; // Add string indexing to resolve type errors
 }
 
 export interface SessionData {

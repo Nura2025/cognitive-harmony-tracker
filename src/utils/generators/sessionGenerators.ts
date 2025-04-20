@@ -24,10 +24,12 @@ export const generateSessionData = (patients: Patient[], sessionsPerPatient: num
       const activityCount = randomInt(3, 6);
       const activities = Array.from({ length: activityCount }, (_, actIdx) => ({
         id: `ACT${patient.id}-${i}-${actIdx}`,
+        name: randomChoice(activityTypes),
         type: randomChoice(activityTypes),
         score: randomFloat(50, 98),
         duration: randomInt(2, 10) * 60, // in seconds
-        difficulty: randomInt(1, 5)
+        difficulty: randomInt(1, 5),
+        completionStatus: randomChoice(completionStatuses)
       }));
       
       const attention = randomFloat(40, 95);

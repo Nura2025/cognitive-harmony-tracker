@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
@@ -105,8 +106,10 @@ export function useCognitiveProfile(userId: string) {
   return useQuery({
     queryKey: ['cognitiveProfile', userId],
     queryFn: () => fetchCognitiveProfile(userId),
-    onError: (error: Error) => {
-      toast.error(error.message);
+    meta: {
+      onError: (error: Error) => {
+        toast.error(error.message);
+      }
     }
   });
 }
@@ -115,8 +118,10 @@ export function useTimeSeriesData(userId: string, domain: string, interval?: str
   return useQuery({
     queryKey: ['timeSeriesData', userId, domain, interval],
     queryFn: () => fetchTimeSeriesData(userId, domain, interval),
-    onError: (error: Error) => {
-      toast.error(error.message);
+    meta: {
+      onError: (error: Error) => {
+        toast.error(error.message);
+      }
     }
   });
 }
