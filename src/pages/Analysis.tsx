@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
@@ -115,7 +116,8 @@ const Analysis = () => {
     memory: patientMetrics.memory,
     executiveFunction: patientMetrics.executiveFunction,
     impulseControl: patientMetrics.impulseControl || 0,
-    behavioral: patientMetrics.behavioral
+    behavioral: patientMetrics.behavioral,
+    clinicalConcerns: patientMetrics.clinicalConcerns
   };
   
   return (
