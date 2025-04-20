@@ -1,3 +1,4 @@
+
 import { CognitiveDomain, Patient, PatientMetrics, SessionData, ReportType } from './types/patientTypes';
 
 // Define mock data
@@ -15,7 +16,7 @@ export const mockSubtypeData: CognitiveDomain = {
   impulseControl: 43
 };
 
-// Update metricsMap with complete data
+// Complete metrics data
 export const metricsMap: Record<string, PatientMetrics> = {
   "p1": {
     patientId: "p1",
@@ -47,7 +48,7 @@ export const metricsMap: Record<string, PatientMetrics> = {
   }
 };
 
-// Update sessionsMap with sample sessions
+// Sessions data
 export const sessionsMap: Record<string, SessionData[]> = {
   "p1": [
     {
@@ -106,7 +107,7 @@ export const sessionsMap: Record<string, SessionData[]> = {
   "p2": []
 };
 
-// Update reportsMap with sample reports
+// Reports data
 export const reportsMap: Record<string, ReportType[]> = {
   "p1": [
     {
@@ -157,17 +158,6 @@ export const patients: Patient[] = [
     lastAssessment: "2024-04-12"
   }
 ];
-
-// Empty session and report maps for mock data
-export const sessionsMap: Record<string, SessionData[]> = {
-  "p1": [],
-  "p2": []
-};
-
-export const reportsMap: Record<string, ReportType[]> = {
-  "p1": [],
-  "p2": []
-};
 
 // Mock patient data for reports
 export const mockPatientData: Patient = {

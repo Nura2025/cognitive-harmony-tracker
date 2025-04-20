@@ -117,7 +117,7 @@ const Analysis = () => {
     executiveFunction: patientMetrics.executiveFunction,
     impulseControl: patientMetrics.impulseControl || 0,
     behavioral: patientMetrics.behavioral,
-    clinicalConcerns: patientMetrics.clinicalConcerns
+    clinicalConcerns: patientMetrics.clinicalConcerns // Now allowed in CognitiveDomainMetrics
   };
   
   return (

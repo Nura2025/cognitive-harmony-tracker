@@ -1,3 +1,4 @@
+
 export interface CognitiveProfile {
   user_id: string;
   user_name: string;
@@ -91,7 +92,8 @@ export interface CognitiveDomainMetrics {
   executiveFunction: number;
   impulseControl: number;
   behavioral?: number;
-  [key: string]: number | undefined; // Only allow numbers or undefined for index signature
+  clinicalConcerns?: string[]; // Make clinicalConcerns optional and move it here
+  [key: string]: number | string[] | undefined; // Allow string[] for clinicalConcerns
 }
 
 export interface Patient {
