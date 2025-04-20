@@ -14,7 +14,7 @@ import {
 } from '@/services/cognitiveService';
 import { Skeleton } from '@/components/ui/skeleton';
 
-type DomainType = 'attention' | 'memory' | 'executiveFunction' | 'impulseControl';
+type DomainType = 'attention' | 'memory' | 'executive_function' | 'impulse_control';
 
 const CognitiveAnalysis = () => {
   const { t, language } = useLanguage();
@@ -32,6 +32,13 @@ const CognitiveAnalysis = () => {
   
   const handlePeriodChange = (period: string) => {
     setSelectedPeriod(period);
+  };
+  
+  // Helper function to convert snake_case domain to camelCase for UI
+  const formatDomainForUI = (domain: DomainType): string => {
+    if (domain === 'executive_function') return 'executiveFunction';
+    if (domain === 'impulse_control') return 'impulseControl';
+    return domain;
   };
   
   const handleDomainCardClick = (domain: DomainType) => {
@@ -61,16 +68,21 @@ const CognitiveAnalysis = () => {
           />
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {Object.keys(profile.domain_scores).map((domain) => (
-              <DomainScoreCard
-                key={domain}
-                domain={domain as DomainType}
-                score={profile.domain_scores[domain]}
-                percentile={profile.percentiles[domain]}
-                classification={profile.classifications[domain]}
-                onClick={() => handleDomainCardClick(domain as DomainType)}
-              />
-            ))}
+            {Object.entries(profile.domain_scores).map(([domain, score]) => {
+              // Convert snake_case domain names to camelCase for UI display
+              const uiDomain = formatDomainForUI(domain as DomainType);
+              
+              return (
+                <DomainScoreCard
+                  key={domain}
+                  domain={uiDomain as any}
+                  score={score}
+                  percentile={profile.percentiles[domain]}
+                  classification={profile.classifications[domain]}
+                  onClick={() => handleDomainCardClick(domain as DomainType)}
+                />
+              );
+            })}
           </div>
         </div>
       )}
@@ -80,8 +92,8 @@ const CognitiveAnalysis = () => {
         <TabsList className="grid grid-cols-4 mb-6">
           <TabsTrigger value="attention">{t('attention')}</TabsTrigger>
           <TabsTrigger value="memory">{t('memory')}</TabsTrigger>
-          <TabsTrigger value="executiveFunction">{t('executiveFunction')}</TabsTrigger>
-          <TabsTrigger value="impulseControl">{t('impulseControl')}</TabsTrigger>
+          <TabsTrigger value="executive_function">{t('executiveFunction')}</TabsTrigger>
+          <TabsTrigger value="impulse_control">{t('impulseControl')}</TabsTrigger>
         </TabsList>
         
         {Object.keys(profile?.domain_scores || {}).map((domain) => (
@@ -90,18 +102,26 @@ const CognitiveAnalysis = () => {
               {timeSeriesData && (
                 <DomainProgressChart
                   data={timeSeriesData}
-                  domain={domain as DomainType}
+                  domain={formatDomainForUI(domain as DomainType) as any}
                   onPeriodChange={handlePeriodChange}
                 />
               )}
               
-              {componentData && ['memory', 'impulseControl'].includes(domain) && (
+              {componentData && ['memory', 'impulse_control'].includes(domain) && (
                 <ComponentBreakdown
-                  data={Object.entries(componentData.components).map(([name, score]) => ({
-                    name,
-                    score: typeof score === 'number' ? score : (score as any).score
-                  }))}
-                  domain={domain as 'memory' | 'impulseControl'}
+                  data={domain === 'memory' 
+                    ? Object.entries(componentData.components).flatMap(([compType, data]) => 
+                        Object.entries((data as any).components || {}).map(([name, score]) => ({
+                          name,
+                          score: typeof score === 'number' ? score : 0
+                        }))
+                      )
+                    : Object.entries(componentData.components).map(([name, score]) => ({
+                        name,
+                        score: typeof score === 'number' ? score : 0
+                      }))
+                  }
+                  domain={domain === 'memory' ? 'memory' : 'impulseControl'}
                 />
               )}
             </div>

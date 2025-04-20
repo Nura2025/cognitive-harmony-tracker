@@ -12,17 +12,21 @@ import {
 } from 'recharts';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-interface CognitiveDomain {
-  attention: number;
-  memory: number;
-  executiveFunction: number;
-  impulseControl: number;
-}
-
 interface CognitiveDomainChartProps {
-  userProfile: CognitiveDomain;
-  normativeData?: CognitiveDomain;
-  adhdComparison?: CognitiveDomain;
+  userProfile: Record<string, number>;
+  normativeData?: {
+    mean?: number;
+    standard_deviation?: number;
+    z_score?: number;
+    percentile?: number;
+    reference?: string;
+    sample_size?: number;
+  };
+  adhdComparison?: {
+    z_score?: number;
+    percentile?: number;
+    reference?: string;
+  };
   title?: string;
   description?: string;
   className?: string;
@@ -40,10 +44,10 @@ export const CognitiveDomainChart: React.FC<CognitiveDomainChartProps> = ({
   
   // Transform data for the radar chart
   const chartData = [
-    { domain: t('attention'), user: userProfile.attention, normative: normativeData?.attention, adhd: adhdComparison?.attention },
-    { domain: t('memory'), user: userProfile.memory, normative: normativeData?.memory, adhd: adhdComparison?.memory },
-    { domain: t('executiveFunction'), user: userProfile.executiveFunction, normative: normativeData?.executiveFunction, adhd: adhdComparison?.executiveFunction },
-    { domain: t('impulseControl'), user: userProfile.impulseControl, normative: normativeData?.impulseControl, adhd: adhdComparison?.impulseControl }
+    { domain: t('attention'), user: userProfile.attention, normative: normativeData?.mean, adhd: adhdComparison?.z_score },
+    { domain: t('memory'), user: userProfile.memory, normative: normativeData?.mean, adhd: adhdComparison?.z_score },
+    { domain: t('executiveFunction'), user: userProfile.executive_function || userProfile.executiveFunction, normative: normativeData?.mean, adhd: adhdComparison?.z_score },
+    { domain: t('impulseControl'), user: userProfile.impulse_control || userProfile.impulseControl, normative: normativeData?.mean, adhd: adhdComparison?.z_score }
   ];
 
   return (

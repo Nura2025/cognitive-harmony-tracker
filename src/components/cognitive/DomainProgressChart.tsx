@@ -13,11 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
-
-interface TimeSeriesDataPoint {
-  date: string;
-  value: number;
-}
+import { TimeSeriesDataPoint } from '@/services/cognitiveService';
 
 interface DomainProgressChartProps {
   data: TimeSeriesDataPoint[];
@@ -109,7 +105,7 @@ export const DomainProgressChart: React.FC<DomainProgressChartProps> = ({
               />
               <Line
                 type="monotone"
-                dataKey="value"
+                dataKey="score"
                 stroke={domainColor}
                 strokeWidth={2}
                 dot={{ r: 4, strokeWidth: 2, fill: 'hsl(var(--background))' }}
