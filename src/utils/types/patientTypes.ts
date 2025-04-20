@@ -106,6 +106,7 @@ export interface Patient {
 }
 
 export interface PatientMetrics {
+  [key: string]: number | string[] | undefined;
   patientId: string;
   date: string;
   attention: number;
