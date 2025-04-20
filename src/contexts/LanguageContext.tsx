@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type Language = 'en' | 'ar';
@@ -39,6 +40,7 @@ export const LanguageProvider: React.FC<{
 
   const translations = {
     en: {
+      // Navigation and layout
       dashboard: 'Dashboard',
       patients: 'Patients',
       analysis: 'Analysis',
@@ -56,6 +58,7 @@ export const LanguageProvider: React.FC<{
       support: 'Support',
       logout: 'Log out',
       
+      // Report section
       clinicalReport: 'Clinical Assessment Report',
       downloadPdf: 'Download PDF Report',
       executiveSummary: 'Executive Summary',
@@ -66,12 +69,16 @@ export const LanguageProvider: React.FC<{
       firstSession: 'First Session',
       latestSession: 'Latest Session',
       change: '% Change',
+      
+      // Cognitive domains
       attention: 'Attention',
       memory: 'Memory',
       processingSpeed: 'Processing Speed',
       executiveFunction: 'Executive Function',
       overall: 'Overall',
+      impulseControl: 'Impulse Control',
       
+      // Domain explanations
       attentionExplanation: 'Measures the ability to focus on specific stimuli while filtering out distractions',
       memoryExplanation: 'Evaluates the capacity to store, retain, and recall information',
       processingSpeedExplanation: 'Assesses how quickly cognitive tasks can be performed',
@@ -82,6 +89,7 @@ export const LanguageProvider: React.FC<{
       inattentionExplanation: 'Number of omission errors due to failure to respond to target stimuli',
       crossGameExplanation: 'Performance comparison across different cognitive exercises',
       
+      // Patients section
       managePatientProfiles: 'Manage patient profiles and assessment data',
       addPatient: 'Add Patient',
       searchPatientsByName: 'Search patients by name...',
@@ -101,12 +109,6 @@ export const LanguageProvider: React.FC<{
       inattentive: 'Inattentive',
       hyperactive: 'Hyperactive-Impulsive',
       combined: 'Combined',
-      
-      // Cognitive domains
-      attention: 'Attention',
-      memory: 'Memory',
-      executiveFunction: 'Executive Function',
-      impulseControl: 'Impulse Control',
       
       // Component breakdowns
       workingMemory: 'Working Memory',
@@ -134,7 +136,6 @@ export const LanguageProvider: React.FC<{
       cognitiveAnalysis: 'Cognitive Analysis',
       cognitiveAnalysisDescription: 'Comprehensive analysis of cognitive performance across domains',
       rawScore: 'Raw Score',
-      percentile: 'Percentile',
       score: 'Score',
       
       // Domain progress
@@ -153,6 +154,7 @@ export const LanguageProvider: React.FC<{
       adhdComparison: 'ADHD Comparison'
     },
     ar: {
+      // Navigation and layout
       dashboard: 'لوحة المعلومات',
       patients: 'المرضى',
       analysis: 'التحليل',
@@ -170,6 +172,7 @@ export const LanguageProvider: React.FC<{
       support: 'الدعم الفني',
       logout: 'تسجيل الخروج',
       
+      // Report section
       clinicalReport: 'تقرير التقييم السريري',
       downloadPdf: 'تحميل التقرير بصيغة PDF',
       executiveSummary: 'الملخص التنفيذي',
@@ -180,12 +183,16 @@ export const LanguageProvider: React.FC<{
       firstSession: 'الجلسة الأولى',
       latestSession: 'الجلسة الأخيرة',
       change: 'نسبة التغيير %',
+      
+      // Cognitive domains
       attention: 'الانتباه',
       memory: 'الذاكرة',
       processingSpeed: 'سرعة المعالجة',
       executiveFunction: 'الوظائف التنفيذية',
       overall: 'التقييم العام',
+      impulseControl: 'ضبط الاندفاع',
       
+      // Domain explanations
       attentionExplanation: 'يقيس القدرة على التركيز على المثيرات المحددة مع تصفية المشتتات',
       memoryExplanation: 'تقييم القدرة على تخزين واسترجاع المعلومات والاحتفاظ بها',
       processingSpeedExplanation: 'تقييم مدى سرعة إنجاز المهام المعرفية',
@@ -196,6 +203,7 @@ export const LanguageProvider: React.FC<{
       inattentionExplanation: 'عدد أخطاء الإغفال بسبب الفشل في الاستجابة للمثيرات المستهدفة',
       crossGameExplanation: 'مقارنة الأداء عبر التمارين المعرفية المختلفة',
       
+      // Patients section
       managePatientProfiles: 'إدارة ملفات المرضى وبيانات التقييم',
       addPatient: 'إضافة مريض',
       searchPatientsByName: 'البحث عن المرضى بالاسم...',
@@ -215,12 +223,6 @@ export const LanguageProvider: React.FC<{
       inattentive: 'نقص الانتباه',
       hyperactive: 'فرط الحركة والاندفاع',
       combined: 'مشترك',
-      
-      // Cognitive domains
-      attention: 'الانتباه',
-      memory: 'الذاكرة',
-      executiveFunction: 'الوظيفة التنفيذية',
-      impulseControl: 'ضبط الاندفاع',
       
       // Component breakdowns
       workingMemory: 'الذاكرة العاملة',
@@ -248,7 +250,6 @@ export const LanguageProvider: React.FC<{
       cognitiveAnalysis: 'التحليل المعرفي',
       cognitiveAnalysisDescription: 'تحليل شامل للأداء المعرفي عبر المجالات',
       rawScore: 'الدرجة الخام',
-      percentile: 'النسبة المئوية',
       score: 'الدرجة',
       
       // Domain progress
