@@ -5,10 +5,9 @@ import { useCognitiveProfile } from '@/services/cognitiveService';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const PatientDetail = () => {
-  const params = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string }>();
   const userId = "883faae2-f14b-40de-be5a-ad4c3ec673bc";
   
-  // Fetch patient data
   const { data: profile, isLoading } = useCognitiveProfile(userId);
   
   if (isLoading) {
@@ -39,15 +38,25 @@ const PatientDetail = () => {
       <div>
         <h1 className="text-3xl font-bold mb-2">{profile.user_name}</h1>
         <p className="text-muted-foreground">
-          Age: {profile.age} • Type: {profile.adhd_subtype}
+          Age: {profile.age} • Type: {profile.adhd_subtype || 'Not specified'}
         </p>
       </div>
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {Object.entries(profile.domain_scores).map(([domain, score]) => (
           <div key={domain} className="p-4 border rounded-lg">
-            <h3 className="font-medium mb-2">{domain}</h3>
-            <div className="text-2xl font-bold">{score}%</div>
+            <h3 className="font-medium mb-2">{domain.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</h3>
+            <div className="text-2xl font-bold">{Math.round(score)}%</div>
+            {profile.percentiles[domain] !== undefined && (
+              <div className="text-sm text-muted-foreground mt-1">
+                Percentile: {(profile.percentiles[domain] * 100).toFixed(1)}%
+              </div>
+            )}
+            {profile.classifications[domain] && (
+              <div className="text-sm mt-1">
+                Status: {profile.classifications[domain]}
+              </div>
+            )}
           </div>
         ))}
       </div>

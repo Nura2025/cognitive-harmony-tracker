@@ -1,108 +1,81 @@
 
-import { format, formatDistance, parseISO } from 'date-fns';
-import { SessionData } from './types/patientTypes';
-
-// Format a date string to a human-readable format
-export const formatDate = (dateString: string): string => {
-  try {
-    return format(parseISO(dateString), 'MMM d, yyyy');
-  } catch (error) {
-    console.error('Invalid date format:', dateString);
-    return 'Invalid date';
-  }
+// Domain styling utilities
+export const getDomainColor = (domain: string): string => {
+  const colors: Record<string, string> = {
+    attention: 'text-blue-600',
+    memory: 'text-green-600',
+    executiveFunction: 'text-amber-600',
+    impulseControl: 'text-purple-600',
+    behavioral: 'text-rose-600'
+  };
+  return colors[domain] || 'text-gray-600';
 };
 
-// Format a date string to show how long ago
-export const formatLastSession = (dateString: string): string => {
-  try {
-    return formatDistance(parseISO(dateString), new Date(), { addSuffix: true });
-  } catch (error) {
-    console.error('Invalid date format:', dateString);
-    return 'Invalid date';
-  }
+export const getDomainBgColor = (domain: string): string => {
+  const colors: Record<string, string> = {
+    attention: 'bg-blue-50',
+    memory: 'bg-green-50',
+    executiveFunction: 'bg-amber-50',
+    impulseControl: 'bg-purple-50',
+    behavioral: 'bg-rose-50'
+  };
+  return colors[domain] || 'bg-gray-50';
 };
 
-// Format a duration in seconds to a human-readable format
-export const formatDuration = (seconds: number): string => {
-  if (!seconds || isNaN(seconds)) return '0m';
+export const getDomainName = (domain: string): string => {
+  const names: Record<string, string> = {
+    attention: 'Attention',
+    memory: 'Memory',
+    executiveFunction: 'Executive Function',
+    impulseControl: 'Impulse Control',
+    behavioral: 'Behavioral'
+  };
+  return names[domain] || domain;
+};
+
+export const getScoreStatus = (score: number): string => {
+  if (score >= 90) return 'Excellent';
+  if (score >= 80) return 'Very Good';
+  if (score >= 70) return 'Good';
+  if (score >= 60) return 'Fair';
+  if (score >= 50) return 'Below Average';
+  return 'Needs Improvement';
+};
+
+export const formatDuration = (minutes: number): string => {
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  return remainingMinutes ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
+};
+
+export const formatLastSession = (date: string): string => {
+  const sessionDate = new Date(date);
+  const now = new Date();
+  const diffTime = Math.abs(now.getTime() - sessionDate.getTime());
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
   
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = Math.floor(seconds % 60);
-  
-  if (minutes < 1) {
-    return `${remainingSeconds}s`;
-  } else if (remainingSeconds === 0) {
-    return `${minutes}m`;
-  } else {
-    return `${minutes}m ${remainingSeconds}s`;
-  }
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+  return sessionDate.toLocaleDateString();
 };
 
-// Get CSS class based on score
 export const getScoreColorClass = (score: number): string => {
-  if (score < 40) return 'text-red-500';
-  if (score < 60) return 'text-amber-500';
-  if (score < 80) return 'text-emerald-500';
-  return 'text-blue-500';
+  if (score >= 90) return 'text-emerald-600';
+  if (score >= 70) return 'text-blue-600';
+  if (score >= 50) return 'text-amber-600';
+  return 'text-red-600';
 };
 
-// Get background CSS class based on score
-export const getScoreBgClass = (score: number): string => {
-  if (score < 40) return 'bg-red-100 text-red-800';
-  if (score < 60) return 'bg-amber-100 text-amber-800';
-  if (score < 80) return 'bg-emerald-100 text-emerald-800';
-  return 'bg-blue-100 text-blue-800';
-};
-
-// Format percentile with + symbol if above threshold
-export const formatPercentile = (percentile: number | undefined): string => {
-  if (percentile === undefined || isNaN(Number(percentile))) return '0th';
-  return `${percentile}${getPercentileSuffix(percentile)}`;
-};
-
-// Get the suffix for a percentile number (1st, 2nd, 3rd, etc.)
-export const getPercentileSuffix = (num: number): string => {
-  if (num === 11 || num === 12 || num === 13) return 'th';
-  
-  const lastDigit = num % 10;
-  switch (lastDigit) {
-    case 1:
-      return 'st';
-    case 2:
-      return 'nd';
-    case 3:
-      return 'rd';
-    default:
-      return 'th';
-  }
-};
-
-// Process sessions for timeline display
-export const processSessionsForTimeline = (sessions: SessionData[]) => {
-  return sessions.map(session => {
-    // Convert session data to format needed for timeline
-    return {
-      date: format(parseISO(session.startTime), 'yyyy-MM-dd'),
-      score: session.overallScore,
-      duration: session.duration || 0
-    };
-  }).sort((a, b) => {
-    return new Date(a.date).getTime() - new Date(b.date).getTime();
-  });
-};
-
-// Convert a string key to a human-readable label
-export const formatKeyToLabel = (key: string): string => {
-  // Handle special cases
-  switch (key) {
-    case 'executiveFunction':
-      return 'Executive Function';
-    case 'impulseControl':
-      return 'Impulse Control';
-    default:
-      // Convert camelCase to space-separated words
-      return key
-        .replace(/([A-Z])/g, ' $1')
-        .replace(/^./, str => str.toUpperCase());
-  }
+// Timeline processing
+export const processSessionsForTimeline = (sessions: any[]): any[] => {
+  return sessions.map(session => ({
+    id: session.id,
+    date: new Date(session.startTime),
+    title: 'Cognitive Assessment',
+    description: `Overall Score: ${session.overallScore}%`,
+    duration: session.duration || 30
+  }));
 };

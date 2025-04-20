@@ -1,8 +1,7 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
 export interface CognitiveProfile {
   user_id: string;
@@ -107,9 +106,7 @@ export function useCognitiveProfile(userId: string) {
     queryKey: ['cognitiveProfile', userId],
     queryFn: () => fetchCognitiveProfile(userId),
     meta: {
-      onError: (error: Error) => {
-        toast.error(error.message);
-      }
+      errorMessage: 'Failed to fetch cognitive profile'
     }
   });
 }
