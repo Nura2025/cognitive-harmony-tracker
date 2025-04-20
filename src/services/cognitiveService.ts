@@ -65,7 +65,7 @@ export interface NormativeComparison {
 }
 
 async function fetchCognitiveProfile(userId: string): Promise<CognitiveProfile> {
-  const response = await fetch(`${API_BASE_URL}/cognitive/profile/${userId}`);
+  const response = await fetch(`${API_BASE_URL}/cognitive/profile/883faae2-f14b-40de-be5a-ad4c3ec673bc`);
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: 'Failed to fetch cognitive profile' }));
     throw new Error(error.message);
@@ -75,7 +75,7 @@ async function fetchCognitiveProfile(userId: string): Promise<CognitiveProfile> 
 
 async function fetchTimeSeriesData(userId: string, domain: string, interval?: string): Promise<TimeSeriesDataPoint[]> {
   const params = new URLSearchParams(interval ? { interval } : {});
-  const response = await fetch(`${API_BASE_URL}/cognitive/timeseries/${userId}?domain=${domain}&${params}`);
+  const response = await fetch(`${API_BASE_URL}/cognitive/timeseries/883faae2-f14b-40de-be5a-ad4c3ec673bc?domain=${domain}&${params}`);
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: 'Failed to fetch time series data' }));
     throw new Error(error.message);
@@ -84,7 +84,7 @@ async function fetchTimeSeriesData(userId: string, domain: string, interval?: st
 }
 
 async function fetchProgressComparison(userId: string, domain: string, period: string): Promise<ProgressComparison> {
-  const response = await fetch(`${API_BASE_URL}/cognitive/progress/${userId}?domain=${domain}&period=${period}`);
+  const response = await fetch(`${API_BASE_URL}/cognitive/progress/883faae2-f14b-40de-be5a-ad4c3ec673bc?domain=${domain}&period=${period}`);
   if (!response.ok) throw new Error('Failed to fetch progress comparison');
   return response.json();
 }
@@ -96,7 +96,7 @@ async function fetchComponentDetails(sessionId: string, domain: string): Promise
 }
 
 async function fetchNormativeComparison(userId: string, domain: string): Promise<NormativeComparison> {
-  const response = await fetch(`${API_BASE_URL}/cognitive/normative-comparison/${userId}?domain=${domain}`);
+  const response = await fetch(`${API_BASE_URL}/cognitive/normative-comparison/883faae2-f14b-40de-be5a-ad4c3ec673bc?domain=${domain}`);
   if (!response.ok) throw new Error('Failed to fetch normative comparison');
   return response.json();
 }
