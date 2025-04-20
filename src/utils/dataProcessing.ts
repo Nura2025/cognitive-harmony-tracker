@@ -1,4 +1,3 @@
-
 // Domain styling utilities
 export const getDomainColor = (domain: string): string => {
   const colors: Record<string, string> = {
@@ -67,6 +66,25 @@ export const getScoreColorClass = (score: number): string => {
   if (score >= 70) return 'text-blue-600';
   if (score >= 50) return 'text-amber-600';
   return 'text-red-600';
+};
+
+export const formatPercentile = (value: number): string => {
+  if (typeof value !== 'number' || isNaN(value)) return 'N/A';
+  return `${Math.round(value)}`;
+};
+
+export const getScoreBgColor = (score: number): string => {
+  if (score >= 90) return 'bg-emerald-100';
+  if (score >= 70) return 'bg-blue-100';
+  if (score >= 50) return 'bg-amber-100';
+  return 'bg-red-100';
+};
+
+export const getScoreBgClass = (score: number): string => {
+  if (score >= 90) return 'bg-emerald-500/10';
+  if (score >= 70) return 'bg-blue-500/10';
+  if (score >= 50) return 'bg-amber-500/10';
+  return 'bg-red-500/10';
 };
 
 // Timeline processing

@@ -22,5 +22,17 @@ export const metricsMap: Record<string, PatientMetrics> = {};
 export const sessionsMap: Record<string, SessionData[]> = {};
 export const reportsMap: Record<string, ReportType[]> = {};
 
-// Type definitions for consistent usage
-export type { CognitiveDomain };
+// Export all types for use in other files
+export type { CognitiveDomain, Patient, PatientMetrics, SessionData, ReportType };
+
+// Mock patient data for reports
+export const mockPatientData: Patient = {
+  id: "p1",
+  name: "John Doe",
+  age: 25,
+  gender: "male",
+  diagnosisDate: "2024-01-01",
+  adhdSubtype: "Combined",
+  assessmentCount: 5,
+  lastAssessment: "2024-04-01"
+};

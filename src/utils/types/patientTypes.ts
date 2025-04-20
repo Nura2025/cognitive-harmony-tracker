@@ -1,4 +1,3 @@
-
 export interface CognitiveProfile {
   user_id: string;
   user_name: string;
@@ -87,12 +86,12 @@ export interface CognitiveDomain {
 }
 
 export interface CognitiveDomainMetrics {
-  [key: string]: number | string | undefined; // Add string indexing to resolve type errors
+  [key: string]: number;
   attention: number;
   memory: number;
   executiveFunction: number;
   impulseControl: number;
-  behavioral?: number; // For backwards compatibility
+  behavioral?: number;
 }
 
 export interface Patient {
@@ -119,7 +118,6 @@ export interface PatientMetrics {
   sessionsCompleted: number;
   progress: number;
   clinicalConcerns: string[];
-  [key: string]: string | number | string[] | undefined; // Add string indexing to resolve type errors
 }
 
 export interface SessionData {
