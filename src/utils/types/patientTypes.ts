@@ -1,74 +1,76 @@
 
-// Type definitions for patient and assessment data
-
-export interface Patient {
-  id: string;
-  name: string;
+export interface CognitiveProfile {
+  user_id: string;
+  user_name: string;
   age: number;
-  gender: 'Male' | 'Female' | 'Other';
-  diagnosisDate: string;
-  adhdSubtype: 'Inattentive' | 'Hyperactive-Impulsive' | 'Combined';
-  assessmentCount: number;
-  lastAssessment: string;
-}
-
-export interface CognitiveDomain {
-  attention: number;
-  memory: number;
-  executiveFunction: number;
-  behavioral: number;
-}
-
-export interface PatientMetrics extends CognitiveDomain {
-  patientId: string;
-  date: string;
-  percentile: number;
-  sessionsDuration: number;
-  sessionsCompleted: number;
-  progress: number;
-  clinicalConcerns: string[];
-}
-
-export interface SessionData {
-  id: string;
-  patientId: string;
-  startTime: string;
-  endTime: string;
-  duration: number;
-  environment: 'Home' | 'School' | 'Clinic';
-  completionStatus: 'Completed' | 'Abandoned' | 'Interrupted';
-  overallScore: number;
-  device: string;
-  activities: Array<{
-    id: string;
-    type: string;
-    score: number;
-    duration: number;
-    difficulty: number;
-  }>;
-  domainScores: CognitiveDomain;
-}
-
-export interface ReportType {
-  id: string;
-  patientId: string;
-  title: string;
-  type: 'clinical' | 'school' | 'progress' | 'detailed';
-  createdDate: string;
-  sections: {
-    overview: boolean;
-    domainAnalysis: boolean;
-    trends: boolean;
-    recommendations: boolean;
-    rawData: boolean;
+  age_group: string;
+  adhd_subtype: string;
+  session_id: string;
+  session_date: string;
+  domain_scores: {
+    attention: number;
+    memory: number;
+    impulse_control: number;
+    executive_function: number;
   };
-  status: 'draft' | 'generated' | 'shared';
+  percentiles: {
+    attention: number;
+    memory: number;
+    impulse_control: number;
+    executive_function: number;
+  };
+  classifications: {
+    attention: string;
+    memory: string;
+    impulse_control: string;
+    executive_function: string;
+  };
+  profile_pattern: string;
 }
 
-// Define relationships between entities
-export interface PatientData {
-  patient: Patient;
-  metrics: PatientMetrics;
-  sessions: SessionData[];
-  reports: ReportType[];
+export interface TimeSeriesDataPoint {
+  date: string;
+  score: number;
+}
+
+export interface ProgressComparison {
+  user_id: string;
+  domain: string;
+  period: string;
+  initial_score: number;
+  current_score: number;
+  initial_date: string;
+  current_date: string;
+  absolute_change: number;
+  percentage_change: number;
+}
+
+export interface ComponentDetails {
+  session_id: string;
+  domain: string;
+  overall_score: number;
+  percentile: number;
+  classification: string;
+  components: Record<string, any>;
+  data_completeness: number;
+}
+
+export interface NormativeComparison {
+  user_id: string;
+  domain: string;
+  age_group: string;
+  raw_score: number;
+  normative_comparison: {
+    mean: number;
+    standard_deviation: number;
+    z_score: number;
+    percentile: number;
+    reference: string;
+    sample_size: number;
+  };
+  adhd_comparison: {
+    z_score: number;
+    percentile: number;
+    reference: string;
+  };
 }

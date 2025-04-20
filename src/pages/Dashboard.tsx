@@ -4,46 +4,49 @@ import { useNavigate } from 'react-router-dom';
 import { Brain, Clock, LineChart, Users } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  patients, 
-  patientMetrics, 
-  metricsMap, 
-  sessionData, 
-  generateTrendData
-} from '@/utils/mockData';
 import { PatientCard } from '@/components/dashboard/PatientCard';
 import { StatusCard } from '@/components/dashboard/StatusCard';
 import { DomainChart } from '@/components/dashboard/DomainChart';
 import { SessionTimeline } from '@/components/dashboard/SessionTimeline';
+import { 
+  useCognitiveProfile, 
+  useTimeSeriesData 
+} from '@/services/cognitiveService';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [selectedPatients, setSelectedPatients] = useState(patients.slice(0, 4));
+  // For demo purposes, using a fixed user ID - in a real app this would come from auth
+  const userId = "example-user-id";
   
-  // Calculate total metrics across all patients
-  const totalPatients = patients.length;
-  const totalSessions = sessionData.length;
-  const averagePercentile = Math.round(
-    patientMetrics.reduce((sum, metric) => sum + metric.percentile, 0) / patientMetrics.length
-  );
-  const totalMinutes = patientMetrics.reduce((sum, metric) => sum + metric.sessionsDuration, 0);
-  
-  // Generate domain trends for the dashboard chart
-  const domainTrendData = {
-    attention: Array(10).fill(0).map((_, i) => 50 + Math.random() * 30),
-    memory: Array(10).fill(0).map((_, i) => 55 + Math.random() * 25),
-    executiveFunction: Array(10).fill(0).map((_, i) => 45 + Math.random() * 35),
-    behavioral: Array(10).fill(0).map((_, i) => 60 + Math.random() * 20),
-  };
-  
-  const handlePatientClick = (patientId: string) => {
-    navigate(`/analysis?patient=${patientId}`);
-  };
+  // Fetch cognitive profile data
+  const { data: profile, isLoading: profileLoading } = useCognitiveProfile(userId);
+  const { data: timeSeriesData } = useTimeSeriesData(userId, 'attention');
   
   const handleViewAllPatients = () => {
     navigate('/patients');
   };
   
+  // Format domain data for the chart
+  const domainTrendData = profile?.domain_scores ? {
+    attention: [profile.domain_scores.attention],
+    memory: [profile.domain_scores.memory],
+    executiveFunction: [profile.domain_scores.executive_function],
+    impulseControl: [profile.domain_scores.impulse_control]
+  } : {
+    attention: [],
+    memory: [],
+    executiveFunction: [],
+    impulseControl: []
+  };
+  
+  if (profileLoading) {
+    return (
+      <div className="space-y-8">
+        <div className="h-[400px] animate-pulse bg-muted rounded-lg" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
@@ -53,55 +56,42 @@ const Dashboard = () => {
         </p>
       </div>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatusCard 
-          title="Total Patients"
-          value={totalPatients}
-          icon={<Users className="h-5 w-5" />}
-        />
-        <StatusCard 
-          title="Average Percentile"
-          value={averagePercentile}
-          isPercentile={true}
-          change={{ value: 12, isImprovement: true }}
-          icon={<Brain className="h-5 w-5" />}
-        />
-        <StatusCard 
-          title="Session Count"
-          value={totalSessions}
-          change={{ value: 8, isImprovement: true }}
-          icon={<LineChart className="h-5 w-5" />}
-        />
-        <StatusCard 
-          title="Total Assessment Time"
-          value={`${totalMinutes} mins`}
-          icon={<Clock className="h-5 w-5" />}
-        />
-      </div>
+      {profile && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <StatusCard 
+            title="Overall Score"
+            value={Math.round(
+              Object.values(profile.domain_scores).reduce((a, b) => a + b, 0) / 
+              Object.values(profile.domain_scores).length
+            )}
+            isPercentile={true}
+            icon={<Brain className="h-5 w-5" />}
+          />
+          <StatusCard 
+            title="Average Percentile"
+            value={Math.round(
+              Object.values(profile.percentiles).reduce((a, b) => a + b, 0) / 
+              Object.values(profile.percentiles).length
+            )}
+            isPercentile={true}
+            icon={<LineChart className="h-5 w-5" />}
+          />
+          <StatusCard 
+            title="Assessment Date"
+            value={new Date(profile.session_date).toLocaleDateString()}
+            icon={<Clock className="h-5 w-5" />}
+          />
+          <StatusCard 
+            title="Age Group"
+            value={profile.age_group}
+            icon={<Users className="h-5 w-5" />}
+          />
+        </div>
+      )}
       
       <div className="grid gap-6 md:grid-cols-2">
         <DomainChart domainData={domainTrendData} />
-        <SessionTimeline sessions={sessionData.slice(0, 10)} />
-      </div>
-      
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Recent Patients</h2>
-          <Button variant="outline" size="sm" onClick={handleViewAllPatients}>
-            View all patients
-          </Button>
-        </div>
-        
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {selectedPatients.map(patient => (
-            <PatientCard 
-              key={patient.id} 
-              patient={patient} 
-              metrics={metricsMap[patient.id]}
-              onClick={handlePatientClick}
-            />
-          ))}
-        </div>
+        {timeSeriesData && <SessionTimeline sessions={timeSeriesData} />}
       </div>
     </div>
   );
