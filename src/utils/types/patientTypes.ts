@@ -1,3 +1,4 @@
+
 export interface CognitiveProfile {
   user_id: string;
   user_name: string;
@@ -86,7 +87,7 @@ export interface CognitiveDomain {
 }
 
 export interface CognitiveDomainMetrics {
-  [key: string]: number;
+  [key: string]: number | string | string[] | undefined;
   attention: number;
   memory: number;
   executiveFunction: number;

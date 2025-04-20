@@ -29,7 +29,7 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = ({
   const totalSessions = sessions.length;
   const totalDuration = 0; // We don't have duration in TimeSeriesDataPoint
   const averageScore = Math.round(
-    sessions.reduce((sum, session) => sum + session.score, 0) / sessions.length
+    sessions.reduce((sum, session) => sum + session.score, 0) / sessions.length || 0
   );
   
   return (
@@ -65,8 +65,12 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = ({
                 axisLine={false} 
                 tickLine={false}
                 tickFormatter={(date) => {
+                  if (typeof date !== 'string') {
+                    return '';  // Return empty string if date is not a string
+                  }
+                  
                   const parts = date.split('-');
-                  return `${parts[1]}/${parts[2]}`;
+                  return parts.length >= 3 ? `${parts[1]}/${parts[2]}` : date;
                 }}
                 stroke="hsl(var(--muted-foreground))"
                 tickMargin={10}
