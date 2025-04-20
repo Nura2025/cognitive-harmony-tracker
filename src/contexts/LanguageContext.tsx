@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 type Language = 'en' | 'ar';
@@ -61,7 +62,6 @@ const translations: Record<Language, Record<string, string>> = {
     age: 'Age',
     adhdSubtype: 'ADHD Subtype',
     lastSession: 'Last Session',
-    sessions: 'Sessions',
     percentile: 'Percentile',
     actions: 'Actions',
     viewAnalysis: 'View analysis',
@@ -126,7 +126,6 @@ const translations: Record<Language, Record<string, string>> = {
     age: 'العمر',
     adhdSubtype: 'نوع اضطراب فرط الحركة ونقص الانتباه',
     lastSession: 'آخر جلسة',
-    sessions: 'الجلسات',
     percentile: 'النسبة المئوية',
     actions: 'الإجراءات',
     viewAnalysis: 'عرض التحليل',
@@ -187,3 +186,4 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     </LanguageContext.Provider>
   );
 };
+

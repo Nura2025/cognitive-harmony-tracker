@@ -57,7 +57,7 @@ export const PatientFilters: React.FC<PatientFiltersProps> = ({
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align={language === 'ar' ? 'start' : 'end'} className="w-56" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+        <DropdownMenuContent align={language === 'ar' ? 'start' : 'end'} className="w-56">
           <DropdownMenuLabel>{t('adhdSubtypes')}</DropdownMenuLabel>
           {adhdSubtypes.map(subtype => (
             <DropdownMenuCheckboxItem
@@ -99,3 +99,4 @@ export const PatientFilters: React.FC<PatientFiltersProps> = ({
     </div>
   );
 };
+
