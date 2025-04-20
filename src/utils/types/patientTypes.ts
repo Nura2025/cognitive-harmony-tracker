@@ -1,5 +1,3 @@
-
-
 export interface CognitiveProfile {
   user_id: string;
   user_name: string;
@@ -93,8 +91,7 @@ export interface CognitiveDomainMetrics {
   executiveFunction: number;
   impulseControl: number;
   behavioral?: number;
-  clinicalConcerns?: string[];
-  [key: string]: number | string | string[] | undefined; // Keep the flexible index signature
+  [key: string]: number | undefined; // Only allow numbers or undefined for index signature
 }
 
 export interface Patient {
@@ -115,13 +112,12 @@ export interface PatientMetrics {
   memory: number;
   executiveFunction: number;
   behavioral: number;
-  impulseControl?: number;
+  impulseControl: number;
   percentile: number;
   sessionsDuration: number;
   sessionsCompleted: number;
   progress: number;
-  clinicalConcerns?: string[];
-  [key: string]: number | string | string[] | undefined; // Add string indexing to match CognitiveDomainMetrics
+  clinicalConcerns: string[];
 }
 
 export interface SessionData {
@@ -167,4 +163,3 @@ export interface ReportType {
   status: string;
   createdDate: string;
 }
-

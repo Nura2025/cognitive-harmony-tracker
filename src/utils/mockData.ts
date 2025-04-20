@@ -1,4 +1,3 @@
-
 import { CognitiveDomain, Patient, PatientMetrics, SessionData, ReportType } from './types/patientTypes';
 
 // Define mock data
@@ -16,8 +15,7 @@ export const mockSubtypeData: CognitiveDomain = {
   impulseControl: 43
 };
 
-// Empty data entries for when real data is not available
-export const patients: Patient[] = [];
+// Mock metrics data
 export const metricsMap: Record<string, PatientMetrics> = {
   "p1": {
     patientId: "p1",
@@ -49,11 +47,40 @@ export const metricsMap: Record<string, PatientMetrics> = {
   }
 };
 
-export const sessionsMap: Record<string, SessionData[]> = {};
-export const reportsMap: Record<string, ReportType[]> = {};
+// Mock patients data
+export const patients: Patient[] = [
+  {
+    id: "p1",
+    name: "John Doe",
+    age: 25,
+    gender: "male",
+    diagnosisDate: "2024-01-01",
+    adhdSubtype: "Combined",
+    assessmentCount: 5,
+    lastAssessment: "2024-04-01"
+  },
+  {
+    id: "p2",
+    name: "Jane Smith",
+    age: 30,
+    gender: "female",
+    diagnosisDate: "2024-02-15",
+    adhdSubtype: "Inattentive",
+    assessmentCount: 6,
+    lastAssessment: "2024-04-12"
+  }
+];
 
-// Export all types for use in other files
-export type { CognitiveDomain, Patient, PatientMetrics, SessionData, ReportType };
+// Empty session and report maps for mock data
+export const sessionsMap: Record<string, SessionData[]> = {
+  "p1": [],
+  "p2": []
+};
+
+export const reportsMap: Record<string, ReportType[]> = {
+  "p1": [],
+  "p2": []
+};
 
 // Mock patient data for reports
 export const mockPatientData: Patient = {
@@ -66,3 +93,6 @@ export const mockPatientData: Patient = {
   assessmentCount: 5,
   lastAssessment: "2024-04-01"
 };
+
+// Export all types for use in other files
+export type { CognitiveDomain, Patient, PatientMetrics, SessionData, ReportType };
