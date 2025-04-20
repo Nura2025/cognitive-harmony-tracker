@@ -31,6 +31,7 @@ export interface CognitiveProfile {
 export interface TimeSeriesDataPoint {
   date: string;
   score: number;
+  value?: number; // Adding this for backward compatibility
 }
 
 export interface ProgressComparison {
@@ -84,6 +85,15 @@ export interface CognitiveDomain {
   behavioral?: number; // For backwards compatibility
 }
 
+export interface CognitiveDomainMetrics {
+  [key: string]: number | string;
+  attention: number;
+  memory: number;
+  executiveFunction: number;
+  impulseControl: number;
+  behavioral?: number; // For backwards compatibility
+}
+
 export interface Patient {
   id: string;
   name: string;
@@ -119,11 +129,17 @@ export interface SessionData {
   overallScore: number;
   domainScores: Record<string, number>;
   activities: {
+    id: string;
     name: string;
+    type: string;
     score: number;
     duration: number;
+    difficulty: number;
     completionStatus: string;
   }[];
+  duration?: number;
+  environment?: string;
+  device?: string;
 }
 
 export interface PatientData {
@@ -139,8 +155,11 @@ export interface ReportType {
   title: string;
   date: string;
   type: string;
-  metrics: Record<string, number>;
-  notes: string;
-  recommendations: string[];
-  generatedBy: string;
+  metrics?: Record<string, number>;
+  notes?: string;
+  recommendations?: string[];
+  generatedBy?: string;
+  sections?: Record<string, boolean>;
+  status: string;
+  createdDate: string;
 }

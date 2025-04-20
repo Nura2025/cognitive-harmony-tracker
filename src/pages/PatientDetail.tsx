@@ -1,380 +1,429 @@
+
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, FileText, Calendar, Clock, User, ArrowUp } from 'lucide-react';
-import { SessionAnalysis } from '@/components/sessions/SessionAnalysis';
-import { DomainComparison } from '@/components/analysis/DomainComparison';
-import { PatientReports } from '@/components/reports/PatientReports';
-import { ReportGenerator } from '@/components/reports/ReportGenerator';
-import { PatientData, ReportType } from '@/utils/types/patientTypes';
+import { Progress } from '@/components/ui/progress';
+import { ClipboardCheck, AlertCircle, Brain, Calendar, ChevronLeft } from 'lucide-react';
+import { PatientData, ReportType, CognitiveDomain, CognitiveDomainMetrics } from '@/utils/types/patientTypes';
 import { 
-  patients, 
-  metricsMap, 
-  sessionsMap, 
-  reportsMap,
-  mockNormativeData,
-  mockSubtypeData
-} from '@/utils/mockData';
-import { formatPercentile, getScoreColorClass } from '@/utils/dataProcessing';
-import { format, parseISO } from 'date-fns';
-import { DomainChart } from '@/components/dashboard/DomainChart';
-import { generateTrendData } from '@/utils/generators/trendGenerators';
+  formatPercentile, 
+  getScoreColorClass, 
+  formatLastSession
+} from '@/utils/dataProcessing';
+import { SessionTimeline } from '@/components/dashboard/SessionTimeline';
+import { PatientReports } from '@/components/reports/PatientReports';
+import { PerformanceTrend } from '@/components/analysis/PerformanceTrend';
+import { CognitiveDomainChart } from '@/components/cognitive/CognitiveDomainChart';
 
-const PatientDetail = () => {
-  const { id } = useParams<{ id: string }>();
+const PatientDetail: React.FC = () => {
+  const params = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
-  const [activeTab, setActiveTab] = useState('profile');
   const [patientData, setPatientData] = useState<PatientData | null>(null);
-  const [selectedSessionIndex, setSelectedSessionIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   
+  // Simulate data fetching
   useEffect(() => {
-    const patient = patients.find(p => p.id === id);
-    
-    if (patient) {
-      const metrics = metricsMap[patient.id];
-      const sessions = sessionsMap[patient.id] || [];
-      const reports = reportsMap[patient.id] || [];
-      
-      setPatientData({
-        patient,
-        metrics,
-        sessions,
-        reports
-      });
-      
-      if (sessions.length > 0) {
-        setSelectedSessionIndex(0);
+    // In a real app, this would be fetched from an API
+    const fetchPatientData = async () => {
+      try {
+        setIsLoading(true);
+        // Replace with actual API call
+        // const data = await fetchPatientById(params.id);
+        
+        // For now, using mock data
+        setTimeout(() => {
+          // Mock patient data - this would normally come from an API
+          const mockData: PatientData = {
+            patient: {
+              id: params.id || 'unknown',
+              name: 'Alex Johnson',
+              age: 12,
+              gender: 'Male',
+              diagnosisDate: '2023-04-12',
+              adhdSubtype: 'Combined',
+              assessmentCount: 8,
+              lastAssessment: '2023-11-02'
+            },
+            metrics: {
+              patientId: params.id || 'unknown',
+              date: '2023-11-02',
+              attention: 68,
+              memory: 81,
+              executiveFunction: 59,
+              behavioral: 52,
+              impulseControl: 56,
+              percentile: 65,
+              sessionsDuration: 240,
+              sessionsCompleted: 8,
+              progress: 15,
+              clinicalConcerns: ['Attention Span', 'Task Completion', 'Organization']
+            },
+            sessions: [
+              {
+                id: 'session-1',
+                patientId: params.id || 'unknown',
+                startTime: '2023-08-15T10:30:00',
+                endTime: '2023-08-15T11:15:00',
+                completionStatus: 'Completed',
+                overallScore: 62,
+                domainScores: {
+                  attention: 58,
+                  memory: 70,
+                  executiveFunction: 55,
+                  behavioral: 48
+                },
+                activities: []
+              },
+              // More sessions...
+            ],
+            reports: [
+              {
+                id: 'report-1',
+                patientId: params.id || 'unknown',
+                title: 'Cognitive Assessment Report',
+                date: '2023-11-03',
+                type: 'clinical',
+                status: 'generated',
+                createdDate: '2023-11-03'
+              },
+              {
+                id: 'report-2',
+                patientId: params.id || 'unknown',
+                title: 'School Accommodation Report',
+                date: '2023-09-15',
+                type: 'school',
+                status: 'shared',
+                createdDate: '2023-09-15'
+              }
+            ]
+          };
+          
+          setPatientData(mockData);
+          setIsLoading(false);
+        }, 800);
+        
+      } catch (error) {
+        console.error('Error fetching patient data:', error);
+        setIsLoading(false);
       }
-    } else {
-      navigate('/patients');
-    }
-  }, [id, navigate]);
+    };
+    
+    fetchPatientData();
+  }, [params.id]);
   
   const handleBackToPatients = () => {
     navigate('/patients');
   };
   
-  const handleReportGenerate = (report: ReportType) => {
-    if (patientData) {
-      setPatientData({
-        ...patientData,
-        reports: [report, ...patientData.reports]
-      });
-      setActiveTab('reports');
-    }
+  const handleViewReport = (report: ReportType) => {
+    navigate(`/reports?patient=${params.id}&report=${report.id}`);
   };
   
+  if (isLoading) {
+    return (
+      <div className="space-y-8 animate-fade-in">
+        <div className="flex items-center mb-6">
+          <div className="w-full">
+            <div className="h-8 w-32 bg-muted animate-pulse rounded"></div>
+            <div className="h-8 w-64 mt-2 bg-muted animate-pulse rounded"></div>
+          </div>
+        </div>
+        <div className="grid gap-6 md:grid-cols-4">
+          <div className="h-32 bg-muted animate-pulse rounded-lg"></div>
+          <div className="h-32 bg-muted animate-pulse rounded-lg"></div>
+          <div className="h-32 bg-muted animate-pulse rounded-lg"></div>
+          <div className="h-32 bg-muted animate-pulse rounded-lg"></div>
+        </div>
+        <div className="h-80 bg-muted animate-pulse rounded-lg"></div>
+      </div>
+    );
+  }
+  
   if (!patientData) {
-    return <div className="p-8">Loading patient data...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center h-[60vh]">
+        <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
+        <h2 className="text-xl font-medium mb-2">Patient Not Found</h2>
+        <p className="text-muted-foreground mb-6">
+          The patient information you're looking for could not be found.
+        </p>
+        <Button onClick={handleBackToPatients}>
+          Return to Patients List
+        </Button>
+      </div>
+    );
   }
   
   const { patient, metrics, sessions, reports } = patientData;
   
-  const domainTrendData = {
-    attention: generateTrendData('attention', 10).map(item => item.value),
-    memory: generateTrendData('memory', 10).map(item => item.value),
-    executiveFunction: generateTrendData('executiveFunction', 10).map(item => item.value),
-    behavioral: generateTrendData('behavioral', 10).map(item => item.value)
+  // Process sessions for performance trends
+  const generatePerformanceData = (domain: keyof CognitiveDomain) => {
+    return sessions.map(session => ({
+      date: new Date(session.startTime).toISOString().split('T')[0],
+      score: session.domainScores[domain],
+      duration: new Date(session.endTime).getTime() - new Date(session.startTime).getTime() / 1000 / 60 // in minutes
+    }));
   };
   
-  const firstSession = sessions.length > 0 
-    ? sessions.reduce((earliest, session) => {
-        return new Date(session.startTime) < new Date(earliest.startTime) 
-          ? session : earliest;
-      }, sessions[0])
-    : null;
-    
-  const lastSession = sessions.length > 0 
-    ? sessions.reduce((latest, session) => {
-        return new Date(session.startTime) > new Date(latest.startTime) 
-          ? session : latest;
-      }, sessions[0])
-    : null;
+  // Format domain data for the radar chart
+  const domainData = {
+    attention: metrics.attention,
+    memory: metrics.memory,
+    executiveFunction: metrics.executiveFunction,
+    impulseControl: metrics.impulseControl || 0,
+    behavioral: metrics.behavioral
+  };
+  
+  const trendData = {
+    attention: generatePerformanceData('attention'),
+    memory: generatePerformanceData('memory'),
+    executiveFunction: generatePerformanceData('executiveFunction'),
+    behavioral: generatePerformanceData('behavioral'),
+    impulseControl: [] // Placeholder since we may not have direct impulse control data
+  };
   
   return (
-    <div className="container mx-auto p-4 max-w-7xl">
-      <Button 
-        variant="ghost" 
-        size="sm" 
-        className="mb-4 -ml-2 text-muted-foreground"
-        onClick={handleBackToPatients}
-      >
-        <ChevronLeft className="mr-1 h-4 w-4" />
-        Back to Patients
-      </Button>
-      
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold mb-1">{patient.name}</h1>
-          <p className="text-muted-foreground">
-            Patient ID: {patient.id} | Diagnosed: {patient.diagnosisDate}
-          </p>
+    <div className="space-y-8 animate-fade-in">
+      <div>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="mb-2 -ml-2 text-muted-foreground"
+          onClick={handleBackToPatients}
+        >
+          <ChevronLeft className="mr-1 h-4 w-4" />
+          Back to Patients
+        </Button>
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-1">
+          <h1 className="text-3xl font-bold">{patient.name}</h1>
+          <div className="flex items-center gap-3 mt-2 lg:mt-0">
+            <Badge className="text-xs">{patient.age} y/o {patient.gender}</Badge>
+            <Badge variant="outline" className="text-xs">{patient.adhdSubtype} Type</Badge>
+            <Badge variant="secondary" className="text-xs">
+              <Calendar className="mr-1 h-3.5 w-3.5" />
+              Diagnosed {new Date(patient.diagnosisDate).toLocaleDateString()}
+            </Badge>
+          </div>
         </div>
-        <div className="mt-4 md:mt-0">
-          <Button 
-            variant="default" 
-            size="sm" 
-            className="gap-1.5"
-            onClick={() => setActiveTab('generate')}
-          >
-            <FileText className="h-4 w-4" />
-            Generate Report
-          </Button>
-        </div>
+        <p className="text-muted-foreground">
+          Detailed patient profile and assessment records
+        </p>
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-4 mb-8">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="glass">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-sm font-medium leading-none">Overall Cognitive Score</p>
+                <p className="text-sm text-muted-foreground">Combined performance</p>
+              </div>
+              <div className={`${getScoreColorClass(metrics.percentile)} text-xl font-bold`}>
+                {formatPercentile(metrics.percentile)}
+              </div>
+            </div>
+            <Separator className="my-4" />
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span>Attention</span>
+                  <span className={getScoreColorClass(metrics.attention)}>
+                    {formatPercentile(metrics.attention)}
+                  </span>
+                </div>
+                <Progress value={metrics.attention} />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span>Memory</span>
+                  <span className={getScoreColorClass(metrics.memory)}>
+                    {formatPercentile(metrics.memory)}
+                  </span>
+                </div>
+                <Progress value={metrics.memory} className="bg-muted" />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span>Executive Function</span>
+                  <span className={getScoreColorClass(metrics.executiveFunction)}>
+                    {formatPercentile(metrics.executiveFunction)}
+                  </span>
+                </div>
+                <Progress value={metrics.executiveFunction} className="bg-muted" />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span>Impulse Control</span>
+                  <span className={getScoreColorClass(metrics.impulseControl || 0)}>
+                    {formatPercentile(metrics.impulseControl || 0)}
+                  </span>
+                </div>
+                <Progress value={metrics.impulseControl || 0} className="bg-muted" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="glass">
+          <CardContent className="pt-6">
+            <div className="space-y-1">
+              <p className="text-sm font-medium leading-none">Session History</p>
+              <p className="text-sm text-muted-foreground">Assessment tracking</p>
+            </div>
+            <div className="mt-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Last Activity</span>
+                <span className="font-medium">
+                  {formatLastSession(patient.lastAssessment)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Total Sessions</span>
+                <span className="font-medium">{patient.assessmentCount}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Avg. Duration</span>
+                <span className="font-medium">
+                  {Math.round(metrics.sessionsDuration / metrics.sessionsCompleted)} mins
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Completion Rate</span>
+                <span className={`font-medium ${
+                  metrics.sessionsCompleted / patient.assessmentCount >= 0.8 
+                    ? 'text-green-600' 
+                    : 'text-amber-600'
+                }`}>
+                  {Math.round((metrics.sessionsCompleted / patient.assessmentCount) * 100)}%
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="glass">
+          <CardContent className="pt-6">
+            <div className="space-y-1">
+              <p className="text-sm font-medium leading-none">Overall Progress</p>
+              <p className="text-sm text-muted-foreground">Improvement over time</p>
+            </div>
+            <div className="flex items-center justify-center mt-5 mb-2">
+              <div className="relative">
+                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-muted">
+                  <Brain className="h-12 w-12 text-primary opacity-90" />
+                </div>
+                <div className="absolute top-0 right-0">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 border-4 border-background">
+                    <span className="text-xs font-semibold text-green-800">+{metrics.progress}%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="text-center mt-3">
+              <p className="font-medium">
+                {metrics.progress >= 15 
+                  ? 'Significant Improvement' 
+                  : metrics.progress >= 5 
+                    ? 'Steady Progress' 
+                    : 'Gradual Improvement'}
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Last 30 Days
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="glass">
+          <CardContent className="pt-6">
+            <div className="space-y-1">
+              <p className="text-sm font-medium leading-none">Clinical Notes</p>
+              <p className="text-sm text-muted-foreground">Areas of concern</p>
+            </div>
+            <div className="mt-4 space-y-3">
+              <div className="flex items-start">
+                <ClipboardCheck className="h-5 w-5 mt-0.5 mr-2 text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium">Focus Areas</p>
+                  <ul className="mt-1 space-y-1">
+                    {metrics.clinicalConcerns.map((concern, i) => (
+                      <li key={i} className="flex items-start">
+                        <div className="h-1.5 w-1.5 rounded-full bg-primary mt-1.5 mr-1.5"></div>
+                        <span className="text-xs text-muted-foreground">{concern}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              <Separator />
+              <div className="flex justify-between items-center pt-1">
+                <span className="text-sm">Latest Report</span>
+                <Button 
+                  variant="link" 
+                  size="sm" 
+                  className="p-0 h-auto"
+                  onClick={() => reports[0] && handleViewReport(reports[0])}
+                >View</Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <Tabs defaultValue="overview" className="space-y-8">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="sessions">Sessions</TabsTrigger>
-          <TabsTrigger value="analysis">Analysis</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="profile" className="animate-fade-in">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="glass md:col-span-1">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-center mb-6">
-                  <div className="relative">
-                    <div className="h-24 w-24 rounded-full bg-primary/20 flex items-center justify-center">
-                      <User className="h-12 w-12 text-primary" />
-                    </div>
-                    <div className="absolute bottom-0 right-0 h-7 w-7 rounded-full bg-background border-2 border-card flex items-center justify-center">
-                      <span className="text-xs font-medium">{patient.age}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-sm text-muted-foreground mb-1">Age</h3>
-                    <p className="font-medium">{patient.age} years</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-sm text-muted-foreground mb-1">Gender</h3>
-                    <p className="font-medium">{patient.gender}</p>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-sm text-muted-foreground mb-1">ADHD Subtype</h3>
-                    <Badge variant="outline" className="font-normal">
-                      {patient.adhdSubtype}
-                    </Badge>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-sm text-muted-foreground mb-1">Total Sessions</h3>
-                    <p className="font-medium">{patient.assessmentCount}</p>
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div>
-                    <h3 className="text-base font-medium mb-3">Cognitive Performance</h3>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm">Attention</span>
-                          <span className="text-sm font-medium">{metrics.attention}%</span>
-                        </div>
-                        <Progress value={metrics.attention} className="h-2" />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm">Memory</span>
-                          <span className="text-sm font-medium">{metrics.memory}%</span>
-                        </div>
-                        <Progress value={metrics.memory} className="h-2" />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm">Executive Function</span>
-                          <span className="text-sm font-medium">{metrics.executiveFunction}%</span>
-                        </div>
-                        <Progress value={metrics.executiveFunction} className="h-2" />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <span className="text-sm">Behavioral</span>
-                          <span className="text-sm font-medium">{metrics.behavioral}%</span>
-                        </div>
-                        <Progress value={metrics.behavioral} className="h-2" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="glass md:col-span-2">
-              <CardContent className="pt-6">
-                <h3 className="text-lg font-medium mb-4">Recent Activity</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="border border-border rounded-lg p-4">
-                    <div className="flex items-center mb-2">
-                      <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <h4 className="text-sm font-medium">First session</h4>
-                    </div>
-                    <p className="text-lg font-medium">
-                      {firstSession 
-                        ? format(parseISO(firstSession.startTime), 'MMM d, yyyy') 
-                        : 'N/A'}
-                    </p>
-                  </div>
-                  
-                  <div className="border border-border rounded-lg p-4">
-                    <div className="flex items-center mb-2">
-                      <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <h4 className="text-sm font-medium">Last session</h4>
-                    </div>
-                    <p className="text-lg font-medium">
-                      {lastSession 
-                        ? format(parseISO(lastSession.startTime), 'MMM d, yyyy') 
-                        : 'N/A'}
-                    </p>
-                  </div>
-                  
-                  <div className="border border-border rounded-lg p-4">
-                    <div className="flex items-center mb-2">
-                      <ArrowUp className="h-4 w-4 mr-2 text-emerald-500" />
-                      <h4 className="text-sm font-medium">Overall improvement</h4>
-                    </div>
-                    <p className="text-lg font-medium text-emerald-500">+{metrics.progress}%</p>
-                  </div>
-                </div>
-                
-                <h3 className="text-lg font-medium mb-4">Progress Overview</h3>
-                
-                <div className="p-4 bg-muted/30 rounded-lg mb-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h4 className="text-base font-medium">Cognitive Percentile</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Compared to age-matched peers
-                      </p>
-                    </div>
-                    <div className="flex items-center">
-                      <span className={`text-2xl font-bold ${getScoreColorClass(metrics.percentile)}`}>
-                        {formatPercentile(metrics.percentile)}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full bg-primary`}
-                      style={{ width: `${metrics.percentile}%` }}
-                    />
-                  </div>
-                </div>
-                
-                <div className="mt-8">
-                  <h3 className="text-lg font-medium mb-4">Cognitive Domain Trends</h3>
-                  <DomainChart domainData={domainTrendData} />
-                </div>
-              </CardContent>
-            </Card>
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            <CognitiveDomainChart 
+              patientData={domainData as unknown as CognitiveDomainMetrics}
+              normativeData={{} as CognitiveDomainMetrics}
+              subtypeData={{} as CognitiveDomainMetrics}
+            />
+            <PerformanceTrend 
+              data={trendData.attention}
+              title="Attention Performance"
+              description="Tracking focus and sustained attention over time"
+            />
+          </div>
+          
+          <div className="grid gap-6 md:grid-cols-2">
+            <PerformanceTrend 
+              data={trendData.memory}
+              title="Memory Performance"
+              description="Working and visual memory recall metrics"
+            />
+            <PerformanceTrend 
+              data={trendData.executiveFunction}
+              title="Executive Function"
+              description="Planning, organization, and cognitive flexibility trends"
+            />
           </div>
         </TabsContent>
         
-        <TabsContent value="sessions" className="animate-fade-in">
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-            <Card className="glass md:col-span-2">
-              <CardContent className="pt-6">
-                <h3 className="text-lg font-medium mb-4">Session History</h3>
-                
-                {sessions.length === 0 ? (
-                  <p className="text-muted-foreground">No sessions available</p>
-                ) : (
-                  <div className="space-y-2">
-                    {sessions.map((session, index) => (
-                      <div 
-                        key={session.id}
-                        onClick={() => setSelectedSessionIndex(index)}
-                        className={`p-3 border border-border rounded-md cursor-pointer transition-colors
-                          ${selectedSessionIndex === index ? 'bg-primary/10 border-primary/50' : 'hover:bg-muted/30'}`}
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-medium">
-                            {format(parseISO(session.startTime), 'MMM d, yyyy')}
-                          </span>
-                          <Badge 
-                            variant={session.completionStatus === 'Completed' ? 'default' : 'outline'}
-                            className="text-xs"
-                          >
-                            {session.completionStatus}
-                          </Badge>
-                        </div>
-                        <div className="flex items-center justify-between text-sm text-muted-foreground">
-                          <div className="flex items-center">
-                            <Clock className="h-3 w-3 mr-1" />
-                            <span>
-                              {format(parseISO(session.startTime), 'h:mm a')}
-                            </span>
-                          </div>
-                          <span className={getScoreColorClass(session.overallScore)}>
-                            {Math.round(session.overallScore)}%
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-            
-            <Card className="glass md:col-span-3">
-              <CardContent className="pt-6">
-                {sessions.length === 0 ? (
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground">No session data available</p>
-                  </div>
-                ) : (
-                  <SessionAnalysis session={sessions[selectedSessionIndex]} />
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="analysis" className="animate-fade-in space-y-6">
+        <TabsContent value="sessions" className="space-y-6">
           <Card className="glass">
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-medium mb-4">Cognitive Domain Analysis</h3>
-              <DomainComparison 
-                patientData={metrics}
-                normativeData={mockNormativeData}
-                subtypeData={mockSubtypeData}
-                sessions={sessions}
-              />
+            <CardHeader>
+              <CardTitle>Session Overview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <SessionTimeline sessions={sessions} title="All Sessions" />
             </CardContent>
           </Card>
         </TabsContent>
         
-        <TabsContent value="reports" className="animate-fade-in space-y-6">
+        <TabsContent value="reports" className="space-y-6">
           <PatientReports 
             reports={reports}
-            onViewReport={(report) => navigate(`/reports?patient=${patient.id}`)}
-          />
-        </TabsContent>
-        
-        <TabsContent value="generate" className="animate-fade-in space-y-6">
-          <ReportGenerator 
-            patient={patient}
-            metrics={metrics}
-            onReportGenerate={handleReportGenerate}
+            onViewReport={handleViewReport}
           />
         </TabsContent>
       </Tabs>

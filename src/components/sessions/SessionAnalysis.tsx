@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { BarChart, CalendarClock, Clock, Laptop, MapPin } from 'lucide-react';
-import { SessionData } from '@/utils/mockData';
+import { SessionData } from '@/utils/types/patientTypes';
 import { formatDuration, getScoreBgClass, getScoreColorClass } from '@/utils/dataProcessing';
 import { format, parseISO } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -72,7 +72,7 @@ export const SessionAnalysis: React.FC<SessionAnalysisProps> = ({ session }) => 
               <div className="flex items-center">
                 <Clock className="h-5 w-5 mr-2 text-muted-foreground" />
                 <div>
-                  <p className="text-sm font-medium">{formatDuration(session.duration)}</p>
+                  <p className="text-sm font-medium">{session.duration ? formatDuration(session.duration) : 'N/A'}</p>
                   <p className="text-xs text-muted-foreground">Session Duration</p>
                 </div>
               </div>
@@ -82,7 +82,7 @@ export const SessionAnalysis: React.FC<SessionAnalysisProps> = ({ session }) => 
               <div className="flex items-center">
                 <MapPin className="h-5 w-5 mr-2 text-muted-foreground" />
                 <div>
-                  <p className="text-sm font-medium">{session.environment}</p>
+                  <p className="text-sm font-medium">{session.environment || 'Not specified'}</p>
                   <p className="text-xs text-muted-foreground">Environment</p>
                 </div>
               </div>
@@ -92,7 +92,7 @@ export const SessionAnalysis: React.FC<SessionAnalysisProps> = ({ session }) => 
               <div className="flex items-center">
                 <Laptop className="h-5 w-5 mr-2 text-muted-foreground" />
                 <div>
-                  <p className="text-sm font-medium">{session.device}</p>
+                  <p className="text-sm font-medium">{session.device || 'Not specified'}</p>
                   <p className="text-xs text-muted-foreground">Device</p>
                 </div>
               </div>
@@ -124,9 +124,7 @@ export const SessionAnalysis: React.FC<SessionAnalysisProps> = ({ session }) => 
             <h3 className="font-medium mb-3">Domain Breakdown</h3>
           </InfoTooltip>
           <div className="space-y-4">
-            {(Object.keys(session.domainScores) as (keyof typeof session.domainScores)[]).map(domain => {
-              const score = session.domainScores[domain];
-              
+            {Object.entries(session.domainScores).map(([domain, score]) => {
               // Domain specific explanations
               const getDomainExplanation = () => {
                 switch(domain) {
@@ -143,19 +141,31 @@ export const SessionAnalysis: React.FC<SessionAnalysisProps> = ({ session }) => 
                 }
               };
               
+              // Format domain name for display
+              const formatDomainName = (domainKey: string): string => {
+                switch(String(domainKey)) {
+                  case 'executiveFunction':
+                    return 'Executive Function';
+                  case 'impulseControl':
+                    return 'Impulse Control';  
+                  default:
+                    return String(domainKey).charAt(0).toUpperCase() + String(domainKey).slice(1);
+                }
+              };
+              
               return (
-                <InfoTooltip key={domain} content={getDomainExplanation()}>
+                <InfoTooltip key={String(domain)} content={getDomainExplanation()}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className={`w-3 h-3 rounded-full bg-cognitive-${domain}`} />
+                      <div className={`w-3 h-3 rounded-full bg-cognitive-${String(domain)}`} />
                       <span className="text-sm">
-                        {domain === 'executiveFunction' ? 'Executive Function' : domain.charAt(0).toUpperCase() + domain.slice(1)}
+                        {formatDomainName(domain)}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                         <div 
-                          className={`h-full bg-cognitive-${domain} rounded-full`}
+                          className={`h-full bg-cognitive-${String(domain)} rounded-full`}
                           style={{ width: `${score}%` }}
                         />
                       </div>

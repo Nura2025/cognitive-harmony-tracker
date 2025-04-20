@@ -10,11 +10,11 @@ import {
   YAxis,
   CartesianGrid
 } from 'recharts';
-import { SessionData } from '@/utils/mockData';
+import { TimeSeriesDataPoint } from '@/utils/types/patientTypes';
 import { formatDuration, processSessionsForTimeline } from '@/utils/dataProcessing';
 
 interface SessionTimelineProps {
-  sessions: SessionData[];
+  sessions: TimeSeriesDataPoint[];
   title?: string;
 }
 
@@ -27,9 +27,9 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = ({
   
   // Calculate sessions statistics
   const totalSessions = sessions.length;
-  const totalDuration = sessions.reduce((sum, session) => sum + session.duration, 0);
+  const totalDuration = 0; // We don't have duration in TimeSeriesDataPoint
   const averageScore = Math.round(
-    sessions.reduce((sum, session) => sum + session.overallScore, 0) / sessions.length
+    sessions.reduce((sum, session) => sum + session.score, 0) / sessions.length
   );
   
   return (
@@ -45,7 +45,7 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = ({
           </div>
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">Total Duration</span>
-            <span className="text-xl font-semibold">{formatDuration(totalDuration)}</span>
+            <span className="text-xl font-semibold">N/A</span>
           </div>
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">Average Score</span>

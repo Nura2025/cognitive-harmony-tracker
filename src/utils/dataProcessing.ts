@@ -1,6 +1,5 @@
 
 import { CognitiveDomain } from './types/patientTypes';
-import { mockNormativeData, mockSubtypeData } from './mockData';
 
 // Get domain display name
 export const getDomainName = (domain: string): string => {
@@ -43,6 +42,14 @@ export const getDomainBgColor = (domain: string): string => {
   return bgColorMap[domain] || 'bg-gray-50';
 };
 
+// Get score background color based on value
+export const getScoreBgClass = (score: number): string => {
+  if (score >= 80) return 'bg-emerald-50';
+  if (score >= 60) return 'bg-blue-50';
+  if (score >= 40) return 'bg-amber-50';
+  return 'bg-red-50';
+};
+
 // Get score color based on value
 export const getScoreColorClass = (score: number): string => {
   if (score >= 80) return 'text-emerald-600';
@@ -63,6 +70,67 @@ export const getScoreStatus = (score: number): string => {
 export const formatPercentile = (value: number): string => {
   if (typeof value !== 'number' || isNaN(value)) return 'N/A';
   return `${Math.round(value)}`;
+};
+
+// Format last session date
+export const formatLastSession = (date: string): string => {
+  if (!date) return 'N/A';
+  
+  const sessionDate = new Date(date);
+  const now = new Date();
+  
+  // Calculate time difference
+  const diffTime = Math.abs(now.getTime() - sessionDate.getTime());
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 0) {
+    return 'Today';
+  } else if (diffDays === 1) {
+    return 'Yesterday';
+  } else if (diffDays < 7) {
+    return `${diffDays} days ago`;
+  } else if (diffDays < 30) {
+    const weeks = Math.floor(diffDays / 7);
+    return `${weeks} week${weeks > 1 ? 's' : ''} ago`;
+  } else {
+    const months = Math.floor(diffDays / 30);
+    return `${months} month${months > 1 ? 's' : ''} ago`;
+  }
+};
+
+// Format duration in seconds to a readable format
+export const formatDuration = (seconds: number): string => {
+  if (!seconds) return '0m 0s';
+  
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  
+  if (minutes === 0) {
+    return `${remainingSeconds}s`;
+  } else if (remainingSeconds === 0) {
+    return `${minutes}m`;
+  } else {
+    return `${minutes}m ${remainingSeconds}s`;
+  }
+};
+
+// Process sessions data for timeline visualization
+export const processSessionsForTimeline = (sessions: any[]): { date: string; score: number }[] => {
+  if (!sessions || !Array.isArray(sessions)) {
+    return [];
+  }
+
+  return sessions.map(session => {
+    // Handle different data formats
+    const date = session.date || (session.startTime ? new Date(session.startTime).toISOString().split('T')[0] : '');
+    const score = typeof session.score === 'number' ? session.score : 
+                 (typeof session.overallScore === 'number' ? session.overallScore : 0);
+    
+    return {
+      date,
+      score
+    };
+  });
 };
 
 // Helper function to convert string object keys to camelCase
@@ -116,4 +184,12 @@ export const calculateImprovement = (sessions: any[]): number => {
   }
   
   return Math.round((lastSession.score - firstSession.score) * 10) / 10;
+};
+
+// For score badges
+export const getScoreBadgeVariant = (score: number): "default" | "destructive" | "outline" | "secondary" => {
+  if (score < 40) return "destructive";
+  if (score < 60) return "outline";
+  if (score < 85) return "secondary";
+  return "default";
 };

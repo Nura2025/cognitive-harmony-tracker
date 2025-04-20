@@ -25,7 +25,7 @@ export const PatientReports: React.FC<PatientReportsProps> = ({
   reports, 
   onViewReport 
 }) => {
-  const getStatusColor = (status: ReportType['status']) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'draft':
         return 'bg-amber-100 text-amber-800 hover:bg-amber-200';
@@ -38,7 +38,7 @@ export const PatientReports: React.FC<PatientReportsProps> = ({
     }
   };
 
-  const getReportTypeLabel = (type: ReportType['type']) => {
+  const getReportTypeLabel = (type: string) => {
     switch (type) {
       case 'clinical':
         return 'Clinical';

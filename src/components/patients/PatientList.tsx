@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Eye, FileText } from 'lucide-react';
-import { Patient, PatientMetrics } from '@/utils/mockData';
+import { Patient, PatientMetrics } from '@/utils/types/patientTypes';
 import { formatLastSession, formatPercentile, getScoreColorClass } from '@/utils/dataProcessing';
 import { useLanguage } from '@/contexts/LanguageContext';
 

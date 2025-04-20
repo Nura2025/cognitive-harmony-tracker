@@ -35,7 +35,7 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
   metrics,
   onReportGenerate
 }) => {
-  const [reportType, setReportType] = useState<ReportType['type']>('clinical');
+  const [reportType, setReportType] = useState<string>('clinical');
   const [includeSections, setIncludeSections] = useState({
     overview: true,
     domainAnalysis: true,
@@ -60,9 +60,10 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       patientId: patient.id,
       title: `${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Report`,
       type: reportType,
-      createdDate: format(new Date(), 'yyyy-MM-dd'),
+      date: format(new Date(), 'yyyy-MM-dd'),
       sections: {...includeSections},
-      status: 'generated'
+      status: 'generated',
+      createdDate: format(new Date(), 'yyyy-MM-dd')
     };
     
     // Call the callback if provided
@@ -84,7 +85,7 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       <CardContent>
         <div className="mb-6">
           <Label className="text-muted-foreground mb-2 block">Report Template</Label>
-          <Select value={reportType} onValueChange={(value: ReportType['type']) => setReportType(value)}>
+          <Select value={reportType} onValueChange={(value: string) => setReportType(value)}>
             <SelectTrigger>
               <SelectValue placeholder="Select report type" />
             </SelectTrigger>
