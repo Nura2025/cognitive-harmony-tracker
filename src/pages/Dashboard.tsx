@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Brain, Clock, LineChart, Users } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,31 +15,11 @@ import {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  // For demo purposes, using a fixed user ID - in a real app this would come from auth
-  const userId = "example-user-id";
+  const userId = "883faae2-f14b-40de-be5a-ad4c3ec673bc";
   
   // Fetch cognitive profile data
   const { data: profile, isLoading: profileLoading } = useCognitiveProfile(userId);
   const { data: timeSeriesData } = useTimeSeriesData(userId, 'attention');
-  
-  const handleViewAllPatients = () => {
-    navigate('/patients');
-  };
-  
-  // Format domain data for the chart
-  const domainTrendData = profile?.domain_scores ? {
-    attention: [profile.domain_scores.attention],
-    memory: [profile.domain_scores.memory],
-    executiveFunction: [profile.domain_scores.executive_function],
-    impulseControl: [profile.domain_scores.impulse_control],
-    behavioral: [Math.round((profile.domain_scores.impulse_control + profile.domain_scores.executive_function) / 2)] // Adding behavioral for backward compatibility
-  } : {
-    attention: [],
-    memory: [],
-    executiveFunction: [],
-    impulseControl: [],
-    behavioral: []
-  };
   
   if (profileLoading) {
     return (
@@ -49,6 +29,21 @@ const Dashboard = () => {
     );
   }
 
+  // Format domain data for the chart
+  const domainTrendData = profile?.domain_scores ? {
+    attention: [profile.domain_scores.attention],
+    memory: [profile.domain_scores.memory],
+    executiveFunction: [profile.domain_scores.executive_function],
+    impulseControl: [profile.domain_scores.impulse_control],
+    behavioral: [Math.round((profile.domain_scores.impulse_control + profile.domain_scores.executive_function) / 2)]
+  } : {
+    attention: [],
+    memory: [],
+    executiveFunction: [],
+    impulseControl: [],
+    behavioral: []
+  };
+  
   return (
     <div className="space-y-8 animate-fade-in">
       <div>

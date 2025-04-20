@@ -1,9 +1,8 @@
-
 import { useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
-const API_BASE_URL = 'http://localhost:3000/api'; // Replace with your actual API base URL
+const API_BASE_URL = 'http://localhost:3000/api';
 
-// Types for API responses
 export interface CognitiveProfile {
   user_id: string;
   user_name: string;
@@ -65,17 +64,22 @@ export interface NormativeComparison {
   };
 }
 
-// Fetch functions
 async function fetchCognitiveProfile(userId: string): Promise<CognitiveProfile> {
   const response = await fetch(`${API_BASE_URL}/cognitive/profile/${userId}`);
-  if (!response.ok) throw new Error('Failed to fetch cognitive profile');
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Failed to fetch cognitive profile' }));
+    throw new Error(error.message);
+  }
   return response.json();
 }
 
 async function fetchTimeSeriesData(userId: string, domain: string, interval?: string): Promise<TimeSeriesDataPoint[]> {
   const params = new URLSearchParams(interval ? { interval } : {});
   const response = await fetch(`${API_BASE_URL}/cognitive/timeseries/${userId}?domain=${domain}&${params}`);
-  if (!response.ok) throw new Error('Failed to fetch time series data');
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Failed to fetch time series data' }));
+    throw new Error(error.message);
+  }
   return response.json();
 }
 
@@ -97,18 +101,23 @@ async function fetchNormativeComparison(userId: string, domain: string): Promise
   return response.json();
 }
 
-// React Query hooks
 export function useCognitiveProfile(userId: string) {
   return useQuery({
     queryKey: ['cognitiveProfile', userId],
-    queryFn: () => fetchCognitiveProfile(userId)
+    queryFn: () => fetchCognitiveProfile(userId),
+    onError: (error: Error) => {
+      toast.error(error.message);
+    }
   });
 }
 
 export function useTimeSeriesData(userId: string, domain: string, interval?: string) {
   return useQuery({
     queryKey: ['timeSeriesData', userId, domain, interval],
-    queryFn: () => fetchTimeSeriesData(userId, domain, interval)
+    queryFn: () => fetchTimeSeriesData(userId, domain, interval),
+    onError: (error: Error) => {
+      toast.error(error.message);
+    }
   });
 }
 
