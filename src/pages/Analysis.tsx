@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
@@ -63,7 +62,7 @@ const Analysis = () => {
   // Parse patient ID from URL query params
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const id = params.get('patient');
+    const id = params.get('patient') || "883faae2-f14b-40de-be5a-ad4c3ec673bc";
     
     if (id && patients.some(p => p.id === id)) {
       setPatientId(id);

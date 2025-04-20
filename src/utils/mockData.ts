@@ -1,4 +1,3 @@
-
 import { CognitiveDomain, Patient, PatientMetrics, SessionData, ReportType } from './types/patientTypes';
 
 // Define mock data
@@ -18,7 +17,37 @@ export const mockSubtypeData: CognitiveDomain = {
 
 // Empty data entries for when real data is not available
 export const patients: Patient[] = [];
-export const metricsMap: Record<string, PatientMetrics> = {};
+export const metricsMap: Record<string, PatientMetrics> = {
+  "p1": {
+    patientId: "p1",
+    date: "2024-04-10",
+    attention: 75,
+    memory: 82,
+    executiveFunction: 68,
+    behavioral: 70,
+    impulseControl: 65,
+    percentile: 76,
+    sessionsDuration: 120,
+    sessionsCompleted: 5,
+    progress: 8,
+    clinicalConcerns: ["Task initiation", "Sustained attention"]
+  },
+  "p2": {
+    patientId: "p2",
+    date: "2024-04-12",
+    attention: 65,
+    memory: 72,
+    executiveFunction: 78,
+    behavioral: 80,
+    impulseControl: 75,
+    percentile: 72,
+    sessionsDuration: 150,
+    sessionsCompleted: 6,
+    progress: 12,
+    clinicalConcerns: ["Emotional regulation"]
+  }
+};
+
 export const sessionsMap: Record<string, SessionData[]> = {};
 export const reportsMap: Record<string, ReportType[]> = {};
 
