@@ -64,133 +64,41 @@ export interface NormativeComparison {
   };
 }
 
-// Import mock data
-import { mockNormativeData, mockSubtypeData, mockPatientData } from '../utils/mockData';
-
 async function fetchCognitiveProfile(userId: string): Promise<CognitiveProfile> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/cognitive/profile/883faae2-f14b-40de-be5a-ad4c3ec673bc`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch cognitive profile');
-    }
-    return response.json();
-  } catch (error) {
-    // Return mock data on error
-    return {
-      user_id: mockPatientData.id,
-      user_name: mockPatientData.name,
-      age: mockPatientData.age,
-      age_group: '12-17',
-      adhd_subtype: mockPatientData.adhdSubtype,
-      session_id: 'mock-session-1',
-      session_date: new Date().toISOString(),
-      domain_scores: mockNormativeData,
-      percentiles: {
-        attention: 75,
-        memory: 80,
-        impulse_control: 65,
-        executive_function: 70
-      },
-      classifications: {
-        attention: 'Above Average',
-        memory: 'High',
-        impulse_control: 'Average',
-        executive_function: 'Above Average'
-      },
-      profile_pattern: 'Combined Type'
-    };
+  const response = await fetch(`${API_BASE_URL}/cognitive/profile/883faae2-f14b-40de-be5a-ad4c3ec673bc`);
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Failed to fetch cognitive profile' }));
+    throw new Error(error.message);
   }
+  return response.json();
 }
 
 async function fetchTimeSeriesData(userId: string, domain: string, interval?: string): Promise<TimeSeriesDataPoint[]> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/cognitive/timeseries/883faae2-f14b-40de-be5a-ad4c3ec673bc?domain=${domain}&${new URLSearchParams(interval ? { interval } : {})}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch time series data');
-    }
-    return response.json();
-  } catch (error) {
-    // Return mock time series data
-    return Array.from({ length: 5 }, (_, i) => ({
-      date: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      score: Math.floor(Math.random() * 30) + 70
-    }));
+  const params = new URLSearchParams(interval ? { interval } : {});
+  const response = await fetch(`${API_BASE_URL}/cognitive/timeseries/883faae2-f14b-40de-be5a-ad4c3ec673bc?domain=${domain}&${params}`);
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Failed to fetch time series data' }));
+    throw new Error(error.message);
   }
+  return response.json();
 }
 
 async function fetchProgressComparison(userId: string, domain: string, period: string): Promise<ProgressComparison> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/cognitive/progress/883faae2-f14b-40de-be5a-ad4c3ec673bc?domain=${domain}&period=${period}`);
-    if (!response.ok) throw new Error('Failed to fetch progress comparison');
-    return response.json();
-  } catch (error) {
-    // Return mock progress comparison data
-    const initialScore = Math.floor(Math.random() * 20) + 60;
-    const currentScore = Math.floor(Math.random() * 20) + 70;
-    return {
-      user_id: mockPatientData.id,
-      domain,
-      period,
-      initial_score: initialScore,
-      current_score: currentScore,
-      initial_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      current_date: new Date().toISOString().split('T')[0],
-      absolute_change: currentScore - initialScore,
-      percentage_change: ((currentScore - initialScore) / initialScore) * 100
-    };
-  }
+  const response = await fetch(`${API_BASE_URL}/cognitive/progress/883faae2-f14b-40de-be5a-ad4c3ec673bc?domain=${domain}&period=${period}`);
+  if (!response.ok) throw new Error('Failed to fetch progress comparison');
+  return response.json();
 }
 
 async function fetchComponentDetails(sessionId: string, domain: string): Promise<ComponentDetails> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/cognitive/component-details/${sessionId}?domain=${domain}`);
-    if (!response.ok) throw new Error('Failed to fetch component details');
-    return response.json();
-  } catch (error) {
-    // Return mock component details
-    return {
-      session_id: sessionId,
-      domain,
-      overall_score: Math.floor(Math.random() * 20) + 70,
-      percentile: Math.floor(Math.random() * 20) + 70,
-      classification: 'Above Average',
-      components: {
-        accuracy: Math.floor(Math.random() * 20) + 70,
-        speed: Math.floor(Math.random() * 20) + 70,
-        consistency: Math.floor(Math.random() * 20) + 70
-      },
-      data_completeness: 100
-    };
-  }
+  const response = await fetch(`${API_BASE_URL}/cognitive/component-details/7063f5c4-8868-47bb-bda2-380e6d5b565c?domain=${domain}`);
+  if (!response.ok) throw new Error('Failed to fetch component details');
+  return response.json();
 }
 
 async function fetchNormativeComparison(userId: string, domain: string): Promise<NormativeComparison> {
-  try {
-    const response = await fetch(`${API_BASE_URL}/cognitive/normative-comparison/883faae2-f14b-40de-be5a-ad4c3ec673bc?domain=${domain}`);
-    if (!response.ok) throw new Error('Failed to fetch normative comparison');
-    return response.json();
-  } catch (error) {
-    // Return mock normative comparison data
-    return {
-      user_id: userId,
-      domain,
-      age_group: '12-17',
-      raw_score: Math.floor(Math.random() * 20) + 70,
-      normative_comparison: {
-        mean: 75,
-        standard_deviation: 10,
-        z_score: 0.8,
-        percentile: 80,
-        reference: 'Age-matched normative sample',
-        sample_size: 1000
-      },
-      adhd_comparison: {
-        z_score: 1.2,
-        percentile: 85,
-        reference: 'ADHD population sample'
-      }
-    };
-  }
+  const response = await fetch(`${API_BASE_URL}/cognitive/normative-comparison/883faae2-f14b-40de-be5a-ad4c3ec673bc?domain=${domain}`);
+  if (!response.ok) throw new Error('Failed to fetch normative comparison');
+  return response.json();
 }
 
 export function useCognitiveProfile(userId: string) {
