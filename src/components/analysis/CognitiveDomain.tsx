@@ -12,7 +12,6 @@ import {
   YAxis,
   CartesianGrid
 } from 'recharts';
-import { CognitiveDomain as CognitiveDomainType } from '@/utils/mockData';
 import { 
   getDomainBgColor, 
   getDomainColor, 
@@ -20,6 +19,14 @@ import {
   getScoreColorClass,
   getScoreStatus 
 } from '@/utils/dataProcessing';
+
+interface CognitiveDomainType {
+  attention: number;
+  memory: number;
+  executiveFunction: number;
+  behavioral: number;
+  impulseControl?: number;
+}
 
 interface CognitiveDomainProps {
   domain: keyof CognitiveDomainType;
@@ -41,19 +48,19 @@ export const CognitiveDomain: React.FC<CognitiveDomainProps> = ({
   const firstScore = formattedTrendData[0]?.value || latestScore;
   const improvement = Math.round((latestScore - firstScore) * 10) / 10;
   
-  const colorClass = getDomainColor(domain);
-  const bgColorClass = getDomainBgColor(domain);
+  const colorClass = getDomainColor(String(domain));
+  const bgColorClass = getDomainBgColor(String(domain));
   const scoreColorClass = getScoreColorClass(score);
   const scoreStatus = getScoreStatus(score);
   
   // Domain-specific insights
-  const insights = getDomainInsights(domain, score);
+  const insights = getDomainInsights(String(domain), score);
   
   return (
     <Card className="glass overflow-hidden">
       <CardHeader className={`${bgColorClass} pb-2`}>
         <div className="flex items-center justify-between">
-          <CardTitle className={`text-lg ${colorClass}`}>{getDomainName(domain)}</CardTitle>
+          <CardTitle className={`text-lg ${colorClass}`}>{getDomainName(String(domain))}</CardTitle>
           <Badge 
             className={`${scoreColorClass} bg-white`}
             variant="outline"
@@ -92,12 +99,12 @@ export const CognitiveDomain: React.FC<CognitiveDomainProps> = ({
                   borderRadius: 'var(--radius)',
                   color: 'hsl(var(--foreground))'
                 }}
-                formatter={(value: number) => [`${value}%`, getDomainName(domain)]}
+                formatter={(value: number) => [`${value}%`, getDomainName(String(domain))]}
               />
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke={`hsl(var(--cognitive-${domain}))`}
+                stroke={`hsl(var(--cognitive-${String(domain)}))`}
                 strokeWidth={2}
                 activeDot={{ r: 6, strokeWidth: 2, stroke: 'hsl(var(--background))' }}
                 dot={{ r: 0 }}
@@ -142,7 +149,7 @@ export const CognitiveDomain: React.FC<CognitiveDomainProps> = ({
 };
 
 // Helper function to get domain-specific insights
-const getDomainInsights = (domain: keyof CognitiveDomainType, score: number): string[] => {
+const getDomainInsights = (domain: string, score: number): string[] => {
   if (score < 60) {
     switch (domain) {
       case 'attention':
@@ -164,6 +171,7 @@ const getDomainInsights = (domain: keyof CognitiveDomainType, score: number): st
           'Challenges with inhibitory control in response-based activities'
         ];
       case 'behavioral':
+      case 'impulseControl':
         return [
           'Exhibits impulsive responses before fully processing information',
           'Difficulty managing frustration during challenging tasks',
@@ -193,6 +201,7 @@ const getDomainInsights = (domain: keyof CognitiveDomainType, score: number): st
           'Shows appropriate inhibitory control during challenging activities'
         ];
       case 'behavioral':
+      case 'impulseControl':
         return [
           'Maintains appropriate response control during activities',
           'Manages frustration effectively during challenging segments',

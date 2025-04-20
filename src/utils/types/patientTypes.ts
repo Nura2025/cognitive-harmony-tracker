@@ -74,3 +74,73 @@ export interface NormativeComparison {
     reference: string;
   };
 }
+
+// Additional types needed by components
+export interface CognitiveDomain {
+  attention: number;
+  memory: number;
+  executiveFunction: number;
+  impulseControl: number;
+  behavioral?: number; // For backwards compatibility
+}
+
+export interface Patient {
+  id: string;
+  name: string;
+  age: number;
+  gender: string;
+  diagnosisDate: string;
+  adhdSubtype: string;
+  assessmentCount: number;
+  lastAssessment: string;
+}
+
+export interface PatientMetrics {
+  patientId: string;
+  date: string;
+  attention: number;
+  memory: number;
+  executiveFunction: number;
+  behavioral: number;
+  impulseControl?: number;
+  percentile: number;
+  sessionsDuration: number;
+  sessionsCompleted: number;
+  progress: number;
+  clinicalConcerns: string[];
+}
+
+export interface SessionData {
+  id: string;
+  patientId: string;
+  startTime: string;
+  endTime: string;
+  completionStatus: string;
+  overallScore: number;
+  domainScores: Record<string, number>;
+  activities: {
+    name: string;
+    score: number;
+    duration: number;
+    completionStatus: string;
+  }[];
+}
+
+export interface PatientData {
+  patient: Patient;
+  metrics: PatientMetrics;
+  sessions: SessionData[];
+  reports: ReportType[];
+}
+
+export interface ReportType {
+  id: string;
+  patientId: string;
+  title: string;
+  date: string;
+  type: string;
+  metrics: Record<string, number>;
+  notes: string;
+  recommendations: string[];
+  generatedBy: string;
+}

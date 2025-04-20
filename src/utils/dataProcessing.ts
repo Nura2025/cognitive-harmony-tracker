@@ -1,170 +1,119 @@
 
-import { CognitiveDomain, PatientMetrics, SessionData } from './mockData';
-import { format, parseISO, differenceInDays } from 'date-fns';
+import { CognitiveDomain } from './types/patientTypes';
+import { mockNormativeData, mockSubtypeData } from './mockData';
 
-// Format percentile value with "th", "st", "nd", or "rd" suffix
-export const formatPercentile = (percentile: number): string => {
-  if (percentile > 10 && percentile < 20) return `${percentile}th`;
-  
-  const lastDigit = percentile % 10;
-  switch (lastDigit) {
-    case 1: return `${percentile}st`;
-    case 2: return `${percentile}nd`;
-    case 3: return `${percentile}rd`;
-    default: return `${percentile}th`;
-  }
-};
-
-// Format time duration from seconds to readable format
-export const formatDuration = (seconds: number): string => {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
-  }
-  return `${minutes} min`;
-};
-
-// Get score status based on value range
-export const getScoreStatus = (
-  score: number
-): 'critical' | 'concern' | 'moderate' | 'good' | 'excellent' => {
-  if (score < 40) return 'critical';
-  if (score < 60) return 'concern';
-  if (score < 75) return 'moderate';
-  if (score < 90) return 'good';
-  return 'excellent';
-};
-
-// Get color class based on score status
-export const getScoreColorClass = (
-  score: number
-): string => {
-  const status = getScoreStatus(score);
-  switch (status) {
-    case 'critical': return 'text-red-600';
-    case 'concern': return 'text-amber-500';
-    case 'moderate': return 'text-yellow-500';
-    case 'good': return 'text-emerald-500';
-    case 'excellent': return 'text-blue-600';
-    default: return 'text-gray-500';
-  }
-};
-
-// Get color class for the background based on score status
-export const getScoreBgClass = (
-  score: number
-): string => {
-  const status = getScoreStatus(score);
-  switch (status) {
-    case 'critical': return 'bg-red-100';
-    case 'concern': return 'bg-amber-100';
-    case 'moderate': return 'bg-yellow-100';
-    case 'good': return 'bg-emerald-100';
-    case 'excellent': return 'bg-blue-100';
-    default: return 'bg-gray-100';
-  }
-};
-
-// Calculate the change in metrics between two periods
-export const calculateMetricsChange = (
-  current: number,
-  previous: number
-): { value: number; isImprovement: boolean } => {
-  const change = current - previous;
-  return {
-    value: Math.abs(change),
-    isImprovement: change > 0
+// Get domain display name
+export const getDomainName = (domain: string): string => {
+  const domainMap: Record<string, string> = {
+    'attention': 'Attention',
+    'memory': 'Memory',
+    'executiveFunction': 'Executive Function',
+    'impulseControl': 'Impulse Control',
+    'behavioral': 'Behavioral',
+    'executive_function': 'Executive Function',
+    'impulse_control': 'Impulse Control'
   };
+  
+  return domainMap[domain] || String(domain);
 };
 
-// Format date difference for "last session" display
-export const formatLastSession = (dateStr: string): string => {
-  const date = parseISO(dateStr);
-  const daysDiff = differenceInDays(new Date(), date);
+// Get domain color for styling
+export const getDomainColor = (domain: string): string => {
+  const colorMap: Record<string, string> = {
+    'attention': 'text-blue-600',
+    'memory': 'text-amber-600',
+    'executiveFunction': 'text-emerald-600',
+    'behavioral': 'text-violet-600',
+    'impulseControl': 'text-rose-600'
+  };
   
-  if (daysDiff === 0) return 'Today';
-  if (daysDiff === 1) return 'Yesterday';
-  if (daysDiff < 7) return `${daysDiff} days ago`;
-  if (daysDiff < 30) return `${Math.floor(daysDiff / 7)} weeks ago`;
-  return `${Math.floor(daysDiff / 30)} months ago`;
+  return colorMap[domain] || 'text-gray-600';
 };
 
-// Get domain color based on domain name
-export const getDomainColor = (domain: keyof CognitiveDomain): string => {
-  switch (domain) {
-    case 'attention': return 'text-cognitive-attention';
-    case 'memory': return 'text-cognitive-memory';
-    case 'executiveFunction': return 'text-cognitive-executive';
-    case 'behavioral': return 'text-cognitive-behavioral';
-    default: return 'text-gray-500';
-  }
+// Get domain background color for styling
+export const getDomainBgColor = (domain: string): string => {
+  const bgColorMap: Record<string, string> = {
+    'attention': 'bg-blue-50',
+    'memory': 'bg-amber-50',
+    'executiveFunction': 'bg-emerald-50',
+    'behavioral': 'bg-violet-50',
+    'impulseControl': 'bg-rose-50'
+  };
+  
+  return bgColorMap[domain] || 'bg-gray-50';
 };
 
-// Get domain background color based on domain name
-export const getDomainBgColor = (domain: keyof CognitiveDomain): string => {
-  switch (domain) {
-    case 'attention': return 'bg-cognitive-attention/10';
-    case 'memory': return 'bg-cognitive-memory/10';
-    case 'executiveFunction': return 'bg-cognitive-executive/10';
-    case 'behavioral': return 'bg-cognitive-behavioral/10';
-    default: return 'bg-gray-100';
-  }
+// Get score color based on value
+export const getScoreColorClass = (score: number): string => {
+  if (score >= 80) return 'text-emerald-600';
+  if (score >= 60) return 'text-blue-600';
+  if (score >= 40) return 'text-amber-600';
+  return 'text-red-600';
 };
 
-// Get readable domain name
-export const getDomainName = (domain: keyof CognitiveDomain): string => {
-  switch (domain) {
-    case 'attention': return 'Attention';
-    case 'memory': return 'Memory';
-    case 'executiveFunction': return 'Executive Function';
-    case 'behavioral': return 'Behavioral';
-    default: return domain;
-  }
+// Get status text based on score
+export const getScoreStatus = (score: number): string => {
+  if (score >= 80) return 'Excellent';
+  if (score >= 60) return 'Good';
+  if (score >= 40) return 'Fair';
+  return 'Needs Improvement';
 };
 
-// Calculate average score from domain scores
-export const calculateAverageScore = (domainScores: CognitiveDomain): number => {
-  const scores = Object.values(domainScores);
-  return scores.reduce((sum, score) => sum + score, 0) / scores.length;
+// Format percentile display
+export const formatPercentile = (value: number): string => {
+  if (typeof value !== 'number' || isNaN(value)) return 'N/A';
+  return `${Math.round(value)}`;
 };
 
-// Process sessions data for timeline visualization
-export const processSessionsForTimeline = (
-  sessions: SessionData[]
-): Array<{ date: string; score: number }> => {
-  return sessions
-    .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
-    .map(session => ({
-      date: format(parseISO(session.startTime), 'yyyy-MM-dd'),
-      score: session.overallScore
-    }));
+// Helper function to convert string object keys to camelCase
+export const toCamelCase = (str: string): string => {
+  return str.replace(/_([a-z])/g, (match, p1) => p1.toUpperCase());
 };
 
-// Get appropriate recommendation based on metrics
-export const generateRecommendations = (metrics: PatientMetrics): string[] => {
-  const recommendations: string[] = [];
+// Convert cognitive profile object from snake_case to camelCase
+export const formatCognitiveProfile = (profile: Record<string, any>): Record<string, any> => {
+  const formattedProfile: Record<string, any> = {};
   
-  if (metrics.attention < 60) {
-    recommendations.push('Focus on attention training exercises that gradually increase in duration');
+  for (const key in profile) {
+    const camelKey = toCamelCase(key);
+    
+    if (typeof profile[key] === 'object' && profile[key] !== null) {
+      formattedProfile[camelKey] = formatCognitiveProfile(profile[key]);
+    } else {
+      formattedProfile[camelKey] = profile[key];
+    }
   }
   
-  if (metrics.memory < 60) {
-    recommendations.push('Implement working memory activities in daily routines');
+  return formattedProfile;
+};
+
+// Get domain key from display name
+export const getDomainKey = (displayName: string): string => {
+  const lowerCaseName = String(displayName).toLowerCase();
+  
+  if (lowerCaseName.includes('attention')) return 'attention';
+  if (lowerCaseName.includes('memory')) return 'memory';
+  if (lowerCaseName.includes('executive')) return 'executiveFunction';
+  if (lowerCaseName.includes('impulse')) return 'impulseControl';
+  if (lowerCaseName.includes('behavior')) return 'behavioral';
+  
+  return String(displayName);
+};
+
+// Calculate overall improvement from sessions
+export const calculateImprovement = (sessions: any[]): number => {
+  if (!sessions || sessions.length < 2) {
+    return 0;
   }
   
-  if (metrics.executiveFunction < 60) {
-    recommendations.push('Practice planning and organizational skills through structured activities');
+  const firstSession = sessions[0];
+  const lastSession = sessions[sessions.length - 1];
+  
+  if (!firstSession || !lastSession || 
+      typeof firstSession.score !== 'number' || 
+      typeof lastSession.score !== 'number') {
+    return 0;
   }
   
-  if (metrics.behavioral < 60) {
-    recommendations.push('Consider behavioral management strategies to reduce impulsivity');
-  }
-  
-  if (recommendations.length === 0) {
-    recommendations.push('Continue current intervention approach as progress is positive');
-  }
-  
-  return recommendations;
+  return Math.round((lastSession.score - firstSession.score) * 10) / 10;
 };

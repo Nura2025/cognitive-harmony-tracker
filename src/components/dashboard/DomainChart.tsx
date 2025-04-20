@@ -11,7 +11,6 @@ import {
   CartesianGrid,
   ReferenceLine
 } from 'recharts';
-import { CognitiveDomain } from '@/utils/mockData';
 import { getDomainName } from '@/utils/dataProcessing';
 
 interface DomainChartProps {
@@ -19,6 +18,7 @@ interface DomainChartProps {
     attention: number[];
     memory: number[];
     executiveFunction: number[];
+    impulseControl: number[];
     behavioral: number[];
   };
 }
@@ -40,7 +40,8 @@ export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
     attention: 'hsl(var(--cognitive-attention))',
     memory: 'hsl(var(--cognitive-memory))',
     executiveFunction: 'hsl(var(--cognitive-executive))',
-    behavioral: 'hsl(var(--cognitive-behavioral))'
+    behavioral: 'hsl(var(--cognitive-behavioral))',
+    impulseControl: 'hsl(var(--cognitive-impulse))'
   };
 
   return (
@@ -51,12 +52,12 @@ export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
       <CardContent>
         <div className="flex flex-wrap gap-3 mb-3">
           {(Object.keys(domainData) as (keyof typeof domainData)[]).map(domain => (
-            <div key={domain} className="flex items-center">
+            <div key={String(domain)} className="flex items-center">
               <div 
                 className="w-3 h-3 rounded-full mr-1.5" 
-                style={{ backgroundColor: domainColors[domain] }}
+                style={{ backgroundColor: domainColors[domain as keyof typeof domainColors] || '#888' }}
               />
-              <span className="text-xs">{getDomainName(domain as keyof CognitiveDomain)}</span>
+              <span className="text-xs">{getDomainName(String(domain))}</span>
             </div>
           ))}
         </div>
@@ -69,9 +70,9 @@ export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
             >
               <defs>
                 {(Object.keys(domainData) as (keyof typeof domainData)[]).map(domain => (
-                  <linearGradient key={domain} id={`gradient-${domain}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={domainColors[domain]} stopOpacity={0.2} />
-                    <stop offset="95%" stopColor={domainColors[domain]} stopOpacity={0} />
+                  <linearGradient key={String(domain)} id={`gradient-${String(domain)}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={domainColors[domain as keyof typeof domainColors] || '#888'} stopOpacity={0.2} />
+                    <stop offset="95%" stopColor={domainColors[domain as keyof typeof domainColors] || '#888'} stopOpacity={0} />
                   </linearGradient>
                 ))}
               </defs>
@@ -107,12 +108,12 @@ export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
               
               {(Object.keys(domainData) as (keyof typeof domainData)[]).map(domain => (
                 <Area
-                  key={domain}
+                  key={String(domain)}
                   type="monotone"
-                  dataKey={domain}
-                  stroke={domainColors[domain]}
+                  dataKey={String(domain)}
+                  stroke={domainColors[domain as keyof typeof domainColors] || '#888'}
                   fillOpacity={1}
-                  fill={`url(#gradient-${domain})`}
+                  fill={`url(#gradient-${String(domain)})`}
                   strokeWidth={2}
                   activeDot={{ r: 6, strokeWidth: 2, stroke: 'hsl(var(--background))' }}
                 />

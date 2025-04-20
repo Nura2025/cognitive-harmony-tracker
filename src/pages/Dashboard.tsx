@@ -31,12 +31,14 @@ const Dashboard = () => {
     attention: [profile.domain_scores.attention],
     memory: [profile.domain_scores.memory],
     executiveFunction: [profile.domain_scores.executive_function],
-    impulseControl: [profile.domain_scores.impulse_control]
+    impulseControl: [profile.domain_scores.impulse_control],
+    behavioral: [Math.round((profile.domain_scores.impulse_control + profile.domain_scores.executive_function) / 2)] // Adding behavioral for backward compatibility
   } : {
     attention: [],
     memory: [],
     executiveFunction: [],
-    impulseControl: []
+    impulseControl: [],
+    behavioral: []
   };
   
   if (profileLoading) {
