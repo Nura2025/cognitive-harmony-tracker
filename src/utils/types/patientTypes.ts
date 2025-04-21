@@ -1,4 +1,3 @@
-
 // Type definitions for patient and assessment data
 
 export interface Patient {
@@ -19,6 +18,10 @@ export interface CognitiveDomain {
   behavioral: number;
 }
 
+export interface CognitiveDomainMetrics extends CognitiveDomain {
+  [key: string]: number;
+}
+
 export interface PatientMetrics extends CognitiveDomain {
   patientId: string;
   date: string;
@@ -27,6 +30,7 @@ export interface PatientMetrics extends CognitiveDomain {
   sessionsCompleted: number;
   progress: number;
   clinicalConcerns: string[];
+  [key: string]: string | number | string[];
 }
 
 export interface SessionData {
@@ -65,7 +69,6 @@ export interface ReportType {
   status: 'draft' | 'generated' | 'shared';
 }
 
-// Define relationships between entities
 export interface PatientData {
   patient: Patient;
   metrics: PatientMetrics;
