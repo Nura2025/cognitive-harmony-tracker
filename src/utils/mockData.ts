@@ -1,175 +1,62 @@
 
-import { CognitiveDomain, Patient, PatientMetrics, SessionData, ReportType } from './types/patientTypes';
+// This file serves as the entry point for mock data
+// It initializes and exports all generated mock data
 
-// Define mock data
-export const mockNormativeData: CognitiveDomain = {
-  attention: 50,
-  memory: 55,
-  executiveFunction: 48,
-  impulseControl: 52
-};
+import { 
+  Patient, 
+  PatientMetrics, 
+  SessionData, 
+  CognitiveDomain,
+  ReportType 
+} from './types/patientTypes';
+import { generatePatients, generatePatientMetrics } from './generators/patientGenerators';
+import { generateSessionData } from './generators/sessionGenerators';
+import { generateTrendData, generatePercentileData } from './generators/trendGenerators';
+import { generateRecommendations } from './generators/recommendationGenerators';
+import { mockPatientData, mockNormativeData, mockSubtypeData } from './mockData/cognitiveDomainData';
+import { generateReports, mockReports } from './mockData/reportData';
 
-export const mockSubtypeData: CognitiveDomain = {
-  attention: 42,
-  memory: 45,
-  executiveFunction: 40,
-  impulseControl: 43
-};
+// Initialize mock data
+export const patients = generatePatients(12);
+export const patientMetrics = generatePatientMetrics(patients);
+export const sessionData = generateSessionData(patients);
+export const reports = generateReports(patients.map(p => p.id));
 
-// Complete metrics data
-export const metricsMap: Record<string, PatientMetrics> = {
-  "p1": {
-    patientId: "p1",
-    date: "2024-04-10",
-    attention: 75,
-    memory: 82,
-    executiveFunction: 68,
-    behavioral: 70,
-    impulseControl: 65,
-    percentile: 76,
-    sessionsDuration: 120,
-    sessionsCompleted: 5,
-    progress: 8,
-    clinicalConcerns: ["Task initiation", "Sustained attention"]
-  },
-  "p2": {
-    patientId: "p2",
-    date: "2024-04-12",
-    attention: 65,
-    memory: 72,
-    executiveFunction: 78,
-    behavioral: 80,
-    impulseControl: 75,
-    percentile: 72,
-    sessionsDuration: 150,
-    sessionsCompleted: 6,
-    progress: 12,
-    clinicalConcerns: ["Emotional regulation"]
+// Export mock cognitive domain data
+export { mockPatientData, mockNormativeData, mockSubtypeData };
+
+// For convenience, create a map of patient IDs to their metrics
+export const metricsMap = patientMetrics.reduce((acc, metrics) => {
+  acc[metrics.patientId] = metrics;
+  return acc;
+}, {} as Record<string, PatientMetrics>);
+
+// For convenience, create a map of patient IDs to their sessions
+export const sessionsMap = sessionData.reduce((acc, session) => {
+  if (!acc[session.patientId]) {
+    acc[session.patientId] = [];
   }
-};
+  acc[session.patientId].push(session);
+  return acc;
+}, {} as Record<string, SessionData[]>);
 
-// Sessions data
-export const sessionsMap: Record<string, SessionData[]> = {
-  "p1": [
-    {
-      id: "s1",
-      patientId: "p1",
-      startTime: "2024-03-01T10:00:00Z",
-      endTime: "2024-03-01T11:00:00Z",
-      completionStatus: "completed",
-      overallScore: 78,
-      domainScores: {
-        attention: 75,
-        memory: 82,
-        executiveFunction: 68,
-        behavioral: 70,
-        impulseControl: 65
-      },
-      activities: [
-        {
-          id: "a1",
-          name: "Memory Task",
-          type: "memory",
-          score: 82,
-          duration: 600,
-          difficulty: 2,
-          completionStatus: "completed"
-        }
-      ]
-    },
-    {
-      id: "s2",
-      patientId: "p1",
-      startTime: "2024-03-15T14:00:00Z",
-      endTime: "2024-03-15T15:00:00Z",
-      completionStatus: "completed",
-      overallScore: 80,
-      domainScores: {
-        attention: 78,
-        memory: 85,
-        executiveFunction: 72,
-        behavioral: 75,
-        impulseControl: 70
-      },
-      activities: [
-        {
-          id: "a2",
-          name: "Attention Task",
-          type: "attention",
-          score: 78,
-          duration: 600,
-          difficulty: 3,
-          completionStatus: "completed"
-        }
-      ]
-    }
-  ],
-  "p2": []
-};
-
-// Reports data
-export const reportsMap: Record<string, ReportType[]> = {
-  "p1": [
-    {
-      id: "r1",
-      patientId: "p1",
-      title: "Clinical Assessment Report",
-      date: "2024-04-10",
-      type: "clinical",
-      metrics: {
-        attention: 75,
-        memory: 82,
-        executiveFunction: 68,
-        behavioral: 70,
-        impulseControl: 65
-      },
-      notes: "Patient shows improvement in memory tasks",
-      recommendations: [
-        "Continue memory exercises",
-        "Focus on executive function tasks"
-      ],
-      status: "generated",
-      createdDate: "2024-04-10"
-    }
-  ],
-  "p2": []
-};
-
-// Mock patients data
-export const patients: Patient[] = [
-  {
-    id: "p1",
-    name: "John Doe",
-    age: 25,
-    gender: "male",
-    diagnosisDate: "2024-01-01",
-    adhdSubtype: "Combined",
-    assessmentCount: 5,
-    lastAssessment: "2024-04-01"
-  },
-  {
-    id: "p2",
-    name: "Jane Smith",
-    age: 30,
-    gender: "female",
-    diagnosisDate: "2024-02-15",
-    adhdSubtype: "Inattentive",
-    assessmentCount: 6,
-    lastAssessment: "2024-04-12"
+// For convenience, create a map of patient IDs to their reports
+export const reportsMap = reports.reduce((acc, report) => {
+  if (!acc[report.patientId]) {
+    acc[report.patientId] = [];
   }
-];
+  acc[report.patientId].push(report);
+  return acc;
+}, {} as Record<string, ReportType[]>);
 
-// Mock patient data for reports
-export const mockPatientData: Patient = {
-  id: "p1",
-  name: "John Doe",
-  age: 25,
-  gender: "male",
-  diagnosisDate: "2024-01-01",
-  adhdSubtype: "Combined",
-  assessmentCount: 5,
-  lastAssessment: "2024-04-01"
+// Re-export all types and generator functions
+export type { Patient, PatientMetrics, SessionData, CognitiveDomain, ReportType };
+export { 
+  generatePatients, 
+  generatePatientMetrics, 
+  generateSessionData, 
+  generateTrendData, 
+  generatePercentileData,
+  generateRecommendations,
+  mockReports
 };
-
-// Export all types for use in other files
-export type { CognitiveDomain, Patient, PatientMetrics, SessionData, ReportType };

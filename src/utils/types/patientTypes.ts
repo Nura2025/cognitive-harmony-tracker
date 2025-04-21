@@ -1,126 +1,32 @@
 
-export interface CognitiveProfile {
-  user_id: string;
-  user_name: string;
-  age: number;
-  age_group: string;
-  adhd_subtype: string;
-  session_id: string;
-  session_date: string;
-  domain_scores: {
-    attention: number;
-    memory: number;
-    impulse_control: number;
-    executive_function: number;
-  };
-  percentiles: {
-    attention: number;
-    memory: number;
-    impulse_control: number;
-    executive_function: number;
-  };
-  classifications: {
-    attention: string;
-    memory: string;
-    impulse_control: string;
-    executive_function: string;
-  };
-  profile_pattern: string;
-}
-
-export interface TimeSeriesDataPoint {
-  date: string;
-  score: number;
-  value?: number; // Adding this for backward compatibility
-}
-
-export interface ProgressComparison {
-  user_id: string;
-  domain: string;
-  period: string;
-  initial_score: number;
-  current_score: number;
-  initial_date: string;
-  current_date: string;
-  absolute_change: number;
-  percentage_change: number;
-}
-
-export interface ComponentDetails {
-  session_id: string;
-  domain: string;
-  overall_score: number;
-  percentile: number;
-  classification: string;
-  components: Record<string, any>;
-  data_completeness: number;
-}
-
-export interface NormativeComparison {
-  user_id: string;
-  domain: string;
-  age_group: string;
-  raw_score: number;
-  normative_comparison: {
-    mean: number;
-    standard_deviation: number;
-    z_score: number;
-    percentile: number;
-    reference: string;
-    sample_size: number;
-  };
-  adhd_comparison: {
-    z_score: number;
-    percentile: number;
-    reference: string;
-  };
-}
-
-// Additional types needed by components
-export interface CognitiveDomain {
-  attention: number;
-  memory: number;
-  executiveFunction: number;
-  impulseControl: number;
-  behavioral?: number; // For backwards compatibility
-  [key: string]: number | undefined; // Add string indexing to resolve type errors
-}
-
-export interface CognitiveDomainMetrics {
-  attention: number;
-  memory: number;
-  executiveFunction: number;
-  impulseControl: number;
-  behavioral?: number;
-  clinicalConcerns?: string[]; // Make clinicalConcerns optional and move it here
-  [key: string]: number | string[] | undefined; // Allow string[] for clinicalConcerns
-}
+// Type definitions for patient and assessment data
 
 export interface Patient {
   id: string;
   name: string;
   age: number;
-  gender: string;
+  gender: 'Male' | 'Female' | 'Other';
   diagnosisDate: string;
-  adhdSubtype: string;
+  adhdSubtype: 'Inattentive' | 'Hyperactive-Impulsive' | 'Combined';
   assessmentCount: number;
   lastAssessment: string;
 }
 
-export interface PatientMetrics {
-  patientId: string;
-  date: string;
+export interface CognitiveDomain {
   attention: number;
   memory: number;
   executiveFunction: number;
   behavioral: number;
-  impulseControl: number;
+}
+
+export interface PatientMetrics extends CognitiveDomain {
+  patientId: string;
+  date: string;
   percentile: number;
   sessionsDuration: number;
   sessionsCompleted: number;
   progress: number;
   clinicalConcerns: string[];
-  [key: string]: string | number | string[] | undefined;
 }
 
 export interface SessionData {
@@ -128,41 +34,41 @@ export interface SessionData {
   patientId: string;
   startTime: string;
   endTime: string;
-  completionStatus: string;
+  duration: number;
+  environment: 'Home' | 'School' | 'Clinic';
+  completionStatus: 'Completed' | 'Abandoned' | 'Interrupted';
   overallScore: number;
-  domainScores: Record<string, number>;
-  activities: {
+  device: string;
+  activities: Array<{
     id: string;
-    name: string;
     type: string;
     score: number;
     duration: number;
     difficulty: number;
-    completionStatus: string;
-  }[];
-  duration?: number;
-  environment?: string;
-  device?: string;
-}
-
-export interface PatientData {
-  patient: Patient;
-  metrics: PatientMetrics;
-  sessions: SessionData[];
-  reports: ReportType[];
+  }>;
+  domainScores: CognitiveDomain;
 }
 
 export interface ReportType {
   id: string;
   patientId: string;
   title: string;
-  date: string;
-  type: string;
-  metrics?: Record<string, number>;
-  notes?: string;
-  recommendations?: string[];
-  generatedBy?: string;
-  sections?: Record<string, boolean>;
-  status: string;
+  type: 'clinical' | 'school' | 'progress' | 'detailed';
   createdDate: string;
+  sections: {
+    overview: boolean;
+    domainAnalysis: boolean;
+    trends: boolean;
+    recommendations: boolean;
+    rawData: boolean;
+  };
+  status: 'draft' | 'generated' | 'shared';
+}
+
+// Define relationships between entities
+export interface PatientData {
+  patient: Patient;
+  metrics: PatientMetrics;
+  sessions: SessionData[];
+  reports: ReportType[];
 }

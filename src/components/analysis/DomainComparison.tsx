@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartLegend } from '@/components/ui/chart';
@@ -12,17 +11,15 @@ import {
   ResponsiveContainer,
   Legend
 } from 'recharts';
+import { CognitiveDomain } from '@/utils/types/patientTypes';
+import { SessionData } from '@/utils/mockData';
 import { getDomainName } from '@/utils/dataProcessing';
-import { SessionData } from '@/utils/types/patientTypes';
-
-interface CognitiveDomainMetrics {
-  [key: string]: number;
-}
+import { BarChart } from 'lucide-react';
 
 interface DomainComparisonProps {
-  patientData: CognitiveDomainMetrics;
-  normativeData?: CognitiveDomainMetrics;
-  subtypeData?: CognitiveDomainMetrics;
+  patientData: CognitiveDomain;
+  normativeData?: CognitiveDomain;
+  subtypeData?: CognitiveDomain;
   sessions?: SessionData[];
 }
 
@@ -32,7 +29,7 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
   subtypeData,
   sessions = []
 }) => {
-  const domains = Object.keys(patientData);
+  const domains = Object.keys(patientData) as (keyof CognitiveDomain)[];
   
   const isValidData = domains.every(domain => 
     typeof patientData[domain] === 'number' && !isNaN(patientData[domain])

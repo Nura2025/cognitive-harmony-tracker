@@ -11,7 +11,7 @@ import {
   YAxis,
   CartesianGrid
 } from 'recharts';
-import { SessionData } from '@/utils/types/patientTypes';
+import { SessionData } from '@/utils/mockData';
 import { formatDuration, getScoreColorClass } from '@/utils/dataProcessing';
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { HelpCircle } from 'lucide-react';
@@ -23,10 +23,10 @@ interface ActivityBreakdownProps {
 export const ActivityBreakdown: React.FC<ActivityBreakdownProps> = ({ session }) => {
   // Process activities data for the chart
   const activityData = session.activities.map(activity => ({
-    name: activity.type || activity.name,
+    name: activity.type,
     score: activity.score,
     duration: activity.duration,
-    difficulty: activity.difficulty || 3
+    difficulty: activity.difficulty
   }));
 
   // Tooltip helper component
@@ -130,13 +130,13 @@ export const ActivityBreakdown: React.FC<ActivityBreakdownProps> = ({ session })
           {session.activities.map(activity => (
             <div key={activity.id} className="p-4 rounded-lg border border-border">
               <div className="flex items-center justify-between mb-3">
-                <InfoTooltip content={getActivityExplanation(activity.type || activity.name)}>
-                  <h4 className="font-medium">{activity.type || activity.name}</h4>
+                <InfoTooltip content={getActivityExplanation(activity.type)}>
+                  <h4 className="font-medium">{activity.type}</h4>
                 </InfoTooltip>
                 <div className="flex items-center gap-2">
-                  <InfoTooltip content={getDifficultyExplanation(activity.difficulty || 3)}>
+                  <InfoTooltip content={getDifficultyExplanation(activity.difficulty)}>
                     <Badge variant="outline">
-                      Difficulty: {activity.difficulty || 3}/5
+                      Difficulty: {activity.difficulty}/5
                     </Badge>
                   </InfoTooltip>
                   <InfoTooltip content="Percentage score achieved in this activity">
@@ -157,7 +157,7 @@ export const ActivityBreakdown: React.FC<ActivityBreakdownProps> = ({ session })
                 <InfoTooltip content="Primary cognitive domain targeted by this activity">
                   <div>
                     <p className="text-muted-foreground">Activity Type</p>
-                    <p className="font-medium">{getActivityCognitiveFocus(activity.type || activity.name)}</p>
+                    <p className="font-medium">{getActivityCognitiveFocus(activity.type)}</p>
                   </div>
                 </InfoTooltip>
               </div>

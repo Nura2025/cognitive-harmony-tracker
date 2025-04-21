@@ -1,3 +1,4 @@
+
 import { format, subDays, addMinutes, subMonths } from 'date-fns';
 import { Patient, PatientMetrics } from '../types/patientTypes';
 import { randomInt, randomFloat, randomChoice } from '../helpers/randomUtils';
@@ -38,7 +39,6 @@ export const generatePatientMetrics = (patients: Patient[]): PatientMetrics[] =>
     const memory = randomFloat(40, 95);
     const executiveFunction = randomFloat(40, 95);
     const behavioral = randomFloat(40, 95);
-    const impulseControl = randomFloat(40, 95);
     
     // Add clinical concerns based on scores
     if (attention < 60) concerns.push('Low sustained attention');
@@ -47,7 +47,7 @@ export const generatePatientMetrics = (patients: Patient[]): PatientMetrics[] =>
     if (behavioral < 60) concerns.push('High impulsivity');
     
     // Calculate average percentile
-    const percentile = Math.round((attention + memory + executiveFunction + behavioral + impulseControl) / 5);
+    const percentile = Math.round((attention + memory + executiveFunction + behavioral) / 4);
     
     return {
       patientId: patient.id,
@@ -56,7 +56,6 @@ export const generatePatientMetrics = (patients: Patient[]): PatientMetrics[] =>
       memory,
       executiveFunction,
       behavioral,
-      impulseControl,
       percentile,
       sessionsDuration: randomInt(20, 200),
       sessionsCompleted: patient.assessmentCount,

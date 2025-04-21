@@ -10,49 +10,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { patients, metricsMap, generatePercentileData, generateTrendData } from '@/utils/mockData';
 import { CognitiveDomain } from '@/components/analysis/CognitiveDomain';
 import { DomainComparison } from '@/components/analysis/DomainComparison';
 import { PerformanceTrend } from '@/components/analysis/PerformanceTrend';
-import { generatePercentileData, generateTrendData } from '@/utils/functions/dataGenerators';
-import { PatientMetrics, CognitiveDomainMetrics } from '@/utils/types/patientTypes';
-
-// Mock data for patients until we integrate with an API
-const patients = [
-  { id: "p1", name: "Alex Johnson" },
-  { id: "p2", name: "Maria Garcia" }
-];
-
-// Mock metrics data 
-const metricsMap: Record<string, PatientMetrics> = {
-  "p1": {
-    patientId: "p1",
-    date: "2024-04-10",
-    attention: 75,
-    memory: 82,
-    executiveFunction: 68,
-    behavioral: 70,
-    impulseControl: 65,
-    percentile: 76,
-    sessionsDuration: 120,
-    sessionsCompleted: 5,
-    progress: 8,
-    clinicalConcerns: ["Task initiation", "Sustained attention"]
-  },
-  "p2": {
-    patientId: "p2",
-    date: "2024-04-12",
-    attention: 65,
-    memory: 72,
-    executiveFunction: 78,
-    behavioral: 80,
-    impulseControl: 75,
-    percentile: 72,
-    sessionsDuration: 150,
-    sessionsCompleted: 6,
-    progress: 12,
-    clinicalConcerns: ["Emotional regulation"]
-  }
-};
 
 const Analysis = () => {
   const location = useLocation();
@@ -63,7 +24,7 @@ const Analysis = () => {
   // Parse patient ID from URL query params
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const id = params.get('patient') || "883faae2-f14b-40de-be5a-ad4c3ec673bc";
+    const id = params.get('patient');
     
     if (id && patients.some(p => p.id === id)) {
       setPatientId(id);
@@ -110,16 +71,6 @@ const Analysis = () => {
     return <div className="p-8 pixel-text">Loading patient data...</div>;
   }
   
-  // Create a CognitiveDomainMetrics object from PatientMetrics
-  const patientDomainMetrics: CognitiveDomainMetrics = {
-    attention: patientMetrics.attention,
-    memory: patientMetrics.memory,
-    executiveFunction: patientMetrics.executiveFunction,
-    impulseControl: patientMetrics.impulseControl || 0,
-    behavioral: patientMetrics.behavioral,
-    clinicalConcerns: patientMetrics.clinicalConcerns // Now allowed in CognitiveDomainMetrics
-  };
-  
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -157,7 +108,7 @@ const Analysis = () => {
       
       <div className="grid gap-6 md:grid-cols-2">
         <DomainComparison 
-          patientData={patientDomainMetrics}
+          patientData={patientMetrics}
           normativeData={percentileData.ageGroup}
           subtypeData={percentileData.adhdSubtype}
         />

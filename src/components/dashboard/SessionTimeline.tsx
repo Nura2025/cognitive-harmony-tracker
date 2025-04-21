@@ -10,11 +10,11 @@ import {
   YAxis,
   CartesianGrid
 } from 'recharts';
-import { TimeSeriesDataPoint } from '@/utils/types/patientTypes';
+import { SessionData } from '@/utils/mockData';
 import { formatDuration, processSessionsForTimeline } from '@/utils/dataProcessing';
 
 interface SessionTimelineProps {
-  sessions: TimeSeriesDataPoint[];
+  sessions: SessionData[];
   title?: string;
 }
 
@@ -27,9 +27,9 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = ({
   
   // Calculate sessions statistics
   const totalSessions = sessions.length;
-  const totalDuration = 0; // We don't have duration in TimeSeriesDataPoint
+  const totalDuration = sessions.reduce((sum, session) => sum + session.duration, 0);
   const averageScore = Math.round(
-    sessions.reduce((sum, session) => sum + session.score, 0) / sessions.length || 0
+    sessions.reduce((sum, session) => sum + session.overallScore, 0) / sessions.length
   );
   
   return (
@@ -45,7 +45,7 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = ({
           </div>
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">Total Duration</span>
-            <span className="text-xl font-semibold">N/A</span>
+            <span className="text-xl font-semibold">{formatDuration(totalDuration)}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">Average Score</span>
@@ -65,12 +65,8 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = ({
                 axisLine={false} 
                 tickLine={false}
                 tickFormatter={(date) => {
-                  if (typeof date !== 'string') {
-                    return '';  // Return empty string if date is not a string
-                  }
-                  
                   const parts = date.split('-');
-                  return parts.length >= 3 ? `${parts[1]}/${parts[2]}` : date;
+                  return `${parts[1]}/${parts[2]}`;
                 }}
                 stroke="hsl(var(--muted-foreground))"
                 tickMargin={10}

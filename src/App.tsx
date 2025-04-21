@@ -13,7 +13,6 @@ import Analysis from "./pages/Analysis";
 import Sessions from "./pages/Sessions";
 import Reports from "./pages/Reports";
 import PatientDetail from "./pages/PatientDetail";
-import CognitiveAnalysis from "./pages/CognitiveAnalysis";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,7 +33,6 @@ const App = () => (
                 <Route path="/analysis" element={<Analysis />} />
                 <Route path="/sessions" element={<Sessions />} />
                 <Route path="/reports" element={<Reports />} />
-                <Route path="/cognitive" element={<CognitiveAnalysis />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Layout>

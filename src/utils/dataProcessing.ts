@@ -1,99 +1,170 @@
-// Domain styling utilities
-export const getDomainColor = (domain: string): string => {
-  const colors: Record<string, string> = {
-    attention: 'text-blue-600',
-    memory: 'text-green-600',
-    executiveFunction: 'text-amber-600',
-    impulseControl: 'text-purple-600',
-    behavioral: 'text-rose-600'
-  };
-  return colors[domain] || 'text-gray-600';
-};
 
-export const getDomainBgColor = (domain: string): string => {
-  const colors: Record<string, string> = {
-    attention: 'bg-blue-50',
-    memory: 'bg-green-50',
-    executiveFunction: 'bg-amber-50',
-    impulseControl: 'bg-purple-50',
-    behavioral: 'bg-rose-50'
-  };
-  return colors[domain] || 'bg-gray-50';
-};
+import { CognitiveDomain, PatientMetrics, SessionData } from './mockData';
+import { format, parseISO, differenceInDays } from 'date-fns';
 
-export const getDomainName = (domain: string): string => {
-  const names: Record<string, string> = {
-    attention: 'Attention',
-    memory: 'Memory',
-    executiveFunction: 'Executive Function',
-    impulseControl: 'Impulse Control',
-    behavioral: 'Behavioral'
-  };
-  return names[domain] || domain;
-};
-
-export const getScoreStatus = (score: number): string => {
-  if (score >= 90) return 'Excellent';
-  if (score >= 80) return 'Very Good';
-  if (score >= 70) return 'Good';
-  if (score >= 60) return 'Fair';
-  if (score >= 50) return 'Below Average';
-  return 'Needs Improvement';
-};
-
-export const formatDuration = (minutes: number): string => {
-  if (minutes < 60) return `${minutes}m`;
-  const hours = Math.floor(minutes / 60);
-  const remainingMinutes = minutes % 60;
-  return remainingMinutes ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
-};
-
-export const formatLastSession = (date: string): string => {
-  const sessionDate = new Date(date);
-  const now = new Date();
-  const diffTime = Math.abs(now.getTime() - sessionDate.getTime());
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+// Format percentile value with "th", "st", "nd", or "rd" suffix
+export const formatPercentile = (percentile: number): string => {
+  if (percentile > 10 && percentile < 20) return `${percentile}th`;
   
-  if (diffDays === 0) return 'Today';
-  if (diffDays === 1) return 'Yesterday';
-  if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-  return sessionDate.toLocaleDateString();
+  const lastDigit = percentile % 10;
+  switch (lastDigit) {
+    case 1: return `${percentile}st`;
+    case 2: return `${percentile}nd`;
+    case 3: return `${percentile}rd`;
+    default: return `${percentile}th`;
+  }
 };
 
-export const getScoreColorClass = (score: number): string => {
-  if (score >= 90) return 'text-emerald-600';
-  if (score >= 70) return 'text-blue-600';
-  if (score >= 50) return 'text-amber-600';
-  return 'text-red-600';
+// Format time duration from seconds to readable format
+export const formatDuration = (seconds: number): string => {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  }
+  return `${minutes} min`;
 };
 
-export const formatPercentile = (value: number): string => {
-  if (typeof value !== 'number' || isNaN(value)) return 'N/A';
-  return `${Math.round(value)}`;
+// Get score status based on value range
+export const getScoreStatus = (
+  score: number
+): 'critical' | 'concern' | 'moderate' | 'good' | 'excellent' => {
+  if (score < 40) return 'critical';
+  if (score < 60) return 'concern';
+  if (score < 75) return 'moderate';
+  if (score < 90) return 'good';
+  return 'excellent';
 };
 
-export const getScoreBgColor = (score: number): string => {
-  if (score >= 90) return 'bg-emerald-100';
-  if (score >= 70) return 'bg-blue-100';
-  if (score >= 50) return 'bg-amber-100';
-  return 'bg-red-100';
+// Get color class based on score status
+export const getScoreColorClass = (
+  score: number
+): string => {
+  const status = getScoreStatus(score);
+  switch (status) {
+    case 'critical': return 'text-red-600';
+    case 'concern': return 'text-amber-500';
+    case 'moderate': return 'text-yellow-500';
+    case 'good': return 'text-emerald-500';
+    case 'excellent': return 'text-blue-600';
+    default: return 'text-gray-500';
+  }
 };
 
-export const getScoreBgClass = (score: number): string => {
-  if (score >= 90) return 'bg-emerald-500/10';
-  if (score >= 70) return 'bg-blue-500/10';
-  if (score >= 50) return 'bg-amber-500/10';
-  return 'bg-red-500/10';
+// Get color class for the background based on score status
+export const getScoreBgClass = (
+  score: number
+): string => {
+  const status = getScoreStatus(score);
+  switch (status) {
+    case 'critical': return 'bg-red-100';
+    case 'concern': return 'bg-amber-100';
+    case 'moderate': return 'bg-yellow-100';
+    case 'good': return 'bg-emerald-100';
+    case 'excellent': return 'bg-blue-100';
+    default: return 'bg-gray-100';
+  }
 };
 
-// Timeline processing
-export const processSessionsForTimeline = (sessions: any[]): any[] => {
-  return sessions.map(session => ({
-    id: session.id,
-    date: new Date(session.startTime),
-    title: 'Cognitive Assessment',
-    description: `Overall Score: ${session.overallScore}%`,
-    duration: session.duration || 30
-  }));
+// Calculate the change in metrics between two periods
+export const calculateMetricsChange = (
+  current: number,
+  previous: number
+): { value: number; isImprovement: boolean } => {
+  const change = current - previous;
+  return {
+    value: Math.abs(change),
+    isImprovement: change > 0
+  };
+};
+
+// Format date difference for "last session" display
+export const formatLastSession = (dateStr: string): string => {
+  const date = parseISO(dateStr);
+  const daysDiff = differenceInDays(new Date(), date);
+  
+  if (daysDiff === 0) return 'Today';
+  if (daysDiff === 1) return 'Yesterday';
+  if (daysDiff < 7) return `${daysDiff} days ago`;
+  if (daysDiff < 30) return `${Math.floor(daysDiff / 7)} weeks ago`;
+  return `${Math.floor(daysDiff / 30)} months ago`;
+};
+
+// Get domain color based on domain name
+export const getDomainColor = (domain: keyof CognitiveDomain): string => {
+  switch (domain) {
+    case 'attention': return 'text-cognitive-attention';
+    case 'memory': return 'text-cognitive-memory';
+    case 'executiveFunction': return 'text-cognitive-executive';
+    case 'behavioral': return 'text-cognitive-behavioral';
+    default: return 'text-gray-500';
+  }
+};
+
+// Get domain background color based on domain name
+export const getDomainBgColor = (domain: keyof CognitiveDomain): string => {
+  switch (domain) {
+    case 'attention': return 'bg-cognitive-attention/10';
+    case 'memory': return 'bg-cognitive-memory/10';
+    case 'executiveFunction': return 'bg-cognitive-executive/10';
+    case 'behavioral': return 'bg-cognitive-behavioral/10';
+    default: return 'bg-gray-100';
+  }
+};
+
+// Get readable domain name
+export const getDomainName = (domain: keyof CognitiveDomain): string => {
+  switch (domain) {
+    case 'attention': return 'Attention';
+    case 'memory': return 'Memory';
+    case 'executiveFunction': return 'Executive Function';
+    case 'behavioral': return 'Behavioral';
+    default: return domain;
+  }
+};
+
+// Calculate average score from domain scores
+export const calculateAverageScore = (domainScores: CognitiveDomain): number => {
+  const scores = Object.values(domainScores);
+  return scores.reduce((sum, score) => sum + score, 0) / scores.length;
+};
+
+// Process sessions data for timeline visualization
+export const processSessionsForTimeline = (
+  sessions: SessionData[]
+): Array<{ date: string; score: number }> => {
+  return sessions
+    .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
+    .map(session => ({
+      date: format(parseISO(session.startTime), 'yyyy-MM-dd'),
+      score: session.overallScore
+    }));
+};
+
+// Get appropriate recommendation based on metrics
+export const generateRecommendations = (metrics: PatientMetrics): string[] => {
+  const recommendations: string[] = [];
+  
+  if (metrics.attention < 60) {
+    recommendations.push('Focus on attention training exercises that gradually increase in duration');
+  }
+  
+  if (metrics.memory < 60) {
+    recommendations.push('Implement working memory activities in daily routines');
+  }
+  
+  if (metrics.executiveFunction < 60) {
+    recommendations.push('Practice planning and organizational skills through structured activities');
+  }
+  
+  if (metrics.behavioral < 60) {
+    recommendations.push('Consider behavioral management strategies to reduce impulsivity');
+  }
+  
+  if (recommendations.length === 0) {
+    recommendations.push('Continue current intervention approach as progress is positive');
+  }
+  
+  return recommendations;
 };

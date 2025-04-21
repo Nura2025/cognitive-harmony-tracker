@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CalendarDays, Clock, User } from 'lucide-react';
-import { Patient, PatientMetrics } from '@/utils/types/patientTypes';
+import { Patient, PatientMetrics } from '@/utils/mockData';
 import { formatLastSession, formatPercentile, getScoreColorClass } from '@/utils/dataProcessing';
 
 interface PatientCardProps {
