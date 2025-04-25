@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { usePatientData } from '@/hooks/usePatientData';
+import { PatientData } from '@/utils/types/patientTypes';
+import { patients, metricsMap, sessionsMap, reportsMap, mockNormativeData, mockSubtypeData } from '@/utils/mockData';
+import { generateTrendData } from '@/utils/generators/trendGenerators';
 import { PatientHeader } from '@/components/patients/detail/PatientHeader';
 import { PatientProfile } from '@/components/patients/detail/PatientProfile';
 import { PatientSessions } from '@/components/patients/detail/PatientSessions';
@@ -10,19 +13,37 @@ import { PatientReports } from '@/components/reports/PatientReports';
 import { ReportGenerator } from '@/components/reports/ReportGenerator';
 import { Card, CardContent } from '@/components/ui/card';
 import { ReportType } from '@/utils/types/patientTypes';
-import { useToast } from '@/components/ui/use-toast';
-import { generateTrendData } from '@/utils/generators/trendGenerators';
-import { mockNormativeData, mockSubtypeData } from '@/utils/mockData';
 
 const PatientDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { toast } = useToast();
   
   const [activeTab, setActiveTab] = useState('profile');
+  const [patientData, setPatientData] = useState<PatientData | null>(null);
   const [selectedSessionIndex, setSelectedSessionIndex] = useState(0);
   
-  const { data: patientData, isLoading, error } = usePatientData(id || '');
+  useEffect(() => {
+    const patient = patients.find(p => p.id === id);
+    
+    if (patient) {
+      const metrics = metricsMap[patient.id];
+      const sessions = sessionsMap[patient.id] || [];
+      const reports = reportsMap[patient.id] || [];
+      
+      setPatientData({
+        patient,
+        metrics,
+        sessions,
+        reports
+      });
+      
+      if (sessions.length > 0) {
+        setSelectedSessionIndex(0);
+      }
+    } else {
+      navigate('/patients');
+    }
+  }, [id, navigate]);
   
   const handleBackToPatients = () => {
     navigate('/patients');
@@ -38,22 +59,13 @@ const PatientDetail = () => {
     }
   };
   
-  if (isLoading) {
+  if (!patientData) {
     return <div className="p-8">Loading patient data...</div>;
-  }
-
-  if (error || !patientData) {
-    toast({
-      variant: "destructive",
-      title: "Error",
-      description: "Failed to load patient data. Please try again later."
-    });
-    return <div className="p-8">Error loading patient data.</div>;
   }
   
   const { patient, metrics, sessions, reports } = patientData;
-
-    const domainTrendData = {
+  
+  const domainTrendData = {
     attention: generateTrendData('attention', 10).map(item => item.value),
     memory: generateTrendData('memory', 10).map(item => item.value),
     executiveFunction: generateTrendData('executiveFunction', 10).map(item => item.value),
