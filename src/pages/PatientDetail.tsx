@@ -24,6 +24,7 @@ import { formatPercentile, getScoreColorClass } from '@/utils/dataProcessing';
 import { format, parseISO } from 'date-fns';
 import { DomainChart } from '@/components/dashboard/DomainChart';
 import { generateTrendData } from '@/utils/generators/trendGenerators';
+import { ActivityBreakdown } from '@/components/analysis/ActivityBreakdown';
 
 const PatientDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -335,17 +336,22 @@ const PatientDetail = () => {
               </CardContent>
             </Card>
             
-            <Card className="glass md:col-span-3">
-              <CardContent className="pt-6">
-                {sessions.length === 0 ? (
-                  <div className="text-center py-12">
-                    <p className="text-muted-foreground">No session data available</p>
-                  </div>
-                ) : (
+            <div className="glass md:col-span-3 space-y-6">
+              {sessions.length === 0 ? (
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center py-12">
+                      <p className="text-muted-foreground">No session data available</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <>
                   <SessionAnalysis session={sessions[selectedSessionIndex]} />
-                )}
-              </CardContent>
-            </Card>
+                  <ActivityBreakdown session={sessions[selectedSessionIndex]} />
+                </>
+              )}
+            </div>
           </div>
         </TabsContent>
         
