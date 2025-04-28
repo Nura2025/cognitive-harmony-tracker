@@ -2,7 +2,6 @@
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronLeft } from "lucide-react";
-import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { usePatientData } from "@/hooks/usePatientData";
 import PatientProfileTab from "@/components/patients/detail/PatientProfileTab";
@@ -13,8 +12,6 @@ const PatientDetail = () => {
   const navigate = useNavigate();
   
   const { patientProfile, patientTrends, patientSessions, loading, error } = usePatientData(id);
-
-  const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 
   if (loading) {
     return <div className="p-8">Loading patient data...</div>;
