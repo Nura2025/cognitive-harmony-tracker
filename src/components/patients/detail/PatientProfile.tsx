@@ -8,16 +8,22 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
   ResponsiveContainer,
+  ReferenceLine
 } from "recharts";
 import { TrendData } from '@/services/patient';
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 
 interface PatientProfileProps {
   patientAgeGroup: string;
@@ -69,6 +75,14 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({
     if (score >= 60) return "text-blue-600";
     if (score >= 40) return "text-yellow-600";
     return "text-red-600";
+  };
+  
+  // Define chart colors for each domain
+  const domainColors = {
+    attention: "#8884d8", // Purple for attention
+    memory: "#82ca9d",    // Green for memory
+    impulse: "#ffc658",   // Yellow for impulse control
+    executive: "#ff7300"  // Orange for executive function
   };
 
   return (
@@ -234,70 +248,106 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({
               </div>
             ) : (
               <div style={{ width: "100%", height: 300 }}>
-                <ResponsiveContainer>
-                  <LineChart
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart
                     data={trendGraph}
                     margin={{
-                      top: 5,
+                      top: 20,
                       right: 30,
                       left: 0,
                       bottom: 5,
                     }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" />
+                    <defs>
+                      <linearGradient id="colorAttention" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={domainColors.attention} stopOpacity={0.2} />
+                        <stop offset="95%" stopColor={domainColors.attention} stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="colorMemory" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={domainColors.memory} stopOpacity={0.2} />
+                        <stop offset="95%" stopColor={domainColors.memory} stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="colorImpulse" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={domainColors.impulse} stopOpacity={0.2} />
+                        <stop offset="95%" stopColor={domainColors.impulse} stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="colorExecutive" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={domainColors.executive} stopOpacity={0.2} />
+                        <stop offset="95%" stopColor={domainColors.executive} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                     <XAxis 
                       dataKey="session_date" 
-                      tickFormatter={formatXAxis} 
+                      tickFormatter={formatXAxis}
+                      axisLine={false}
+                      tickLine={false}
+                      tickMargin={10} 
                       fontSize={12}
-                      tickMargin={5}
+                      stroke="hsl(var(--muted-foreground))"
                     />
                     <YAxis 
                       fontSize={12}
                       tickMargin={5}
-                      domain={[0, 100]} // Assuming scores are 0-100
+                      domain={[0, 100]}
+                      axisLine={false}
+                      tickLine={false}
+                      stroke="hsl(var(--muted-foreground))"
                     />
-                    <Tooltip 
-                      formatter={(value: number) => formatScore(value)}
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--background))',
+                        borderColor: 'hsl(var(--border))',
+                        boxShadow: 'var(--shadow)',
+                        borderRadius: 'var(--radius)',
+                        color: 'hsl(var(--foreground))'
+                      }}
+                      formatter={(value: number) => [`${formatScore(value)}`, '']}
                       labelFormatter={(label: string) => format(parseISO(label), "MMM d, yyyy")}
                     />
                     <Legend />
-                    <Line 
+                    <ReferenceLine y={60} stroke="hsl(var(--muted))" strokeDasharray="3 3" />
+                    <Area 
                       type="monotone" 
                       dataKey="attention_score" 
-                      stroke="#8884d8" 
+                      stroke={domainColors.attention} 
                       name="Attention"
-                      dot={true}
+                      fillOpacity={1}
+                      fill="url(#colorAttention)"
                       strokeWidth={2}
-                      activeDot={{ r: 6 }}
+                      activeDot={{ r: 6, strokeWidth: 2, stroke: 'hsl(var(--background))' }}
                     />
-                    <Line 
+                    <Area 
                       type="monotone" 
                       dataKey="memory_score" 
-                      stroke="#82ca9d" 
+                      stroke={domainColors.memory} 
                       name="Memory"
-                      dot={true}
+                      fillOpacity={1}
+                      fill="url(#colorMemory)"
                       strokeWidth={2}
-                      activeDot={{ r: 6 }}
+                      activeDot={{ r: 6, strokeWidth: 2, stroke: 'hsl(var(--background))' }}
                     />
-                    <Line 
+                    <Area 
                       type="monotone" 
                       dataKey="impulse_score" 
-                      stroke="#ffc658" 
+                      stroke={domainColors.impulse} 
                       name="Impulse"
-                      dot={true}
+                      fillOpacity={1}
+                      fill="url(#colorImpulse)"
                       strokeWidth={2}
-                      activeDot={{ r: 6 }}
+                      activeDot={{ r: 6, strokeWidth: 2, stroke: 'hsl(var(--background))' }}
                     />
-                    <Line 
+                    <Area 
                       type="monotone" 
                       dataKey="executive_score" 
-                      stroke="#ff7300" 
+                      stroke={domainColors.executive} 
                       name="Executive"
-                      dot={true}
+                      fillOpacity={1}
+                      fill="url(#colorExecutive)"
                       strokeWidth={2}
-                      activeDot={{ r: 6 }}
+                      activeDot={{ r: 6, strokeWidth: 2, stroke: 'hsl(var(--background))' }}
                     />
-                  </LineChart>
+                  </AreaChart>
                 </ResponsiveContainer>
               </div>
             )}
