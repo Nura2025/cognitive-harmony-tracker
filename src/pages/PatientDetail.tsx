@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Activity, FileText, CalendarDays, User, TrendingUp } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { usePatientData } from "@/hooks/usePatientData";
 import PatientProfileTab from "@/components/patients/detail/PatientProfileTab";
@@ -41,17 +41,45 @@ const PatientDetail = () => {
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid grid-cols-2 mb-8">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="trend">Trend</TabsTrigger>
+        <TabsList className="grid grid-cols-4 mb-8">
+          <TabsTrigger value="profile"><User className="mr-2 h-4 w-4" />Profile</TabsTrigger>
+          <TabsTrigger value="sessions"><CalendarDays className="mr-2 h-4 w-4" />Sessions</TabsTrigger>
+          <TabsTrigger value="analysis"><Activity className="mr-2 h-4 w-4" />Analysis</TabsTrigger>
+          <TabsTrigger value="reports"><FileText className="mr-2 h-4 w-4" />Reports</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile">
-          <PatientProfileTab patientProfile={patientProfile} />
+          <div className="grid grid-cols-1 gap-6">
+            <PatientProfileTab patientProfile={patientProfile} />
+            <div className="mt-6">
+              <h3 className="text-lg font-medium mb-4 flex items-center">
+                <TrendingUp className="mr-2 h-5 w-5" />
+                Trend Analysis
+              </h3>
+              <PatientTrendTab patientTrends={patientTrends} />
+            </div>
+          </div>
         </TabsContent>
 
-        <TabsContent value="trend">
-          <PatientTrendTab patientTrends={patientTrends} />
+        <TabsContent value="sessions">
+          <div className="p-4 border rounded-lg">
+            <h3 className="text-lg font-medium mb-4">Patient Sessions</h3>
+            <p className="text-muted-foreground">Sessions content will be implemented here.</p>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="analysis">
+          <div className="p-4 border rounded-lg">
+            <h3 className="text-lg font-medium mb-4">Analysis</h3>
+            <p className="text-muted-foreground">Analysis content will be implemented here.</p>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="reports">
+          <div className="p-4 border rounded-lg">
+            <h3 className="text-lg font-medium mb-4">Reports</h3>
+            <p className="text-muted-foreground">Reports content will be implemented here.</p>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

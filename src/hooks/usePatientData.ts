@@ -34,13 +34,15 @@ export const usePatientData = (patientId: string | undefined) => {
     queryKey: ['patientProfile', patientId],
     queryFn: fetchPatientProfile,
     enabled: !!patientId,
-    onError: (error) => {
-      console.error('Failed to fetch patient profile:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load patient profile data.",
-      });
+    meta: {
+      onError: (error: Error) => {
+        console.error('Failed to fetch patient profile:', error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load patient profile data.",
+        });
+      }
     }
   });
 
@@ -48,8 +50,10 @@ export const usePatientData = (patientId: string | undefined) => {
     queryKey: ['patientTrends', patientId],
     queryFn: fetchPatientTrends,
     enabled: !!patientId,
-    onError: (error) => {
-      console.error('Failed to fetch patient trends:', error);
+    meta: {
+      onError: (error: Error) => {
+        console.error('Failed to fetch patient trends:', error);
+      }
     }
   });
 
@@ -57,8 +61,10 @@ export const usePatientData = (patientId: string | undefined) => {
     queryKey: ['patientSessions', patientId],
     queryFn: fetchPatientSessions,
     enabled: !!patientId,
-    onError: (error) => {
-      console.error('Failed to fetch patient sessions:', error);
+    meta: {
+      onError: (error: Error) => {
+        console.error('Failed to fetch patient sessions:', error);
+      }
     }
   });
 
@@ -66,8 +72,10 @@ export const usePatientData = (patientId: string | undefined) => {
     queryKey: ['patientMetrics', patientId],
     queryFn: fetchPatientMetrics,
     enabled: !!patientId,
-    onError: (error) => {
-      console.error('Failed to fetch patient metrics:', error);
+    meta: {
+      onError: (error: Error) => {
+        console.error('Failed to fetch patient metrics:', error);
+      }
     }
   });
 
