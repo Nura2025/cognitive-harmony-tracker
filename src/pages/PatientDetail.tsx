@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { format, parseISO } from "date-fns";
-import { AlertCircle, ChevronLeft, LineChart as LineChartIcon, User, RefreshCw } from "lucide-react";
+import { AlertCircle, ChevronLeft, LineChart as LineChartIcon, User, RefreshCw, FileText, ChartBar } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -22,6 +22,7 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PerformanceTrend } from "@/components/analysis/PerformanceTrend";
 
 // Services
 import PatientService from "@/services/patient";
@@ -116,6 +117,28 @@ const PatientDetail = () => {
     if (score >= 60) return "text-blue-600";
     if (score >= 40) return "text-yellow-600";
     return "text-red-600";
+  };
+
+  // Prepare data for PerformanceTrend component
+  const prepareTrendData = (trendGraph: TrendData[] = []) => {
+    return {
+      attention: trendGraph.map(session => ({
+        date: session.session_date,
+        score: session.attention_score,
+      })),
+      memory: trendGraph.map(session => ({
+        date: session.session_date,
+        score: session.memory_score,
+      })),
+      impulse: trendGraph.map(session => ({
+        date: session.session_date,
+        score: session.impulse_score,
+      })),
+      executive: trendGraph.map(session => ({
+        date: session.session_date,
+        score: session.executive_score,
+      })),
+    };
   };
 
   // Loading state with skeletons for better UX
@@ -267,6 +290,7 @@ const PatientDetail = () => {
 
   // Check if trend data is valid
   const hasTrendData = patient.trend_graph && patient.trend_graph.length > 0;
+  const trendData = prepareTrendData(patient.trend_graph);
 
   return (
     <div className="container mx-auto p-4 max-w-7xl">
@@ -298,9 +322,11 @@ const PatientDetail = () => {
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid grid-cols-2 mb-8">
+        <TabsList className="grid grid-cols-4 mb-8">
           <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="trend">Trend</TabsTrigger>
+          <TabsTrigger value="sessions">Sessions</TabsTrigger>
+          <TabsTrigger value="analysis">Analysis</TabsTrigger>
+          <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
 
         {/* Profile Tab */}
@@ -444,149 +470,206 @@ const PatientDetail = () => {
               </CardContent>
             </Card>
           </div>
+          
+          {/* Trend Graph in Profile Tab */}
+          <div className="mt-6">
+            <Card className="glass">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-medium">Cognitive Score Trends</h3>
+                  <LineChartIcon className="h-5 w-5 text-muted-foreground" />
+                </div>
+
+                {!hasTrendData ? (
+                  <div className="p-8 text-center h-64 flex flex-col justify-center items-center">
+                    <AlertCircle className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-muted-foreground">
+                      No session data available to display trends.
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Trends will appear after the patient completes sessions.
+                    </p>
+                  </div>
+                ) : (
+                  <div style={{ width: "100%", height: 300 }}>
+                    <ResponsiveContainer>
+                      <LineChart
+                        data={patient.trend_graph}
+                        margin={{
+                          top: 5,
+                          right: 30,
+                          left: 0,
+                          bottom: 5,
+                        }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis 
+                          dataKey="session_date" 
+                          tickFormatter={formatXAxis} 
+                          fontSize={12}
+                          tickMargin={5}
+                        />
+                        <YAxis 
+                          fontSize={12}
+                          tickMargin={5}
+                          domain={[0, 100]} // Assuming scores are 0-100
+                        />
+                        <Tooltip 
+                          formatter={(value: number) => formatScore(value)}
+                          labelFormatter={(label: string) => format(parseISO(label), "MMM d, yyyy")}
+                        />
+                        <Legend />
+                        <Line 
+                          type="monotone" 
+                          dataKey="attention_score" 
+                          stroke="#8884d8" 
+                          name="Attention"
+                          dot={true}
+                          strokeWidth={2}
+                          activeDot={{ r: 6 }}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="memory_score" 
+                          stroke="#82ca9d" 
+                          name="Memory"
+                          dot={true}
+                          strokeWidth={2}
+                          activeDot={{ r: 6 }}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="impulse_score" 
+                          stroke="#ffc658" 
+                          name="Impulse"
+                          dot={true}
+                          strokeWidth={2}
+                          activeDot={{ r: 6 }}
+                        />
+                        <Line 
+                          type="monotone" 
+                          dataKey="executive_score" 
+                          stroke="#ff7300" 
+                          name="Executive"
+                          dot={true}
+                          strokeWidth={2}
+                          activeDot={{ r: 6 }}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
-        {/* Trend Tab - Enhanced with Recharts */}
-        <TabsContent value="trend">
+        {/* Sessions Tab */}
+        <TabsContent value="sessions">
           <Card className="glass">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium">Cognitive Score Trends</h3>
-                <LineChartIcon className="h-5 w-5 text-muted-foreground" />
+                <h3 className="text-lg font-medium">Session Details</h3>
               </div>
 
               {!hasTrendData ? (
                 <div className="p-8 text-center h-64 flex flex-col justify-center items-center">
                   <AlertCircle className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                   <p className="text-muted-foreground">
-                    No session data available to display trends.
+                    No session data available.
                   </p>
                   <p className="text-xs text-muted-foreground mt-2">
-                    Trends will appear after the patient completes sessions.
+                    Sessions will appear after the patient completes assessments.
                   </p>
                 </div>
               ) : (
-                <div style={{ width: "100%", height: 300 }}>
-                  <ResponsiveContainer>
-                    <LineChart
-                      data={patient.trend_graph}
-                      margin={{
-                        top: 5,
-                        right: 30,
-                        left: 0,
-                        bottom: 5,
-                      }}
+                <div className="max-h-96 overflow-y-auto pr-2">
+                  {patient.trend_graph.map((session, idx) => (
+                    <div 
+                      key={idx} 
+                      className="p-3 border rounded-md space-y-2 hover:bg-accent/50 transition-colors mb-2"
                     >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
-                        dataKey="session_date" 
-                        tickFormatter={formatXAxis} 
-                        fontSize={12}
-                        tickMargin={5}
-                      />
-                      <YAxis 
-                        fontSize={12}
-                        tickMargin={5}
-                        domain={[0, 100]} // Assuming scores are 0-100
-                      />
-                      <Tooltip 
-                        formatter={(value: number) => formatScore(value)}
-                        labelFormatter={(label: string) => format(parseISO(label), "MMM d, yyyy")}
-                      />
-                      <Legend />
-                      <Line 
-                        type="monotone" 
-                        dataKey="attention_score" 
-                        stroke="#8884d8" 
-                        name="Attention"
-                        dot={true}
-                        strokeWidth={2}
-                        activeDot={{ r: 6 }}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="memory_score" 
-                        stroke="#82ca9d" 
-                        name="Memory"
-                        dot={true}
-                        strokeWidth={2}
-                        activeDot={{ r: 6 }}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="impulse_score" 
-                        stroke="#ffc658" 
-                        name="Impulse"
-                        dot={true}
-                        strokeWidth={2}
-                        activeDot={{ r: 6 }}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="executive_score" 
-                        stroke="#ff7300" 
-                        name="Executive"
-                        dot={true}
-                        strokeWidth={2}
-                        activeDot={{ r: 6 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
+                      <p className="text-sm font-medium">
+                        {format(parseISO(session.session_date), "MMM d, yyyy")}
+                      </p>
 
-              {hasTrendData && (
-                <div className="mt-6 space-y-4">
-                  <h4 className="text-sm font-medium">Session Details</h4>
-                  <div className="max-h-60 overflow-y-auto pr-2">
-                    {patient.trend_graph.map((session, idx) => (
-                      <div 
-                        key={idx} 
-                        className="p-3 border rounded-md space-y-2 hover:bg-accent/50 transition-colors mb-2"
-                      >
-                        <p className="text-sm font-medium">
-                          {format(parseISO(session.session_date), "MMM d, yyyy")}
-                        </p>
-
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                          <div>
-                            <span className="text-xs text-muted-foreground">
-                              Attention
-                            </span>
-                            <p className={`font-medium ${getScoreColor(session.attention_score)}`}>
-                              {formatScore(session.attention_score)}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="text-xs text-muted-foreground">
-                              Memory
-                            </span>
-                            <p className={`font-medium ${getScoreColor(session.memory_score)}`}>
-                              {formatScore(session.memory_score)}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="text-xs text-muted-foreground">
-                              Impulse
-                            </span>
-                            <p className={`font-medium ${getScoreColor(session.impulse_score)}`}>
-                              {formatScore(session.impulse_score)}
-                            </p>
-                          </div>
-                          <div>
-                            <span className="text-xs text-muted-foreground">
-                              Executive
-                            </span>
-                            <p className={`font-medium ${getScoreColor(session.executive_score)}`}>
-                              {formatScore(session.executive_score)}
-                            </p>
-                          </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        <div>
+                          <span className="text-xs text-muted-foreground">
+                            Attention
+                          </span>
+                          <p className={`font-medium ${getScoreColor(session.attention_score)}`}>
+                            {formatScore(session.attention_score)}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-xs text-muted-foreground">
+                            Memory
+                          </span>
+                          <p className={`font-medium ${getScoreColor(session.memory_score)}`}>
+                            {formatScore(session.memory_score)}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-xs text-muted-foreground">
+                            Impulse
+                          </span>
+                          <p className={`font-medium ${getScoreColor(session.impulse_score)}`}>
+                            {formatScore(session.impulse_score)}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-xs text-muted-foreground">
+                            Executive
+                          </span>
+                          <p className={`font-medium ${getScoreColor(session.executive_score)}`}>
+                            {formatScore(session.executive_score)}
+                          </p>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Analysis Tab */}
+        <TabsContent value="analysis">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {hasTrendData && Object.keys(trendData).map((key, index) => (
+              <PerformanceTrend 
+                key={key}
+                title={`${key.charAt(0).toUpperCase() + key.slice(1)} Performance`}
+                data={trendData[key as keyof typeof trendData]}
+                description={`Trend of ${key} scores over time`}
+              />
+            ))}
+            
+            {!hasTrendData && (
+              <Card className="glass md:col-span-2">
+                <CardContent className="pt-6 flex flex-col items-center justify-center h-64">
+                  <ChartBar className="h-10 w-10 text-muted-foreground mb-2" />
+                  <h3 className="text-lg font-medium mb-1">No Analysis Data Available</h3>
+                  <p className="text-muted-foreground text-center">
+                    Detailed analysis will be available after the patient completes cognitive assessments.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+
+        {/* Reports Tab */}
+        <TabsContent value="reports">
+          <Card className="glass">
+            <CardContent className="pt-6 flex flex-col items-center justify-center h-64">
+              <FileText className="h-10 w-10 text-muted-foreground mb-2" />
+              <h3 className="text-lg font-medium mb-1">Reports Coming Soon</h3>
+              <p className="text-muted-foreground text-center">
+                Patient reports are currently under development and will be available soon.
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
