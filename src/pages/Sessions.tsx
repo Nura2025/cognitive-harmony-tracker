@@ -1,90 +1,115 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ActivityBreakdown } from "@/components/sessions/ActivityBreakdown";
+import { SessionAnalysis } from "@/components/sessions/SessionAnalysis";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { patients, sessionsMap } from '@/utils/mockData';
-import { SessionAnalysis } from '@/components/sessions/SessionAnalysis';
-import { ActivityBreakdown } from '@/components/sessions/ActivityBreakdown';
+} from "@/components/ui/select";
+import PatientService from "@/services/patient";
+import SessionService from "@/services/session";
+
+import { ChevronLeft } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Sessions = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [patients, setPatients] = useState([]);
+  const [sessionsMap, setSessionsMap] = useState({});
   const [patientId, setPatientId] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  
-  // Parse patient ID and session ID from URL query params
+
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const pId = params.get('patient');
-    const sId = params.get('session');
-    
-    if (pId && patients.some(p => p.id === pId)) {
-      setPatientId(pId);
-      
-      // If there's also a session ID, set it if it belongs to this patient
-      if (sId && sessionsMap[pId]?.some(s => s.id === sId)) {
-        setSessionId(sId);
-      } else if (sessionsMap[pId]?.length > 0) {
-        // Otherwise, use the first session of this patient
-        setSessionId(sessionsMap[pId][0].id);
+    const fetchData = async () => {
+      try {
+        const clinicianId = "3f7a219b-32d7-4ca8-abae-d9a77c922aff"; // Replace with your real clinician ID (from auth, etc.)
+        const patientsRes = await PatientService.getPatientsByClinician(
+          clinicianId
+        );
+        const patientList = patientsRes.data;
+        setPatients(patientList);
+
+        const map = {};
+        for (const patient of patientList) {
+          const sessionsRes = await SessionService.getUserSessions(
+            patient.user_id
+          );
+          map[patient.user_id] = sessionsRes.data;
+        }
+        setSessionsMap(map);
+
+        const params = new URLSearchParams(location.search);
+        const pId = params.get("patient");
+        const sId = params.get("session");
+
+        const selectedPatientId =
+          pId && patientList.some((p) => p.user_id === pId)
+            ? pId
+            : patientList[0]?.user_id;
+        const selectedSessions = map[selectedPatientId] || [];
+        const selectedSessionId =
+          sId && selectedSessions.some((s) => s.session_id === sId)
+            ? sId
+            : selectedSessions[0]?.session_id;
+
+        setPatientId(selectedPatientId);
+        setSessionId(selectedSessionId);
+      } catch (err) {
+        console.error("Error fetching data:", err);
       }
-    } else if (patients.length > 0) {
-      // Default to first patient if no valid patient ID provided
-      const firstPatient = patients[0].id;
-      setPatientId(firstPatient);
-      
-      if (sessionsMap[firstPatient]?.length > 0) {
-        setSessionId(sessionsMap[firstPatient][0].id);
-      }
-    }
+    };
+
+    fetchData();
   }, [location]);
-  
+
   const handlePatientChange = (id: string) => {
     if (sessionsMap[id]?.length > 0) {
-      navigate(`/sessions?patient=${id}&session=${sessionsMap[id][0].id}`);
+      navigate(
+        `/sessions?patient=${id}&session=${sessionsMap[id][0].session_id}`
+      );
     } else {
       navigate(`/sessions?patient=${id}`);
     }
   };
-  
+
   const handleSessionChange = (id: string) => {
     navigate(`/sessions?patient=${patientId}&session=${id}`);
   };
-  
+
   const handleBackToDashboard = () => {
-    navigate('/');
+    navigate("/");
   };
-  
-  // Find the current patient and session
-  const currentPatient = patients.find(p => p.id === patientId);
+
+  const currentPatient = patients.find((p) => p.user_id === patientId);
   const patientSessions = patientId ? sessionsMap[patientId] || [] : [];
-  const currentSession = patientSessions.find(s => s.id === sessionId);
-  
+  const currentSession = patientSessions.find(
+    (s) => s.session_id === sessionId
+  );
+
   if (!currentPatient || !currentSession) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <h3 className="text-lg font-medium">No session data available</h3>
-          <p className="text-muted-foreground">Select a patient with recorded sessions</p>
+          <p className="text-muted-foreground">
+            Select a patient with recorded sessions
+          </p>
         </div>
       </div>
     );
   }
-  
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             className="mb-2 -ml-2 text-muted-foreground"
             onClick={handleBackToDashboard}
           >
@@ -96,36 +121,36 @@ const Sessions = () => {
             Detailed breakdown of individual assessment sessions
           </p>
         </div>
-        
+
         <div className="flex items-center space-x-4">
-          <Select value={patientId || ''} onValueChange={handlePatientChange}>
+          <Select value={patientId || ""} onValueChange={handlePatientChange}>
             <SelectTrigger className="min-w-[180px]">
               <SelectValue placeholder="Select a patient" />
             </SelectTrigger>
             <SelectContent>
-              {patients.map(patient => (
-                <SelectItem key={patient.id} value={patient.id}>
+              {patients.map((patient) => (
+                <SelectItem key={patient.user_id} value={patient.user_id}>
                   {patient.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          
-          <Select value={sessionId || ''} onValueChange={handleSessionChange}>
+
+          <Select value={sessionId || ""} onValueChange={handleSessionChange}>
             <SelectTrigger className="min-w-[180px]">
               <SelectValue placeholder="Select a session" />
             </SelectTrigger>
             <SelectContent>
-              {patientSessions.map(session => (
-                <SelectItem key={session.id} value={session.id}>
-                  Session {session.id.split('-')[1]}
+              {patientSessions.map((session) => (
+                <SelectItem key={session.session_id} value={session.session_id}>
+                  Session {session.session_id.split("-")[1]}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
       </div>
-      
+
       <div className="grid gap-6 md:grid-cols-2">
         <SessionAnalysis session={currentSession} />
         <ActivityBreakdown session={currentSession} />
