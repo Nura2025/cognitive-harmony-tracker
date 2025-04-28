@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,7 +19,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
   return (
     <Card 
       className="glass cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-md hover:translate-y-[-2px]"
-      onClick={() => onClick(patient.id)}
+      onClick={() => onClick(patient.id)} // Navigate to patient details
     >
       <div className="h-2 bg-gradient-to-r from-primary/80 to-primary"></div>
       <CardContent className="pt-5">

@@ -30,7 +30,7 @@ const Sessions = () => {
         const patientsRes = await PatientService.getPatientsByClinician(
           clinicianId
         );
-        const patientList = patientsRes.data;
+        const patientList = patientsRes;
         setPatients(patientList);
 
         const map = {};

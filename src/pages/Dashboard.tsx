@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Brain, Clock, LineChart, Users } from 'lucide-react';
@@ -37,7 +36,7 @@ const Dashboard = () => {
   };
   
   const handlePatientClick = (patientId: string) => {
-    navigate(`/analysis?patient=${patientId}`);
+    navigate(`/patients/${patientId}`); // Navigate to patient details page
   };
   
   const handleViewAllPatients = () => {
