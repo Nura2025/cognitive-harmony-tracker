@@ -1,4 +1,3 @@
-
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { API_BASE } from "./config"; // Make sure this points to your backend URL
 
@@ -110,3 +109,33 @@ const PatientService = {
 };
 
 export default PatientService;
+
+// Export TrendData interface for use in components
+export interface TrendData {
+  session_date: string;
+  attention_score: number;
+  memory_score: number;
+  impulse_score: number;
+  executive_score: number;
+}
+
+export interface DomainScores {
+  memory: number;
+  attention: number;
+  impulse_control: number;
+  executive_function: number;
+}
+
+export interface PatientProfile {
+  user_id: string;
+  user_name: string;
+  age: number;
+  age_group: string;
+  gender: string;
+  total_sessions: number;
+  first_session_date: string | null;
+  last_session_date: string | null;
+  adhd_subtype: string | null;
+  avg_domain_scores: DomainScores;
+  trend_graph: TrendData[];
+}
