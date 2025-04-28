@@ -3,43 +3,67 @@ import { PatientList } from "@/components/patients/PatientList";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import PatientService from "@/services/patient"; // your API service
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, AlertCircle, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Define the patient interface based on API response
+// Remove the local Patient interface and import the correct one
+import type { Patient } from "@/components/patients/PatientList";
 
 const Patients = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeFilters, setActiveFilters] = useState<Record<string, boolean>>(
-    {}
-  );
-  const [patients, setPatients] = useState([]);
-  const [filteredPatients, setFilteredPatients] = useState([]);
+  const [activeFilters, setActiveFilters] = useState<Record<string, boolean>>({});
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [retrying, setRetrying] = useState(false);
   const { t, language } = useLanguage();
+  const navigate = useNavigate();
 
   // ✅ Fetch patients from API
-  useEffect(() => {
-    const fetchPatients = async () => {
-      try {
-        const clinicianId = "3f7a219b-32d7-4ca8-abae-d9a77c922aff"; // Replace with real clinician ID from auth
-        const response = await PatientService.getPatientsByClinician(
-          clinicianId
-        );
-        const patientList = response.data.map((p: any) => {
-          const birthYear = new Date(p.date_of_birth).getFullYear();
-          const age = new Date().getFullYear() - birthYear;
-          return {
-            ...p,
-            name: `${p.first_name} ${p.last_name}`,
-            age,
-            adhdSubtype: p.adhd_subtype,
-          };
-        });
-        setPatients(patientList);
-        setFilteredPatients(patientList);
-      } catch (error) {
-        console.error("Failed to fetch patients:", error);
-      }
-    };
+  const fetchPatients = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const clinicianId = "77a87318-00e6-4124-90ab-c0e72c3b2597"; // Replace with real clinician ID from auth
+      const patientData = await PatientService.getPatientsByClinician(clinicianId);
+      
+      // Process the data to add derived fields
+      const patientList = patientData.map((p: any) => {
+        const birthDate = new Date(p.date_of_birth);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          age--;
+        }
+        
+        return {
+          ...p,
+          name: `${p.first_name} ${p.last_name}`,
+          age,
+          adhdSubtype: p.adhd_subtype,
+        };
+      });
+      
+      setPatients(patientList);
+      setFilteredPatients(patientList);
+    } catch (error) {
+      console.error("Failed to fetch patients:", error);
+      setError(error instanceof Error ? error.message : "Failed to fetch patients");
+    } finally {
+      setLoading(false);
+      setRetrying(false);
+    }
+  };
 
+  useEffect(() => {
     fetchPatients();
   }, []);
 
@@ -50,7 +74,7 @@ const Patients = () => {
     if (searchTerm) {
       const lowerSearchTerm = searchTerm.toLowerCase();
       result = result.filter((patient) =>
-        patient.name.toLowerCase().includes(lowerSearchTerm)
+        patient.name?.toLowerCase().includes(lowerSearchTerm)
       );
     }
 
@@ -60,7 +84,7 @@ const Patients = () => {
 
     if (activeSubtypes.length > 0) {
       result = result.filter((patient) =>
-        activeSubtypes.includes(patient.adhdSubtype)
+        activeSubtypes.includes(patient.adhdSubtype || "")
       );
     }
 
@@ -72,7 +96,7 @@ const Patients = () => {
       result = result.filter((patient) =>
         activeAgeRanges.some((range) => {
           const [min, max] = range.split("-").map(Number);
-          return patient.age >= min && patient.age <= max;
+          return (patient.age || 0) >= min && (patient.age || 0) <= max;
         })
       );
     }
@@ -95,6 +119,77 @@ const Patients = () => {
     setActiveFilters({});
     setSearchTerm("");
   };
+
+  const handlePatientClick = (patientId: string) => {
+    navigate(`/patient/${patientId}`);
+  };
+
+  const handleRetry = () => {
+    setRetrying(true);
+    fetchPatients();
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className={`flex items-center justify-between ${language === "ar" ? "flex-row-reverse" : ""}`}>
+          <div className={language === "ar" ? "text-right" : "text-left"}>
+            <h1 className="text-3xl font-bold mb-1">{t("patients")}</h1>
+            <p className="text-muted-foreground">{t("managePatientProfiles")}</p>
+          </div>
+
+          <Button className={`gap-1.5 ${language === "ar" ? "flex-row-reverse" : ""}`} disabled>
+            <PlusCircle className="h-4 w-4" />
+            <span>{t("addPatient")}</span>
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Skeleton key={i} className="h-24 w-full rounded-md" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className={`flex items-center justify-between ${language === "ar" ? "flex-row-reverse" : ""}`}>
+          <div className={language === "ar" ? "text-right" : "text-left"}>
+            <h1 className="text-3xl font-bold mb-1">{t("patients")}</h1>
+            <p className="text-muted-foreground">{t("managePatientProfiles")}</p>
+          </div>
+        </div>
+
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error Loading Patients</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+        
+        <Button 
+          onClick={handleRetry}
+          disabled={retrying}
+        >
+          {retrying ? (
+            <>
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+              {t("retrying")}...
+            </>
+          ) : (
+            <>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              {t("retry")}
+            </>
+          )}
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">

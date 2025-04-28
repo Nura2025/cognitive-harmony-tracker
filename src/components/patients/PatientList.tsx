@@ -18,7 +18,7 @@ import { Eye, FileText } from "lucide-react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-interface Patient {
+export interface Patient {
   user_id: string;
   name: string;
   age: number;
