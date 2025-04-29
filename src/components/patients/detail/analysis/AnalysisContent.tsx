@@ -14,6 +14,7 @@ interface AnalysisContentProps {
   performanceTrendData: Array<{date: string; score: number;}>;
   domainTrendData: Record<string, any>;
   isLoadingDomainData: boolean;
+  patientId?: string;
 }
 
 export const AnalysisContent: React.FC<AnalysisContentProps> = ({
@@ -22,7 +23,8 @@ export const AnalysisContent: React.FC<AnalysisContentProps> = ({
   subtypeData,
   performanceTrendData,
   domainTrendData,
-  isLoadingDomainData
+  isLoadingDomainData,
+  patientId
 }) => {
   return (
     <div className="space-y-8 animate-fade-in">
@@ -32,6 +34,7 @@ export const AnalysisContent: React.FC<AnalysisContentProps> = ({
             patientData={patientMetrics}
             normativeData={normativeData}
             subtypeData={subtypeData}
+            patientId={patientId}
           />
         )}
         <PerformanceTrend 

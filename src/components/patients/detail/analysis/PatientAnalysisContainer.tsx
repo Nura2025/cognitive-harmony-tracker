@@ -9,9 +9,14 @@ import { AnalysisContent } from './AnalysisContent';
 interface PatientAnalysisProps {
   trendGraph: TrendData[];
   hasTrendData: boolean;
+  patientId?: string; // Add patientId prop
 }
 
-export const PatientAnalysis: React.FC<PatientAnalysisProps> = ({ trendGraph, hasTrendData }) => {
+export const PatientAnalysis: React.FC<PatientAnalysisProps> = ({ 
+  trendGraph, 
+  hasTrendData,
+  patientId 
+}) => {
   const [isLoadingDomainData, setIsLoadingDomainData] = React.useState(false);
   const [fetchError, setFetchError] = React.useState<string | null>(null);
   
@@ -108,6 +113,7 @@ export const PatientAnalysis: React.FC<PatientAnalysisProps> = ({ trendGraph, ha
       performanceTrendData={performanceTrendData}
       domainTrendData={domainTrendData}
       isLoadingDomainData={isLoadingDomainData}
+      patientId={patientId}
     />
   );
 };

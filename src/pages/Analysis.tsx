@@ -176,6 +176,7 @@ const Analysis = () => {
       <PatientAnalysis 
         trendGraph={trendData}
         hasTrendData={trendData.length > 0}
+        patientId={patientId || undefined}
       />
     </div>
   );

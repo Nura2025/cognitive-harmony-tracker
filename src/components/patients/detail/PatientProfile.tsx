@@ -1,24 +1,31 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
-import { LineChartIcon, User, AlertCircle } from 'lucide-react';
+import { LineChartIcon, User, AlertCircle, InfoIcon } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from "@/components/ui/tooltip";
+import {
   AreaChart,
   Area,
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
+  Tooltip as RechartsTooltip,
   Legend,
   ResponsiveContainer,
   ReferenceLine
 } from "recharts";
 import { TrendData } from '@/services/patient';
+import NormativeService, { NormativeComparisonData } from '@/services/normative';
 import {
   ChartContainer,
   ChartTooltip,
@@ -41,6 +48,7 @@ interface PatientProfileProps {
   age: number;
   gender: string;
   hasTrendData: boolean;
+  patientId: string;
 }
 
 export const PatientProfile: React.FC<PatientProfileProps> = ({
@@ -53,8 +61,31 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({
   lastSessionDate,
   age,
   gender,
-  hasTrendData
+  hasTrendData,
+  patientId
 }) => {
+  const [normativeData, setNormativeData] = useState<Record<string, NormativeComparisonData>>({});
+  const [isLoadingNormative, setIsLoadingNormative] = useState(true);
+
+  // Fetch normative data when component mounts
+  useEffect(() => {
+    const fetchData = async () => {
+      if (patientId) {
+        setIsLoadingNormative(true);
+        try {
+          const data = await NormativeService.fetchAllNormativeData(patientId);
+          setNormativeData(data);
+        } catch (error) {
+          console.error("Failed to fetch normative data:", error);
+        } finally {
+          setIsLoadingNormative(false);
+        }
+      }
+    };
+
+    fetchData();
+  }, [patientId]);
+
   // Format date for XAxis
   const formatXAxis = (tickItem: string) => {
     try {
@@ -83,6 +114,73 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({
     memory: "#82ca9d",    // Green for memory
     impulse: "#ffc658",   // Yellow for impulse control
     executive: "#ff7300"  // Orange for executive function
+  };
+
+  // Map domain keys to API domain names
+  const mapDomainToApiKey = (domainKey: string): string => {
+    switch(domainKey) {
+      case 'memory': return 'memory';
+      case 'attention': return 'attention';
+      case 'executive_function': return 'executivefunction';
+      case 'impulse_control': return 'behavioral';
+      default: return domainKey;
+    }
+  };
+
+  // Render normative data tooltip content
+  const renderNormativeTooltip = (domain: string) => {
+    const apiDomain = mapDomainToApiKey(domain);
+    const data = normativeData[apiDomain];
+    
+    if (isLoadingNormative) {
+      return <p className="text-xs animate-pulse">Loading normative data...</p>;
+    }
+    
+    if (!data) {
+      return <p className="text-xs text-muted-foreground">No normative data available</p>;
+    }
+    
+    const { normative_comparison } = data;
+    
+    return (
+      <div className="space-y-2">
+        <div className="flex justify-between items-center border-b pb-1">
+          <span className="text-sm font-medium">Normative Comparison</span>
+          <Badge variant="outline" className="text-xs">
+            {data.age_group}
+          </Badge>
+        </div>
+        
+        <div className="space-y-1">
+          <div className="flex justify-between">
+            <span className="text-xs text-muted-foreground">Percentile:</span>
+            <span className={`text-xs font-medium ${getPercentileColor(normative_comparison.percentile)}`}>
+              {normative_comparison.percentile.toFixed(1)}%
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-xs text-muted-foreground">Z-Score:</span>
+            <span className={`text-xs font-medium ${getZScoreColor(normative_comparison.z_score)}`}>
+              {normative_comparison.z_score.toFixed(2)}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-xs text-muted-foreground">Mean Score:</span>
+            <span className="text-xs font-medium">{normative_comparison.mean.toFixed(1)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-xs text-muted-foreground">Standard Deviation:</span>
+            <span className="text-xs font-medium">{normative_comparison.standard_deviation.toFixed(2)}</span>
+          </div>
+        </div>
+        
+        {normative_comparison.reference && (
+          <div className="pt-1 border-t text-[10px] text-muted-foreground italic">
+            Reference: {normative_comparison.reference} (n={normative_comparison.sample_size})
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -167,9 +265,23 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({
               <div>
                 <div className="flex justify-between mb-1">
                   <p className="text-sm">Memory</p>
-                  <p className={`text-sm font-medium ${getScoreColor(avgDomainScores?.memory ?? 0)}`}>
-                    {formatScore(avgDomainScores?.memory ?? 0)}
-                  </p>
+                  <div className="flex items-center">
+                    <p className={`text-sm font-medium ${getScoreColor(avgDomainScores?.memory ?? 0)}`}>
+                      {formatScore(avgDomainScores?.memory ?? 0)}
+                    </p>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button className="ml-1.5 focus:outline-none">
+                            <InfoIcon className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground transition-colors" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="w-64">
+                          {renderNormativeTooltip('memory')}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                 </div>
                 <Progress 
                   value={avgDomainScores?.memory ?? 0} 
@@ -179,9 +291,23 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({
               <div>
                 <div className="flex justify-between mb-1">
                   <p className="text-sm">Attention</p>
-                  <p className={`text-sm font-medium ${getScoreColor(avgDomainScores?.attention ?? 0)}`}>
-                    {formatScore(avgDomainScores?.attention ?? 0)}
-                  </p>
+                  <div className="flex items-center">
+                    <p className={`text-sm font-medium ${getScoreColor(avgDomainScores?.attention ?? 0)}`}>
+                      {formatScore(avgDomainScores?.attention ?? 0)}
+                    </p>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button className="ml-1.5 focus:outline-none">
+                            <InfoIcon className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground transition-colors" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="w-64">
+                          {renderNormativeTooltip('attention')}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                 </div>
                 <Progress
                   value={avgDomainScores?.attention ?? 0}
@@ -191,9 +317,23 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({
               <div>
                 <div className="flex justify-between mb-1">
                   <p className="text-sm">Impulse Control</p>
-                  <p className={`text-sm font-medium ${getScoreColor(avgDomainScores?.impulse_control ?? 0)}`}>
-                    {formatScore(avgDomainScores?.impulse_control ?? 0)}
-                  </p>
+                  <div className="flex items-center">
+                    <p className={`text-sm font-medium ${getScoreColor(avgDomainScores?.impulse_control ?? 0)}`}>
+                      {formatScore(avgDomainScores?.impulse_control ?? 0)}
+                    </p>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button className="ml-1.5 focus:outline-none">
+                            <InfoIcon className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground transition-colors" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="w-64">
+                          {renderNormativeTooltip('impulse_control')}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                 </div>
                 <Progress
                   value={avgDomainScores?.impulse_control ?? 0}
@@ -203,9 +343,23 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({
               <div>
                 <div className="flex justify-between mb-1">
                   <p className="text-sm">Executive Function</p>
-                  <p className={`text-sm font-medium ${getScoreColor(avgDomainScores?.executive_function ?? 0)}`}>
-                    {formatScore(avgDomainScores?.executive_function ?? 0)}
-                  </p>
+                  <div className="flex items-center">
+                    <p className={`text-sm font-medium ${getScoreColor(avgDomainScores?.executive_function ?? 0)}`}>
+                      {formatScore(avgDomainScores?.executive_function ?? 0)}
+                    </p>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button className="ml-1.5 focus:outline-none">
+                            <InfoIcon className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground transition-colors" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="w-64">
+                          {renderNormativeTooltip('executive_function')}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                 </div>
                 <Progress
                   value={avgDomainScores?.executive_function ?? 0}
@@ -294,7 +448,7 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({
                       tickLine={false}
                       stroke="hsl(var(--muted-foreground))"
                     />
-                    <Tooltip
+                    <RechartsTooltip
                       contentStyle={{
                         backgroundColor: 'hsl(var(--background))',
                         borderColor: 'hsl(var(--border))',
@@ -356,4 +510,21 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({
       </div>
     </div>
   );
+};
+
+// Helper functions for color coding based on percentile and z-score
+const getPercentileColor = (percentile: number) => {
+  if (percentile < 16) return "text-red-500";
+  if (percentile < 50) return "text-amber-500";
+  if (percentile < 85) return "text-green-500";
+  return "text-emerald-600";
+};
+
+const getZScoreColor = (zScore: number) => {
+  if (zScore < -2) return "text-red-500";
+  if (zScore < -1) return "text-red-400";
+  if (zScore < 0) return "text-amber-400";
+  if (zScore < 1) return "text-amber-500";
+  if (zScore < 2) return "text-green-500";
+  return "text-emerald-600";
 };
