@@ -27,8 +27,8 @@ export const ExecutiveTab: React.FC<ExecutiveTabProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [executiveDetails, setExecutiveDetails] = useState<any>(null);
   
-  // Get the session ID from the TrendData structure
-  const sessionId = session.id;
+  // Get the session ID directly from the session_id property
+  const sessionId = session.session_id;
 
   useEffect(() => {
     // Only fetch when executive domain is expanded
@@ -54,15 +54,6 @@ export const ExecutiveTab: React.FC<ExecutiveTabProps> = ({
   // Fallback to session data if API fetch fails or isn't expanded yet
   const details = executiveDetails || session.executive_details;
 
-  if (!details) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        <AlertCircle className="h-8 w-8 mx-auto mb-2" />
-        <p>No detailed executive function data available for this session</p>
-      </div>
-    );
-  }
-
   if (loading) {
     return (
       <div className="text-center py-8">
@@ -76,6 +67,15 @@ export const ExecutiveTab: React.FC<ExecutiveTabProps> = ({
       <div className="text-center py-8 text-red-500">
         <AlertCircle className="h-8 w-8 mx-auto mb-2" />
         <p>{error}</p>
+      </div>
+    );
+  }
+
+  if (!details) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <AlertCircle className="h-8 w-8 mx-auto mb-2" />
+        <p>No detailed executive function data available for this session</p>
       </div>
     );
   }

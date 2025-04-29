@@ -27,8 +27,8 @@ export const AttentionTab: React.FC<AttentionTabProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [attentionDetails, setAttentionDetails] = useState<any>(null);
   
-  // Get the session ID from the TrendData structure
-  const sessionId = session.id;
+  // Get the session ID directly from the session_id property
+  const sessionId = session.session_id;
 
   useEffect(() => {
     // Only fetch when the attention domain is expanded
@@ -53,6 +53,23 @@ export const AttentionTab: React.FC<AttentionTabProps> = ({
 
   // Fallback to session data if API fetch fails or isn't expanded yet
   const details = attentionDetails || session.attention_details;
+
+  if (loading) {
+    return (
+      <div className="text-center py-8">
+        <p>Loading attention details...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8 text-red-500">
+        <AlertCircle className="h-8 w-8 mx-auto mb-2" />
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   if (!details) {
     return (

@@ -1,3 +1,4 @@
+
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { API_BASE } from "./config"; // Make sure this points to your backend URL
 
@@ -53,8 +54,8 @@ interface AttentionDetails {
     crop_score: number;
     sequence_score: number;
   };
-  data_completeness: number; // Added missing property
-  tasks_used?: string[]; // Added as optional to match mock data
+  data_completeness: number;
+  tasks_used?: string[];
 }
 
 interface ExecutiveDetails {
@@ -67,11 +68,12 @@ interface ExecutiveDetails {
     attention_contribution: number;
   };
   profile_pattern: string;
-  data_completeness: number; // Added missing property
+  data_completeness: number;
 }
 
 export interface TrendData {
-  id?: string; // Added optional id field for API data
+  id?: string; // Keep for backward compatibility
+  session_id: string; // Add this field to match the actual data structure
   session_date: string;
   attention_score: number;
   memory_score: number;
