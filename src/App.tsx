@@ -8,6 +8,7 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import Dashboard from "./pages/Dashboard";
+import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 import PatientDetail from "./pages/PatientDetail";
 import Patients from "./pages/Patients";
@@ -36,11 +37,12 @@ const App = () => {
               <Sonner />
               <Routes>
                 {/* Public routes */}
-                <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" replace />} />
-                <Route path="/register" element={!isAuthenticated ? <Register /> : <Navigate to="/" replace />} />
+                <Route path="/" element={<Landing />} />
+                <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/dashboard" replace />} />
+                <Route path="/register" element={!isAuthenticated ? <Register /> : <Navigate to="/dashboard" replace />} />
                 
                 {/* Protected routes */}
-                <Route path="/" element={
+                <Route path="/dashboard" element={
                   <PrivateRoute>
                     <Layout>
                       <Dashboard />

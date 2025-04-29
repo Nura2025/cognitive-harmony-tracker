@@ -110,9 +110,19 @@ const registerAsClinician = async (data: RegisterClinicianData): Promise<AuthRes
 
 // Logout function
 const logout = () => {
+  // Remove auth related items from localStorage
   localStorage.removeItem('neurocog_token');
   localStorage.removeItem('neurocog_user');
-  window.location.href = '/login';
+  
+  // Clear any session data or cookies if needed
+  document.cookie.split(';').forEach(cookie => {
+    document.cookie = cookie
+      .replace(/^ +/, '')
+      .replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
+  });
+  
+  // Optional: Redirect to login page or home
+  window.location.href = '/';
 };
 
 // Get current user function

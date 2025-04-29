@@ -1,13 +1,13 @@
 
 import React from 'react';
-import { BellIcon, Search, Settings, UserCircle } from 'lucide-react';
+import { BellIcon, Search, Settings, UserCircle, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AuthService from '@/services/auth';
 import {
   DropdownMenu,
@@ -17,13 +17,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { toast } from 'sonner';
 
 export const Navbar: React.FC = () => {
   const { t, language } = useLanguage();
   const user = AuthService.getCurrentUser();
+  const navigate = useNavigate();
   
   const handleLogout = () => {
     AuthService.logout();
+    toast.success(t('logoutSuccess'));
+    navigate('/login');
   };
   
   return (
@@ -76,7 +80,10 @@ export const Navbar: React.FC = () => {
             </DropdownMenuItem>
             <DropdownMenuItem>{t('support')}</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>{t('logout')}</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive flex items-center">
+              <LogOut className="h-4 w-4 mr-2" />
+              {t('logout')}
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
