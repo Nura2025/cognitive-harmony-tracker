@@ -126,6 +126,8 @@ const getUserSession = (user_id, session_id) => {
 // Function to get domain-specific component details
 const getSessionDomainDetails = async (sessionId: string, domain: string) => {
   try {
+    console.log(`Fetching ${domain} details for session ${sessionId}`);
+    
     // For development/testing when API might not be available
     if (process.env.NODE_ENV === "development" || !API_BASE) {
       console.log(`Using mock data for ${domain} details for session ${sessionId}`);
@@ -160,7 +162,7 @@ const getSessionDomainDetails = async (sessionId: string, domain: string) => {
                 }
               }
             },
-            data_completeness: Math.random(),
+            data_completeness: Math.floor(Math.random() * 40) + 60, // 60-100%
             tasks_used: ['Memory Matrix', 'Sequence Recall', 'Dual N-Back', 'Pattern Memory']
               .sort(() => Math.random() - 0.5)
               .slice(0, Math.floor(Math.random() * 4) + 1)
@@ -240,7 +242,6 @@ const getSessionDomainDetails = async (sessionId: string, domain: string) => {
       });
     }
     
-    console.log(`Fetching ${domain} details for session ${sessionId}`);
     const response = await axios.get(`${API_BASE}/api/cognitive/component-details/${sessionId}?domain=${domain}`);
     return response.data;
   } catch (error) {

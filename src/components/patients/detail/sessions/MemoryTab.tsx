@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -57,7 +58,7 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
   }, [expandedDomain, sessionId]);
 
   // Fallback to session data if API fetch fails or isn't expanded yet
-  const details = memoryDetails || session?.memory_details;
+  const details = memoryDetails || session.memory_details;
   console.log('MemoryTab - Final details to render:', details);
 
   if (loading) {
