@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { PercentileGauge } from '../PercentileGauge';
-import { ZScoreBar } from '../ZScoreBar';
+import { PercentileGauge } from '../percentile-gauge/PercentileGauge';
+import { ZScoreBar } from '../z-score-bar/ZScoreBar';
 import { NormativeComparisonData } from '@/services/normative';
 import { CognitiveDomain } from '@/utils/types/patientTypes';
 
