@@ -1,4 +1,3 @@
-
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { API_BASE } from "./config"; // Make sure this points to your backend URL
 
@@ -16,6 +15,57 @@ export interface TrendData {
   memory_score: number;
   impulse_score: number;
   executive_score: number;
+  // Add detailed domain information
+  memory_details?: {
+    overall_score: number;
+    percentile: number;
+    classification: string;
+    components: {
+      working_memory: {
+        score: number;
+        components: any;
+      };
+      visual_memory: {
+        score: number;
+        components: any;
+      };
+    };
+    data_completeness: number;
+    tasks_used: string[];
+  };
+  impulse_details?: {
+    overall_score: number;
+    percentile: number;
+    classification: string;
+    components: {
+      inhibitory_control: number;
+      response_control: number;
+      decision_speed: number;
+      error_adaptation: number;
+    };
+    data_completeness: number;
+    games_used: string[];
+  };
+  attention_details?: {
+    overall_score: number;
+    percentile: number;
+    classification: string;
+    components: {
+      crop_score: number;
+      sequence_score: number;
+    };
+  };
+  executive_details?: {
+    overall_score: number;
+    percentile: number;
+    classification: string;
+    components: {
+      memory_contribution: number;
+      impulse_contribution: number;
+      attention_contribution: number;
+    };
+    profile_pattern: string;
+  };
 }
 
 export interface PatientProfile {
