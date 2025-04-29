@@ -2,12 +2,9 @@
 import React from 'react';
 import { format, parseISO } from 'date-fns';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TrendData } from '@/services/patient';
-import { MemoryTab } from './MemoryTab';
-import { AttentionTab } from './AttentionTab';
-import { ImpulseTab } from './ImpulseTab';
-import { ExecutiveTab } from './ExecutiveTab';
+import { SessionTabProvider } from './SessionTabProvider';
+import { getScoreColor, formatScore } from './utils/scoreUtils';
 
 interface SessionCardProps {
   session: TrendData;
@@ -20,10 +17,6 @@ interface SessionCardProps {
   expandedDomain: string | null;
   toggleSessionDetails: (index: number) => void;
   toggleDomainDetails: (domain: string) => void;
-  getScoreColor: (score: number) => string;
-  formatScore: (score: number) => number;
-  formatPercentile: (percentile: number) => string;
-  getClassificationStyle: (classification: string) => string;
 }
 
 export const SessionCard: React.FC<SessionCardProps> = ({
@@ -36,11 +29,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({
   selectedSessionIndex,
   expandedDomain,
   toggleSessionDetails,
-  toggleDomainDetails,
-  getScoreColor,
-  formatScore,
-  formatPercentile,
-  getClassificationStyle
+  toggleDomainDetails
 }) => {
   return (
     <div className="border rounded-md overflow-hidden shadow-sm transition-all hover:shadow-md">
@@ -93,62 +82,13 @@ export const SessionCard: React.FC<SessionCardProps> = ({
       
       {selectedSessionIndex === idx && (
         <div className="px-3 pb-3 pt-0">
-          <Tabs defaultValue="memory" className="w-full">
-            <TabsList className="grid grid-cols-4 mb-4">
-              <TabsTrigger value="memory">Memory</TabsTrigger>
-              <TabsTrigger value="attention">Attention</TabsTrigger>
-              <TabsTrigger value="impulse">Impulse</TabsTrigger>
-              <TabsTrigger value="executive">Executive</TabsTrigger>
-            </TabsList>
-            
-            {/* Memory Tab */}
-            <TabsContent value="memory">
-              <MemoryTab 
-                session={session}
-                expandedDomain={expandedDomain}
-                toggleDomainDetails={toggleDomainDetails}
-                getScoreColor={getScoreColor}
-                formatScore={formatScore}
-                formatPercentile={formatPercentile}
-                getClassificationStyle={getClassificationStyle}
-              />
-            </TabsContent>
-            
-            {/* Attention Tab */}
-            <TabsContent value="attention">
-              <AttentionTab 
-                session={session}
-                getScoreColor={getScoreColor}
-                formatScore={formatScore}
-                formatPercentile={formatPercentile}
-                getClassificationStyle={getClassificationStyle}
-              />
-            </TabsContent>
-            
-            {/* Impulse Tab */}
-            <TabsContent value="impulse">
-              <ImpulseTab 
-                session={session}
-                getScoreColor={getScoreColor}
-                formatScore={formatScore}
-                formatPercentile={formatPercentile}
-                getClassificationStyle={getClassificationStyle}
-              />
-            </TabsContent>
-            
-            {/* Executive Tab */}
-            <TabsContent value="executive">
-              <ExecutiveTab 
-                session={session}
-                getScoreColor={getScoreColor}
-                formatScore={formatScore}
-                formatPercentile={formatPercentile}
-                getClassificationStyle={getClassificationStyle}
-              />
-            </TabsContent>
-          </Tabs>
+          <SessionTabProvider 
+            session={session}
+            expandedDomain={expandedDomain}
+            toggleDomainDetails={toggleDomainDetails}
+          />
         </div>
       )}
     </div>
   );
-}
+};

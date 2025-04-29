@@ -3,7 +3,6 @@ import React from 'react';
 import { Search, Filter, Calendar } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
 
 interface SessionFiltersProps {
   searchQuery: string;
@@ -12,8 +11,6 @@ interface SessionFiltersProps {
   setScoreFilter: (value: string) => void;
   dateRangeFilter: string;
   setDateRangeFilter: (value: string) => void;
-  sortOrder: "desc" | "asc";
-  toggleSortOrder: () => void;
 }
 
 export const SessionFilters: React.FC<SessionFiltersProps> = ({
@@ -22,9 +19,7 @@ export const SessionFilters: React.FC<SessionFiltersProps> = ({
   scoreFilter,
   setScoreFilter,
   dateRangeFilter,
-  setDateRangeFilter,
-  sortOrder,
-  toggleSortOrder
+  setDateRangeFilter
 }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
