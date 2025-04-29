@@ -11,15 +11,93 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { patients, metricsMap, generatePercentileData, generateTrendData } from '@/utils/mockData';
-import { CognitiveDomain } from '@/components/analysis/CognitiveDomain';
-import { DomainComparison } from '@/components/analysis/DomainComparison';
-import { PerformanceTrend } from '@/components/analysis/PerformanceTrend';
+import { PatientAnalysis } from '@/components/patients/detail/PatientAnalysis';
+import { TrendData } from '@/services/patient';
+
+// Mock TrendData for Analysis page
+const generateMockTrendData = (): TrendData[] => {
+  // Create mock trend data for the past 90 days
+  const trendData: TrendData[] = [];
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - 90);
+  
+  for (let i = 0; i < 12; i++) {
+    const sessionDate = new Date(startDate);
+    sessionDate.setDate(sessionDate.getDate() + (i * 7)); // weekly data
+    
+    const baseScore = 50 + (i * 2); // Scores improve over time
+    const variability = 10; // Random variation
+    
+    trendData.push({
+      session_id: `session-${i}`,
+      session_date: sessionDate.toISOString().split('T')[0],
+      attention_score: Math.min(100, Math.max(0, baseScore + Math.random() * variability - variability/2)),
+      memory_score: Math.min(100, Math.max(0, baseScore + Math.random() * variability - variability/2)),
+      executive_score: Math.min(100, Math.max(0, baseScore + Math.random() * variability - variability/2)),
+      impulse_score: Math.min(100, Math.max(0, baseScore + Math.random() * variability - variability/2)),
+      attention_details: {
+        overall_score: 0,
+        percentile: 0,
+        classification: '',
+        components: {
+          crop_score: 0,
+          sequence_score: Math.floor(Math.random() * 1000)
+        },
+        data_completeness: 0
+      },
+      memory_details: {
+        overall_score: 0,
+        percentile: 0,
+        classification: '',
+        components: {
+          working_memory: {
+            score: Math.floor(Math.random() * 1000),
+            components: {}
+          },
+          visual_memory: {
+            score: 0,
+            components: {}
+          }
+        },
+        data_completeness: 0,
+        tasks_used: []
+      },
+      executive_details: {
+        overall_score: 0,
+        percentile: 0,
+        classification: '',
+        components: {
+          memory_contribution: Math.floor(Math.random() * 1000),
+          impulse_contribution: 0,
+          attention_contribution: 0
+        },
+        profile_pattern: '',
+        data_completeness: 0
+      },
+      impulse_details: {
+        overall_score: 0,
+        percentile: 0,
+        classification: '',
+        components: {
+          inhibitory_control: Math.floor(Math.random() * 1000),
+          response_control: 0,
+          decision_speed: 0,
+          error_adaptation: 0
+        },
+        data_completeness: 0,
+        games_used: []
+      }
+    });
+  }
+  
+  return trendData;
+};
 
 const Analysis = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [patientId, setPatientId] = useState<string | null>(null);
-  const [domainTrendData, setDomainTrendData] = useState<Record<string, any>>({});
+  const [mockTrendData, setMockTrendData] = useState<TrendData[]>([]);
   
   // Parse patient ID from URL query params
   useEffect(() => {
@@ -31,19 +109,10 @@ const Analysis = () => {
     } else if (patients.length > 0) {
       setPatientId(patients[0].id);
     }
-  }, [location]);
-  
-  // Generate trend data when patient changes
-  useEffect(() => {
-    if (!patientId) return;
     
-    setDomainTrendData({
-      attention: generateTrendData('attention'),
-      memory: generateTrendData('memory'),
-      executiveFunction: generateTrendData('executiveFunction'),
-      behavioral: generateTrendData('behavioral')
-    });
-  }, [patientId]);
+    // Generate mock trend data when component mounts
+    setMockTrendData(generateMockTrendData());
+  }, [location]);
   
   const handlePatientChange = (id: string) => {
     navigate(`/analysis?patient=${id}`);
@@ -55,19 +124,8 @@ const Analysis = () => {
   
   // Find the current patient
   const currentPatient = patients.find(p => p.id === patientId);
-  const patientMetrics = patientId ? metricsMap[patientId] : null;
   
-  // Generate percentile comparison data
-  const percentileData = generatePercentileData();
-  
-  // Generate performance trend data with validation
-  const performanceTrendData = generateTrendData('attention', 60)
-    .map(item => ({ 
-      date: item.date, 
-      score: typeof item.value === 'number' && !isNaN(item.value) ? item.value : 0
-    }));
-  
-  if (!currentPatient || !patientMetrics) {
+  if (!currentPatient) {
     return <div className="p-8 pixel-text">Loading patient data...</div>;
   }
   
@@ -106,44 +164,11 @@ const Analysis = () => {
         </div>
       </div>
       
-      <div className="grid gap-6 md:grid-cols-2">
-        <DomainComparison 
-          patientData={patientMetrics}
-          normativeData={percentileData.ageGroup}
-          subtypeData={percentileData.adhdSubtype}
-        />
-        <PerformanceTrend 
-          data={performanceTrendData}
-          title="Overall Performance Trend"
-          description="90-day progress tracking across all cognitive metrics"
-        />
-      </div>
-      
-      <div className="grid gap-6 md:grid-cols-2">
-        <CognitiveDomain 
-          domain="attention"
-          score={patientMetrics.attention}
-          trendData={domainTrendData.attention || []}
-        />
-        <CognitiveDomain 
-          domain="memory"
-          score={patientMetrics.memory}
-          trendData={domainTrendData.memory || []}
-        />
-      </div>
-      
-      <div className="grid gap-6 md:grid-cols-2">
-        <CognitiveDomain 
-          domain="executiveFunction"
-          score={patientMetrics.executiveFunction}
-          trendData={domainTrendData.executiveFunction || []}
-        />
-        <CognitiveDomain 
-          domain="behavioral"
-          score={patientMetrics.behavioral}
-          trendData={domainTrendData.behavioral || []}
-        />
-      </div>
+      {/* Patient Analysis Component */}
+      <PatientAnalysis 
+        trendGraph={mockTrendData}
+        hasTrendData={mockTrendData.length > 0}
+      />
     </div>
   );
 };

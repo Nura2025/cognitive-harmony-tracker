@@ -3,6 +3,7 @@ import React from 'react';
 import { TrendData } from '@/services/patient';
 import { NoAnalysisData } from './NoAnalysisData';
 import { AnalysisError } from './AnalysisError';
+import { AnalysisLoading } from './AnalysisLoading';
 import { AnalysisContent } from './AnalysisContent';
 
 interface PatientAnalysisProps {
@@ -45,7 +46,7 @@ export const PatientAnalysis: React.FC<PatientAnalysisProps> = ({ trendGraph, ha
 
   // Create performance trend data with validation
   const createPerformanceTrendData = () => {
-    if (!hasTrendData) return [];
+    if (!hasTrendData || trendGraph.length === 0) return [];
     
     return trendGraph.map(session => ({
       date: session.session_date,
@@ -56,7 +57,7 @@ export const PatientAnalysis: React.FC<PatientAnalysisProps> = ({ trendGraph, ha
 
   // Create domain trend data directly from trend graph
   const createDomainTrendData = () => {
-    if (!hasTrendData) return {
+    if (!hasTrendData || trendGraph.length === 0) return {
       attention: [],
       memory: [],
       executiveFunction: [],
@@ -110,4 +111,3 @@ export const PatientAnalysis: React.FC<PatientAnalysisProps> = ({ trendGraph, ha
     />
   );
 };
-
