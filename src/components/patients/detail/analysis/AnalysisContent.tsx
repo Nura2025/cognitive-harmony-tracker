@@ -2,10 +2,8 @@
 import React from 'react';
 import { DomainComparison } from '@/components/analysis/DomainComparison';
 import { PerformanceTrend } from '@/components/analysis/PerformanceTrend';
-import { CognitiveDomain } from '@/components/analysis/CognitiveDomain';
 import { CognitiveDomainGrid } from './CognitiveDomainGrid';
 import { CognitiveDomainMetrics } from '@/utils/types/patientTypes';
-import { AnalysisLoading } from './AnalysisLoading';
 
 interface AnalysisContentProps {
   patientMetrics: CognitiveDomainMetrics | null;

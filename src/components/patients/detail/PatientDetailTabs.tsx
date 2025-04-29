@@ -62,6 +62,7 @@ export const PatientDetailTabs: React.FC<PatientDetailTabsProps> = ({
           age={age}
           gender={gender}
           hasTrendData={hasTrendData}
+          patientId={patientId}
         />
       </TabsContent>
 
@@ -69,6 +70,7 @@ export const PatientDetailTabs: React.FC<PatientDetailTabsProps> = ({
         <PatientSessions 
           trendGraph={trendGraph}
           hasTrendData={hasTrendData}
+          patientId={patientId}
         />
       </TabsContent>
 
@@ -76,6 +78,7 @@ export const PatientDetailTabs: React.FC<PatientDetailTabsProps> = ({
         <PatientAnalysis 
           trendGraph={trendGraph}
           hasTrendData={hasTrendData}
+          patientId={patientId}
         />
       </TabsContent>
 
