@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +16,7 @@ interface PatientAnalysisProps {
 export const PatientAnalysis: React.FC<PatientAnalysisProps> = ({ trendGraph, hasTrendData }) => {
   const [domainTrendData, setDomainTrendData] = useState<Record<string, any>>({});
   const [isLoadingDomainData, setIsLoadingDomainData] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   // Prepare data for PerformanceTrend component
   const prepareTrendData = (trendGraph: TrendData[] = []) => {
@@ -40,37 +40,63 @@ export const PatientAnalysis: React.FC<PatientAnalysisProps> = ({ trendGraph, ha
     };
   };
 
-  // Generate domain-specific trend data
+  // Fetch all domain data at once - optimized to make a single request for each domain
   useEffect(() => {
     if (hasTrendData && trendGraph.length > 0) {
       setIsLoadingDomainData(true);
+      setFetchError(null);
       
-      // Generate trend data for each domain
+      // Get the latest session for fetching domain details
       const latestSession = trendGraph[trendGraph.length - 1];
+      const sessionId = latestSession.session_id;
       
-      Promise.all([
-        SessionService.getSessionDomainDetails(latestSession.session_id, 'attention'),
-        SessionService.getSessionDomainDetails(latestSession.session_id, 'memory'),
-        SessionService.getSessionDomainDetails(latestSession.session_id, 'executive'),
-        SessionService.getSessionDomainDetails(latestSession.session_id, 'behavioral')
-      ]).then(([attentionData, memoryData, executiveData, behavioralData]) => {
-        setDomainTrendData({
-          attention: attentionData ? attentionData.trendData || [] : [],
-          memory: memoryData ? memoryData.trendData || [] : [],
-          executiveFunction: executiveData ? executiveData.trendData || [] : [],
-          behavioral: behavioralData ? behavioralData.trendData || [] : []
+      console.log('PatientAnalysis - Fetching domain details for session ID:', sessionId);
+      
+      // Fetch all domain data in parallel with a single batch of requests
+      const domainPromises = [
+        { domain: 'attention', promise: SessionService.getSessionDomainDetails(sessionId, 'attention') },
+        { domain: 'memory', promise: SessionService.getSessionDomainDetails(sessionId, 'memory') },
+        { domain: 'executive', promise: SessionService.getSessionDomainDetails(sessionId, 'executive') },
+        { domain: 'behavioral', promise: SessionService.getSessionDomainDetails(sessionId, 'behavioral') }
+      ];
+      
+      // Use Promise.allSettled to handle both successful and failed promises
+      Promise.allSettled(domainPromises.map(item => item.promise))
+        .then(results => {
+          // Create a new object to store all domain data
+          const newDomainData: Record<string, any> = {
+            attention: [],
+            memory: [],
+            executiveFunction: [],
+            behavioral: []
+          };
+          
+          // Process results, keeping track of which succeeded and which failed
+          results.forEach((result, index) => {
+            const domainName = domainPromises[index].domain;
+            const mappedDomain = domainName === 'executive' ? 'executiveFunction' : 
+                               domainName === 'behavioral' ? 'behavioral' : domainName;
+            
+            if (result.status === 'fulfilled' && result.value) {
+              console.log(`PatientAnalysis - Successfully fetched ${domainName} data:`, result.value);
+              newDomainData[mappedDomain] = result.value.trendData || [];
+            } else {
+              console.error(`PatientAnalysis - Failed to fetch ${domainName} data:`, 
+                result.status === 'rejected' ? result.reason : 'No data returned');
+              newDomainData[mappedDomain] = [];
+            }
+          });
+          
+          // Update state with all domain data at once
+          setDomainTrendData(newDomainData);
+        })
+        .catch(error => {
+          console.error("PatientAnalysis - Error in domain data Promise.allSettled:", error);
+          setFetchError("Failed to load one or more domain details");
+        })
+        .finally(() => {
+          setIsLoadingDomainData(false);
         });
-        setIsLoadingDomainData(false);
-      }).catch(error => {
-        console.error("Error fetching domain details:", error);
-        setIsLoadingDomainData(false);
-        setDomainTrendData({
-          attention: [],
-          memory: [],
-          executiveFunction: [],
-          behavioral: []
-        });
-      });
     } else {
       setIsLoadingDomainData(false);
     }
@@ -82,7 +108,7 @@ export const PatientAnalysis: React.FC<PatientAnalysisProps> = ({ trendGraph, ha
   const createMetricsData = () => {
     if (!hasTrendData || trendGraph.length === 0) return null;
     
-    const latestSession = trendGraph[trendGraph.length - 0];
+    const latestSession = trendGraph[trendGraph.length - 1];
     return {
       attention: latestSession.attention_score,
       memory: latestSession.memory_score,
@@ -130,6 +156,21 @@ export const PatientAnalysis: React.FC<PatientAnalysisProps> = ({ trendGraph, ha
           <h3 className="text-lg font-medium mb-1">No Analysis Data Available</h3>
           <p className="text-muted-foreground text-center">
             Detailed analysis will be available after the patient completes cognitive assessments.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Add error state display
+  if (fetchError) {
+    return (
+      <Card className="glass md:col-span-2">
+        <CardContent className="pt-6 flex flex-col items-center justify-center h-64">
+          <AlertCircle className="h-10 w-10 text-rose-500 mb-2" />
+          <h3 className="text-lg font-medium mb-1">Error Loading Analysis Data</h3>
+          <p className="text-muted-foreground text-center">
+            {fetchError}
           </p>
         </CardContent>
       </Card>
