@@ -32,9 +32,11 @@ export const AttentionTab: React.FC<AttentionTabProps> = ({
 
   useEffect(() => {
     // Only fetch when the attention domain is expanded
-    if (expandedDomain && expandedDomain.includes('attention') && sessionId) {
+    if (expandedDomain === 'attention' && sessionId) {
       setLoading(true);
       setError(null);
+      
+      console.log('Fetching attention details for session ID:', sessionId);
       
       SessionService.getSessionDomainDetails(sessionId, 'attention')
         .then(data => {
@@ -52,7 +54,7 @@ export const AttentionTab: React.FC<AttentionTabProps> = ({
   }, [expandedDomain, sessionId]);
 
   // Fallback to session data if API fetch fails or isn't expanded yet
-  const details = attentionDetails || session.attention_details;
+  const details = attentionDetails || session?.attention_details;
 
   if (loading) {
     return (
@@ -123,7 +125,7 @@ export const AttentionTab: React.FC<AttentionTabProps> = ({
         <div>
           <div className="text-sm font-medium mb-2">Tasks Used</div>
           <div className="flex flex-wrap gap-2">
-            {details.tasks_used.map((task, i) => (
+            {details.tasks_used.map((task: string, i: number) => (
               <span key={i} className="bg-primary/10 px-2 py-1 rounded-full text-xs font-medium text-primary">
                 {task}
               </span>
