@@ -1,3 +1,4 @@
+
 // Type definitions for patient and assessment data
 
 export interface Patient {
@@ -75,3 +76,4 @@ export interface PatientData {
   sessions: SessionData[];
   reports: ReportType[];
 }
+

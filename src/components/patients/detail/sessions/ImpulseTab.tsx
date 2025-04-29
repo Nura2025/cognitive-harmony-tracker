@@ -28,9 +28,8 @@ export const ImpulseTab: React.FC<ImpulseTabProps> = ({
   const [impulseDetails, setImpulseDetails] = useState<any>(null);
   
   // Get the session ID from the TrendData structure
-  // For debugging purposes, log the session object to see its structure
   console.log('ImpulseTab - Session data:', session);
-  const sessionId = session?.id;
+  const sessionId = session?.id || session?.session_id;
   console.log('ImpulseTab - Using sessionId:', sessionId);
 
   useEffect(() => {
@@ -59,6 +58,23 @@ export const ImpulseTab: React.FC<ImpulseTabProps> = ({
   // Fallback to session data if API fetch fails or isn't expanded yet
   const details = impulseDetails || session?.impulse_details;
   console.log('ImpulseTab - Final details to render:', details);
+
+  if (loading) {
+    return (
+      <div className="text-center py-8">
+        <p>Loading impulse control details...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8 text-red-500">
+        <AlertCircle className="h-8 w-8 mx-auto mb-2" />
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   if (!details) {
     return (
