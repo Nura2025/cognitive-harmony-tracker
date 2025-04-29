@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TrendData } from '@/services/patient';
 import { MemoryTab } from './MemoryTab';
@@ -19,8 +19,21 @@ export const SessionTabProvider: React.FC<SessionTabProviderProps> = ({
   expandedDomain,
   toggleDomainDetails
 }) => {
+  const [activeTab, setActiveTab] = useState('memory');
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    // When tab changes, we set expandedDomain to the new tab value
+    toggleDomainDetails(value);
+  };
+
   return (
-    <Tabs defaultValue="memory" className="w-full">
+    <Tabs 
+      defaultValue="memory" 
+      className="w-full"
+      onValueChange={handleTabChange}
+      value={activeTab}
+    >
       <TabsList className="grid grid-cols-4 mb-4">
         <TabsTrigger value="memory">Memory</TabsTrigger>
         <TabsTrigger value="attention">Attention</TabsTrigger>

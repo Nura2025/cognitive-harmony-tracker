@@ -29,32 +29,37 @@ export const AttentionTab: React.FC<AttentionTabProps> = ({
   
   // Get the session ID directly from the session_id property
   const sessionId = session.session_id;
+  
+  console.log('AttentionTab - Session data:', session);
+  console.log('AttentionTab - Using sessionId:', sessionId);
 
+  // Fetch attention details when component mounts or when session changes
   useEffect(() => {
-    // Only fetch when the attention domain is expanded
-    if (expandedDomain === 'attention' && sessionId) {
+    if (sessionId) {
       setLoading(true);
       setError(null);
       
-      console.log('Fetching attention details for session ID:', sessionId);
+      console.log('AttentionTab - Fetching attention details for session ID:', sessionId);
       
       SessionService.getSessionDomainDetails(sessionId, 'attention')
         .then(data => {
           setAttentionDetails(data);
-          console.log('Fetched attention details:', data);
+          console.log('AttentionTab - Fetched attention details:', data);
         })
         .catch(err => {
-          console.error('Error fetching attention details:', err);
+          console.error('AttentionTab - Error fetching attention details:', err);
           setError('Failed to load attention details.');
         })
         .finally(() => {
           setLoading(false);
         });
     }
-  }, [expandedDomain, sessionId]);
+  }, [sessionId]);
 
-  // Fallback to session data if API fetch fails or isn't expanded yet
+  // Fallback to session data if API fetch fails
   const details = attentionDetails || session?.attention_details;
+
+  console.log('AttentionTab - Final details to render:', details);
 
   if (loading) {
     return (
