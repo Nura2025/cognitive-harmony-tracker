@@ -1,9 +1,13 @@
 
-import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import React, { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { ChartBar, AlertCircle } from 'lucide-react';
+import { DomainComparison } from '@/components/analysis/DomainComparison';
 import { PerformanceTrend } from '@/components/analysis/PerformanceTrend';
+import { CognitiveDomain } from '@/components/analysis/CognitiveDomain';
 import { TrendData } from '@/services/patient';
+import SessionService from '@/services/session';
 
 interface PatientAnalysisProps {
   trendGraph: TrendData[];
@@ -11,6 +15,9 @@ interface PatientAnalysisProps {
 }
 
 export const PatientAnalysis: React.FC<PatientAnalysisProps> = ({ trendGraph, hasTrendData }) => {
+  const [domainTrendData, setDomainTrendData] = useState<Record<string, any>>({});
+  const [isLoadingDomainData, setIsLoadingDomainData] = useState(true);
+
   // Prepare data for PerformanceTrend component
   const prepareTrendData = (trendGraph: TrendData[] = []) => {
     return {
@@ -33,30 +40,162 @@ export const PatientAnalysis: React.FC<PatientAnalysisProps> = ({ trendGraph, ha
     };
   };
 
+  // Generate domain-specific trend data
+  useEffect(() => {
+    if (hasTrendData && trendGraph.length > 0) {
+      setIsLoadingDomainData(true);
+      
+      // Generate trend data for each domain
+      const latestSession = trendGraph[trendGraph.length - 1];
+      
+      Promise.all([
+        SessionService.getSessionDomainDetails(latestSession.session_id, 'attention'),
+        SessionService.getSessionDomainDetails(latestSession.session_id, 'memory'),
+        SessionService.getSessionDomainDetails(latestSession.session_id, 'executive'),
+        SessionService.getSessionDomainDetails(latestSession.session_id, 'behavioral')
+      ]).then(([attentionData, memoryData, executiveData, behavioralData]) => {
+        setDomainTrendData({
+          attention: attentionData ? attentionData.trendData || [] : [],
+          memory: memoryData ? memoryData.trendData || [] : [],
+          executiveFunction: executiveData ? executiveData.trendData || [] : [],
+          behavioral: behavioralData ? behavioralData.trendData || [] : []
+        });
+        setIsLoadingDomainData(false);
+      }).catch(error => {
+        console.error("Error fetching domain details:", error);
+        setIsLoadingDomainData(false);
+        setDomainTrendData({
+          attention: [],
+          memory: [],
+          executiveFunction: [],
+          behavioral: []
+        });
+      });
+    } else {
+      setIsLoadingDomainData(false);
+    }
+  }, [hasTrendData, trendGraph]);
+
   const trendData = prepareTrendData(trendGraph);
+  
+  // Create metrics data for DomainComparison
+  const createMetricsData = () => {
+    if (!hasTrendData || trendGraph.length === 0) return null;
+    
+    const latestSession = trendGraph[trendGraph.length - 0];
+    return {
+      attention: latestSession.attention_score,
+      memory: latestSession.memory_score,
+      executiveFunction: latestSession.executive_score,
+      behavioral: latestSession.impulse_score
+    };
+  };
+  
+  const patientMetrics = createMetricsData();
+  
+  // Create percentile comparison data
+  const percentileData = {
+    ageGroup: {
+      attention: 75,
+      memory: 68,
+      executiveFunction: 72,
+      behavioral: 70
+    },
+    adhdSubtype: {
+      attention: 60,
+      memory: 55,
+      executiveFunction: 58,
+      behavioral: 52
+    }
+  };
+
+  // Create performance trend data with validation
+  const createPerformanceTrendData = () => {
+    if (!hasTrendData) return [];
+    
+    return trendGraph.map(session => ({
+      date: session.session_date,
+      score: (session.attention_score + session.memory_score + 
+              session.executive_score + session.impulse_score) / 4
+    }));
+  };
+
+  const performanceTrendData = createPerformanceTrendData();
+
+  if (!hasTrendData) {
+    return (
+      <Card className="glass md:col-span-2">
+        <CardContent className="pt-6 flex flex-col items-center justify-center h-64">
+          <ChartBar className="h-10 w-10 text-muted-foreground mb-2" />
+          <h3 className="text-lg font-medium mb-1">No Analysis Data Available</h3>
+          <p className="text-muted-foreground text-center">
+            Detailed analysis will be available after the patient completes cognitive assessments.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {hasTrendData && Object.keys(trendData).map((key, index) => (
+    <div className="space-y-8 animate-fade-in">
+      <div className="grid gap-6 md:grid-cols-2">
+        {patientMetrics && (
+          <DomainComparison 
+            patientData={patientMetrics}
+            normativeData={percentileData.ageGroup}
+            subtypeData={percentileData.adhdSubtype}
+          />
+        )}
         <PerformanceTrend 
-          key={key}
-          title={`${key.charAt(0).toUpperCase() + key.slice(1)} Performance`}
-          data={trendData[key as keyof typeof trendData]}
-          description={`Trend of ${key} scores over time`}
+          data={performanceTrendData}
+          title="Overall Performance Trend"
+          description="Progress tracking across all cognitive metrics"
         />
-      ))}
+      </div>
       
-      {!hasTrendData && (
-        <Card className="glass md:col-span-2">
-          <CardContent className="pt-6 flex flex-col items-center justify-center h-64">
-            <ChartBar className="h-10 w-10 text-muted-foreground mb-2" />
-            <h3 className="text-lg font-medium mb-1">No Analysis Data Available</h3>
-            <p className="text-muted-foreground text-center">
-              Detailed analysis will be available after the patient completes cognitive assessments.
-            </p>
-          </CardContent>
-        </Card>
-      )}
+      <div className="grid gap-6 md:grid-cols-2">
+        {!isLoadingDomainData ? (
+          <>
+            <CognitiveDomain 
+              domain="attention"
+              score={patientMetrics?.attention || 0}
+              trendData={domainTrendData.attention || []}
+            />
+            <CognitiveDomain 
+              domain="memory"
+              score={patientMetrics?.memory || 0}
+              trendData={domainTrendData.memory || []}
+            />
+          </>
+        ) : (
+          <Card className="glass md:col-span-2">
+            <CardContent className="pt-6 flex flex-col items-center justify-center h-64">
+              <AlertCircle className="h-10 w-10 text-muted-foreground mb-2" />
+              <h3 className="text-lg font-medium mb-1">Loading Domain Data</h3>
+              <p className="text-muted-foreground text-center">
+                Please wait while we fetch detailed domain analysis...
+              </p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+      
+      <div className="grid gap-6 md:grid-cols-2">
+        {!isLoadingDomainData ? (
+          <>
+            <CognitiveDomain 
+              domain="executiveFunction"
+              score={patientMetrics?.executiveFunction || 0}
+              trendData={domainTrendData.executiveFunction || []}
+            />
+            <CognitiveDomain 
+              domain="behavioral"
+              score={patientMetrics?.behavioral || 0}
+              trendData={domainTrendData.behavioral || []}
+            />
+          </>
+        ) : null}
+      </div>
     </div>
   );
 };
