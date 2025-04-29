@@ -4,8 +4,10 @@ import { API_BASE } from "./config";
 import { toast } from "sonner";
 
 interface AuthResponse {
-  user: any;
-  token: string;
+  user?: any;
+  token?: string;
+  access_token?: string;
+  token_type?: string;
 }
 
 interface LoginData {
@@ -37,9 +39,24 @@ const login = async (data: LoginData): Promise<AuthResponse> => {
     const response = await axios.post(`${API_BASE}/login`, data);
     
     // Store the token in localStorage
-    if (response.data.token) {
+    // Handle both response formats: {token, user} or {access_token, token_type}
+    if (response.data.access_token) {
+      localStorage.setItem('neurocog_token', response.data.access_token);
+      
+      // Since user data is not returned by the API, we'll store minimal user info
+      const userEmail = data.email;
+      const userInfo = { email: userEmail };
+      localStorage.setItem('neurocog_user', JSON.stringify(userInfo));
+      
+      return {
+        token: response.data.access_token,
+        user: userInfo
+      };
+    } else if (response.data.token) {
+      // Handle the original format if it's ever returned
       localStorage.setItem('neurocog_token', response.data.token);
       localStorage.setItem('neurocog_user', JSON.stringify(response.data.user));
+      return response.data;
     }
     
     return response.data;
