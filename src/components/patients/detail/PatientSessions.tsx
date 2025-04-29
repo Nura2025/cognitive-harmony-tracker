@@ -7,6 +7,15 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TrendData } from '@/services/patient';
+import { 
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 
 interface PatientSessionsProps {
   trendGraph: TrendData[];
@@ -16,6 +25,16 @@ interface PatientSessionsProps {
 export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, hasTrendData }) => {
   const [selectedSessionIndex, setSelectedSessionIndex] = useState<number | null>(null);
   const [expandedDomain, setExpandedDomain] = useState<string | null>(null);
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const sessionsPerPage = 3;
+  const totalPages = Math.ceil((trendGraph?.length || 0) / sessionsPerPage);
+  
+  // Get current sessions for pagination
+  const indexOfLastSession = currentPage * sessionsPerPage;
+  const indexOfFirstSession = indexOfLastSession - sessionsPerPage;
+  const currentSessions = trendGraph?.slice(indexOfFirstSession, indexOfLastSession) || [];
 
   // Format score for display
   const formatScore = (score: number) => {
@@ -85,6 +104,12 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
     }
   };
 
+  // Handle pagination
+  const changePage = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    setSelectedSessionIndex(null); // Reset selected session when changing pages
+  };
+
   return (
     <Card className="glass">
       <CardHeader className="pb-2">
@@ -103,7 +128,7 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
           </div>
         ) : (
           <div className="space-y-4">
-            {trendGraph.map((session, idx) => (
+            {currentSessions.map((session, idx) => (
               <div 
                 key={idx} 
                 className="border rounded-md overflow-hidden"
@@ -117,7 +142,7 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
                       <p className="text-sm font-medium">
                         {format(parseISO(session.session_date), "MMM d, yyyy")}
                       </p>
-                      <p className="text-xs text-muted-foreground">Session {idx + 1}</p>
+                      <p className="text-xs text-muted-foreground">Session {indexOfFirstSession + idx + 1}</p>
                     </div>
                     <div className="flex items-center space-x-2 lg:space-x-4">
                       <div className="grid grid-cols-4 gap-2 md:gap-4">
@@ -219,7 +244,7 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
                                             <TableRow key={key}>
                                               <TableCell className="capitalize">{key.replace(/_/g, ' ')}</TableCell>
                                               <TableCell>
-                                                {typeof value === 'number' ? formatScore(value) : value}
+                                                {typeof value === 'number' ? formatScore(value as number) : String(value)}
                                               </TableCell>
                                             </TableRow>
                                           ))}
@@ -260,7 +285,7 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
                                             <TableRow key={key}>
                                               <TableCell className="capitalize">{key.replace(/_/g, ' ')}</TableCell>
                                               <TableCell>
-                                                {typeof value === 'number' ? formatScore(value) : value}
+                                                {typeof value === 'number' ? formatScore(value as number) : String(value)}
                                               </TableCell>
                                             </TableRow>
                                           ))}
@@ -386,12 +411,12 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
                             <div>
                               <div className="font-medium mb-2">Components</div>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {Object.entries(session.impulse_details.components).map(([key, value]) => (
+                                {Object.entries(session.impulse_details.components || {}).map(([key, value]) => (
                                   <div key={key} className="border rounded-md p-3">
                                     <div className="flex justify-between">
                                       <span className="font-medium capitalize">{key.replace(/_/g, ' ')}</span>
-                                      <span className={`font-bold ${getScoreColor(value as number)}`}>
-                                        {formatScore(value as number)}
+                                      <span className={`font-bold ${getScoreColor(typeof value === 'number' ? value : 0)}`}>
+                                        {typeof value === 'number' ? formatScore(value) : String(value)}
                                       </span>
                                     </div>
                                   </div>
@@ -458,12 +483,12 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
                             <div>
                               <div className="font-medium mb-2">Domain Contributions</div>
                               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                {Object.entries(session.executive_details.components).map(([key, value]) => (
+                                {Object.entries(session.executive_details.components || {}).map(([key, value]) => (
                                   <div key={key} className="border rounded-md p-3">
                                     <div className="flex justify-between">
                                       <span className="font-medium capitalize">{key.replace(/_contribution/g, '').replace(/_/g, ' ')}</span>
-                                      <span className={`font-bold ${getScoreColor(value as number)}`}>
-                                        {formatScore(value as number)}
+                                      <span className={`font-bold ${getScoreColor(typeof value === 'number' ? value : 0)}`}>
+                                        {typeof value === 'number' ? formatScore(value) : String(value)}
                                       </span>
                                     </div>
                                   </div>
@@ -490,9 +515,62 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
                 )}
               </div>
             ))}
+            
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <Pagination className="mt-4">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => currentPage > 1 && changePage(currentPage - 1)}
+                      className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                  
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    // Show first page, current page, last page, and pages around current
+                    if (
+                      page === 1 || 
+                      page === totalPages || 
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    ) {
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationLink 
+                            isActive={page === currentPage}
+                            onClick={() => changePage(page)}
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    }
+                    
+                    // Show ellipsis for skipped pages
+                    if (page === 2 && currentPage > 3) {
+                      return <PaginationEllipsis key="ellipsis-start" />;
+                    }
+                    
+                    if (page === totalPages - 1 && currentPage < totalPages - 2) {
+                      return <PaginationEllipsis key="ellipsis-end" />;
+                    }
+                    
+                    return null;
+                  })}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => currentPage < totalPages && changePage(currentPage + 1)}
+                      className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
           </div>
         )}
       </CardContent>
     </Card>
   );
 };
+

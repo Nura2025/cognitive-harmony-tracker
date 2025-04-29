@@ -9,63 +9,74 @@ export interface DomainScores {
   executive_function: number;
 }
 
+interface WorkingMemoryComponent {
+  score: number;
+  components: Record<string, number | string>;
+}
+
+interface VisualMemoryComponent {
+  score: number;
+  components: Record<string, number | string>;
+}
+
+interface MemoryDetails {
+  overall_score: number;
+  percentile: number;
+  classification: string;
+  components: {
+    working_memory: WorkingMemoryComponent;
+    visual_memory: VisualMemoryComponent;
+  };
+  data_completeness: number;
+  tasks_used: string[];
+}
+
+interface ImpulseDetails {
+  overall_score: number;
+  percentile: number;
+  classification: string;
+  components: {
+    inhibitory_control: number;
+    response_control: number;
+    decision_speed: number;
+    error_adaptation: number;
+  };
+  data_completeness: number;
+  games_used: string[];
+}
+
+interface AttentionDetails {
+  overall_score: number;
+  percentile: number;
+  classification: string;
+  components: {
+    crop_score: number;
+    sequence_score: number;
+  };
+}
+
+interface ExecutiveDetails {
+  overall_score: number;
+  percentile: number;
+  classification: string;
+  components: {
+    memory_contribution: number;
+    impulse_contribution: number;
+    attention_contribution: number;
+  };
+  profile_pattern: string;
+}
+
 export interface TrendData {
   session_date: string;
   attention_score: number;
   memory_score: number;
   impulse_score: number;
   executive_score: number;
-  // Add detailed domain information
-  memory_details?: {
-    overall_score: number;
-    percentile: number;
-    classification: string;
-    components: {
-      working_memory: {
-        score: number;
-        components: any;
-      };
-      visual_memory: {
-        score: number;
-        components: any;
-      };
-    };
-    data_completeness: number;
-    tasks_used: string[];
-  };
-  impulse_details?: {
-    overall_score: number;
-    percentile: number;
-    classification: string;
-    components: {
-      inhibitory_control: number;
-      response_control: number;
-      decision_speed: number;
-      error_adaptation: number;
-    };
-    data_completeness: number;
-    games_used: string[];
-  };
-  attention_details?: {
-    overall_score: number;
-    percentile: number;
-    classification: string;
-    components: {
-      crop_score: number;
-      sequence_score: number;
-    };
-  };
-  executive_details?: {
-    overall_score: number;
-    percentile: number;
-    classification: string;
-    components: {
-      memory_contribution: number;
-      impulse_contribution: number;
-      attention_contribution: number;
-    };
-    profile_pattern: string;
-  };
+  memory_details?: MemoryDetails;
+  impulse_details?: ImpulseDetails;
+  attention_details?: AttentionDetails;
+  executive_details?: ExecutiveDetails;
 }
 
 export interface PatientProfile {
@@ -87,6 +98,7 @@ interface PatientListItem {
   user_id: string;
   first_name: string;
   last_name: string;
+  name: string;
   date_of_birth: string;
   gender: string;
   adhd_subtype: string | null;
