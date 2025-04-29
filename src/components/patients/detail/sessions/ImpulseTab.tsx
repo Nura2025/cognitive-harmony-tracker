@@ -28,7 +28,10 @@ export const ImpulseTab: React.FC<ImpulseTabProps> = ({
   const [impulseDetails, setImpulseDetails] = useState<any>(null);
   
   // Get the session ID from the TrendData structure
-  const sessionId = session.id;
+  // For debugging purposes, log the session object to see its structure
+  console.log('ImpulseTab - Session data:', session);
+  const sessionId = session?.id;
+  console.log('ImpulseTab - Using sessionId:', sessionId);
 
   useEffect(() => {
     // Only fetch when impulse domain is expanded
@@ -36,10 +39,12 @@ export const ImpulseTab: React.FC<ImpulseTabProps> = ({
       setLoading(true);
       setError(null);
       
+      console.log('ImpulseTab - Fetching impulse details for session ID:', sessionId);
+      
       SessionService.getSessionDomainDetails(sessionId, 'impulse_control')
         .then(data => {
+          console.log('ImpulseTab - Fetched impulse details:', data);
           setImpulseDetails(data);
-          console.log('Fetched impulse details:', data);
         })
         .catch(err => {
           console.error('Error fetching impulse details:', err);
@@ -52,7 +57,8 @@ export const ImpulseTab: React.FC<ImpulseTabProps> = ({
   }, [expandedDomain, sessionId]);
 
   // Fallback to session data if API fetch fails or isn't expanded yet
-  const details = impulseDetails || session.impulse_details;
+  const details = impulseDetails || session?.impulse_details;
+  console.log('ImpulseTab - Final details to render:', details);
 
   if (!details) {
     return (
@@ -119,11 +125,13 @@ export const ImpulseTab: React.FC<ImpulseTabProps> = ({
           <div className="w-full bg-muted rounded-full h-2.5">
             <div 
               className="bg-primary h-2.5 rounded-full" 
-              style={{ width: `${details.data_completeness * 100}%` }}
+              style={{ width: `${typeof details.data_completeness === 'number' ? details.data_completeness * 100 : details.data_completeness * 100}%` }}
             ></div>
           </div>
           <div className="text-xs text-muted-foreground mt-1">
-            {Math.round(details.data_completeness * 100)}% complete
+            {typeof details.data_completeness === 'number' 
+              ? `${Math.round(details.data_completeness * 100)}% complete` 
+              : `${Math.round(details.data_completeness * 100)}% complete`}
           </div>
         </div>
       </div>

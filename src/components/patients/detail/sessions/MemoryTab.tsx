@@ -29,20 +29,23 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [memoryDetails, setMemoryDetails] = useState<any>(null);
   
-  // Get the session ID - should be present in the session data structure from TrendData
-  // Looking at the mocked data in SessionService, we can see it's potentially in session.id
-  const sessionId = session.id;
+  // For debugging purposes, log the session object to see its structure
+  console.log('MemoryTab - Session data:', session);
+  const sessionId = session?.id;
+  console.log('MemoryTab - Using sessionId:', sessionId);
 
   useEffect(() => {
-    // Only fetch when the component is mounted or when domain is expanded
-    if (expandedDomain && sessionId) {
+    // Only fetch when the memory domain is expanded
+    if (expandedDomain && expandedDomain.includes('memory') && sessionId) {
       setLoading(true);
       setError(null);
       
+      console.log('MemoryTab - Fetching memory details for session ID:', sessionId);
+      
       SessionService.getSessionDomainDetails(sessionId, 'memory')
         .then(data => {
+          console.log('MemoryTab - Fetched memory details:', data);
           setMemoryDetails(data);
-          console.log('Fetched memory details:', data);
         })
         .catch(err => {
           console.error('Error fetching memory details:', err);
@@ -55,13 +58,31 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
   }, [expandedDomain, sessionId]);
 
   // Fallback to session data if API fetch fails or isn't expanded yet
-  const details = memoryDetails || session.memory_details;
+  const details = memoryDetails || session?.memory_details;
+  console.log('MemoryTab - Final details to render:', details);
 
   if (!details) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         <AlertCircle className="h-8 w-8 mx-auto mb-2" />
         <p>No detailed memory data available for this session</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="text-center py-8">
+        <p>Loading memory details...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8 text-red-500">
+        <AlertCircle className="h-8 w-8 mx-auto mb-2" />
+        <p>{error}</p>
       </div>
     );
   }
@@ -209,11 +230,13 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
           <div className="w-full bg-muted rounded-full h-2.5">
             <div 
               className="bg-primary h-2.5 rounded-full" 
-              style={{ width: `${details.data_completeness}%` }}
+              style={{ width: `${typeof details.data_completeness === 'number' ? details.data_completeness * 100 : details.data_completeness}%` }}
             ></div>
           </div>
           <div className="text-xs text-muted-foreground mt-1">
-            {details.data_completeness}% complete
+            {typeof details.data_completeness === 'number' 
+              ? `${Math.round(details.data_completeness * 100)}% complete` 
+              : `${details.data_completeness}% complete`}
           </div>
         </div>
       </div>
