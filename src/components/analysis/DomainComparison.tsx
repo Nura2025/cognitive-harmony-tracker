@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartLegend } from '@/components/ui/chart';
@@ -74,26 +73,35 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
     typeof patientData[domain] === 'number' && !isNaN(patientData[domain])
   );
   
-  const normativeChartData = domains.map(domain => {
-    const patientValue = typeof patientData[domain] === 'number' && !isNaN(patientData[domain]) 
-      ? patientData[domain] 
-      : 0;
-    
-    const normativeValue = normativeData && typeof normativeData[domain] === 'number' && !isNaN(normativeData[domain])
-      ? normativeData[domain]
-      : 50;
+  const normativeChartData = useMemo(() => {
+    return domains.map(domain => {
+      // Get patient's raw score
+      const patientValue = typeof patientData[domain] === 'number' && !isNaN(patientData[domain]) 
+        ? patientData[domain] 
+        : 0;
       
-    const subtypeValue = subtypeData && typeof subtypeData[domain] === 'number' && !isNaN(subtypeData[domain])
-      ? subtypeData[domain]
-      : 40;
+      // Map domain keys to API domain names for normative data lookup
+      const apiDomainKey = mapDomainKey(domain);
+      const normData = normativeComparison[apiDomainKey];
       
-    return {
-      domain: getDomainName(domain),
-      patient: patientValue,
-      normative: normativeValue,
-      subtype: subtypeValue
-    };
-  });
+      // Use normative mean from API data if available, otherwise fallback to provided normativeData
+      const normativeMean = normData?.normative_comparison?.mean ?? 
+        (normativeData && typeof normativeData[domain] === 'number' && !isNaN(normativeData[domain])
+          ? normativeData[domain]
+          : 50);
+          
+      const subtypeValue = subtypeData && typeof subtypeData[domain] === 'number' && !isNaN(subtypeData[domain])
+        ? subtypeData[domain]
+        : 40;
+        
+      return {
+        domain: getDomainName(domain),
+        patient: patientValue,
+        normative: normativeMean,
+        subtype: subtypeValue
+      };
+    });
+  }, [domains, patientData, normativeData, subtypeData, normativeComparison]);
   
   const firstAndLastSession = useMemo(() => {
     if (!sessions || sessions.length < 2) {
@@ -177,14 +185,12 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
             <div className="flex flex-wrap gap-4 mb-4">
               <div className="flex items-center">
                 <div className="w-3 h-3 rounded-full bg-primary mr-1.5" />
-                <span className="text-xs">Patient</span>
+                <span className="text-xs">Patient's Raw Score</span>
               </div>
-              {normativeData && (
-                <div className="flex items-center">
-                  <div className="w-3 h-3 rounded-full bg-blue-400 mr-1.5" />
-                  <span className="text-xs">Age-Based Normative</span>
-                </div>
-              )}
+              <div className="flex items-center">
+                <div className="w-3 h-3 rounded-full bg-blue-400 mr-1.5" />
+                <span className="text-xs">Normative Mean</span>
+              </div>
               {subtypeData && (
                 <div className="flex items-center">
                   <div className="w-3 h-3 rounded-full bg-amber-400 mr-1.5" />
@@ -220,18 +226,16 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
                         />
                       )}
                       
-                      {normativeData && (
-                        <Radar
-                          name="Age-Based Normative"
-                          dataKey="normative"
-                          stroke="rgb(96, 165, 250)"
-                          fill="rgb(96, 165, 250)"
-                          fillOpacity={0.5}
-                        />
-                      )}
+                      <Radar
+                        name="Normative Mean"
+                        dataKey="normative"
+                        stroke="rgb(96, 165, 250)"
+                        fill="rgb(96, 165, 250)"
+                        fillOpacity={0.5}
+                      />
                       
                       <Radar
-                        name="Patient"
+                        name="Patient's Raw Score"
                         dataKey="patient"
                         stroke="hsl(var(--primary))"
                         fill="hsl(var(--primary))"

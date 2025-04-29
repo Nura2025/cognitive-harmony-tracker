@@ -68,8 +68,6 @@ export const PatientDetailTabs: React.FC<PatientDetailTabsProps> = ({
 
       <TabsContent value="sessions">
         <PatientSessions 
-          trendGraph={trendGraph}
-          hasTrendData={hasTrendData}
           patientId={patientId}
         />
       </TabsContent>
@@ -88,3 +86,4 @@ export const PatientDetailTabs: React.FC<PatientDetailTabsProps> = ({
     </Tabs>
   );
 };
+
