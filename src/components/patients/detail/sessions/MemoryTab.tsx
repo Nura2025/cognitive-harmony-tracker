@@ -29,14 +29,13 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [memoryDetails, setMemoryDetails] = useState<any>(null);
   
-  // For debugging purposes, log the session object to see its structure
-  console.log('MemoryTab - Session data:', session);
   const sessionId = session.session_id;
+  console.log('MemoryTab - Session data:', session);
   console.log('MemoryTab - Using sessionId:', sessionId);
 
+  // Always fetch memory details when the component mounts
   useEffect(() => {
-    // Only fetch when the memory domain is expanded
-    if (expandedDomain && expandedDomain.includes('memory') && sessionId) {
+    if (sessionId) {
       setLoading(true);
       setError(null);
       
@@ -55,10 +54,10 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
           setLoading(false);
         });
     }
-  }, [expandedDomain, sessionId]);
+  }, [sessionId]);
 
-  // Fallback to session data if API fetch fails or isn't expanded yet
-  const details = memoryDetails || session.memory_details;
+  // Combine fetched data with session data if available
+  const details = memoryDetails || (session.memory_details || null);
   console.log('MemoryTab - Final details to render:', details);
 
   if (loading) {
@@ -115,6 +114,7 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {details.components && (
             <>
+              {/* Working Memory Component */}
               <div className="border rounded-md p-3 bg-background shadow-sm">
                 <div className="flex justify-between mb-2">
                   <span className="font-medium">Working Memory</span>
@@ -132,6 +132,7 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
                   {expandedDomain === 'working_memory' ? <ChevronUp className="ml-2 h-4 w-4" /> : <ChevronDown className="ml-2 h-4 w-4" />}
                 </Button>
                 
+                {/* Working Memory Details */}
                 {expandedDomain === 'working_memory' && (
                   <div className="mt-2 animate-fade-in">
                     {loading ? (
@@ -162,6 +163,7 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
                 )}
               </div>
               
+              {/* Visual Memory Component */}
               <div className="border rounded-md p-3 bg-background shadow-sm">
                 <div className="flex justify-between mb-2">
                   <span className="font-medium">Visual Memory</span>
@@ -179,6 +181,7 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
                   {expandedDomain === 'visual_memory' ? <ChevronUp className="ml-2 h-4 w-4" /> : <ChevronDown className="ml-2 h-4 w-4" />}
                 </Button>
                 
+                {/* Visual Memory Details */}
                 {expandedDomain === 'visual_memory' && (
                   <div className="mt-2 animate-fade-in">
                     {loading ? (
@@ -213,6 +216,7 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
         </div>
       </div>
       
+      {/* Tasks and Data Completeness */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <div className="text-sm font-medium mb-2">Tasks Used</div>
