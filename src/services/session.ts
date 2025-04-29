@@ -1,10 +1,9 @@
-
 import axios from "axios";
 import { API_BASE } from "./config";
 import { TrendData } from "./patient";
 import { format, subDays } from "date-fns";
 
-// Mock data for sessions
+// We'll keep the mock data generator for development or when API is not available
 const generateMockSessions = (userId: string, count: number = 10): { data: TrendData[] } => {
   const sessions: TrendData[] = [];
   
@@ -14,8 +13,8 @@ const generateMockSessions = (userId: string, count: number = 10): { data: Trend
     const sessionId = `session-${userId}-${i}`; // Generate a session ID
     
     const session: TrendData = {
-      id: sessionId, // Keep for backward compatibility
-      session_id: sessionId, // Add the required session_id property
+      id: sessionId, 
+      session_id: sessionId, // Using the same ID for both properties for consistency
       session_date: date,
       memory_score: baseScore + Math.floor(Math.random() * 20 - 10),
       attention_score: baseScore + Math.floor(Math.random() * 20 - 10),
@@ -98,41 +97,65 @@ const generateMockSessions = (userId: string, count: number = 10): { data: Trend
   return { data: sessions };
 };
 
-const addSession = (data) => {
-  return axios.post(API_BASE + "/session", data);
+const addSession = (data: any) => {
+  return axios.post(`${API_BASE}/session`, data);
 };
 
-const getUserSessions = (user_id) => {
-  // Mock sessions data
+const getUserSessions = (userId: string) => {
+  console.log(`Fetching sessions for user ${userId}`);
+  
+  // Check if we're in development or API_BASE is not configured
   if (process.env.NODE_ENV === "development" || !API_BASE) {
-    console.log("Using mock session data");
-    return Promise.resolve(generateMockSessions(user_id));
+    console.log("Using mock session data (Development mode or API not configured)");
+    return Promise.resolve(generateMockSessions(userId));
   }
-  return axios.get(API_BASE + `/sessions/${user_id}`);
+  
+  // Use the actual API endpoint
+  return axios.get(`${API_BASE}/sessions/${userId}`)
+    .then(response => {
+      console.log("API returned sessions:", response.data);
+      return response;
+    })
+    .catch(error => {
+      console.error("Error fetching user sessions from API:", error);
+      throw error;
+    });
 };
 
-const getUserSession = (user_id, session_id) => {
-  // Mock session data
+const getUserSession = (userId: string, sessionId: string) => {
+  console.log(`Fetching specific session ${sessionId} for user ${userId}`);
+  
+  // Check if we're in development or API_BASE is not configured
   if (process.env.NODE_ENV === "development" || !API_BASE) {
-    console.log("Using mock session data for specific session");
-    const sessions = generateMockSessions(user_id, 1);
+    console.log("Using mock session data for specific session (Development mode or API not configured)");
+    const sessions = generateMockSessions(userId, 1);
     // Make sure the mock session has the specified ID
-    sessions.data[0].session_id = session_id;
+    sessions.data[0].session_id = sessionId;
     return Promise.resolve({ data: sessions.data[0] });
   }
-  return axios.get(API_BASE + `/sessions/${user_id}/${session_id}`);
+  
+  // Use the actual API endpoint
+  return axios.get(`${API_BASE}/sessions/${userId}/${sessionId}`)
+    .then(response => {
+      console.log("API returned specific session:", response.data);
+      return response;
+    })
+    .catch(error => {
+      console.error(`Error fetching session ${sessionId} from API:`, error);
+      throw error;
+    });
 };
 
 // Function to get domain-specific component details
 const getSessionDomainDetails = async (sessionId: string, domain: string) => {
+  console.log(`Fetching ${domain} details for session ${sessionId}`);
+  
   try {
-    console.log(`Fetching ${domain} details for session ${sessionId}`);
-    
     // For development/testing when API might not be available
     if (process.env.NODE_ENV === "development" || !API_BASE) {
-      console.log(`Using mock data for ${domain} details for session ${sessionId}`);
+      console.log(`Using mock data for ${domain} details (Development mode or API not configured)`);
       
-      // Generate appropriate mock data based on domain
+      // Generate mock data (we'll keep this part for development)
       let mockData;
       
       switch(domain) {
@@ -236,16 +259,20 @@ const getSessionDomainDetails = async (sessionId: string, domain: string) => {
           mockData = null;
       }
       
-      // Return the mock data after a short delay to simulate API call
+      // Add a delay to simulate API response time
       return new Promise((resolve) => {
-        setTimeout(() => resolve(mockData), 300);
+        setTimeout(() => resolve(mockData), 500);
       });
     }
     
+    // If we're not in development mode and API_BASE is configured, use the actual API endpoint
+    console.log(`Calling API: ${API_BASE}/api/cognitive/component-details/${sessionId}?domain=${domain}`);
     const response = await axios.get(`${API_BASE}/api/cognitive/component-details/${sessionId}?domain=${domain}`);
+    console.log(`API returned ${domain} details:`, response.data);
     return response.data;
+    
   } catch (error) {
-    console.error(`Error fetching ${domain} details for session ${sessionId}:`, error);
+    console.error(`Error fetching ${domain} details from API:`, error);
     throw error;
   }
 };
