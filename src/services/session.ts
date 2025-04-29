@@ -11,9 +11,11 @@ const generateMockSessions = (userId: string, count: number = 10): { data: Trend
   for (let i = 0; i < count; i++) {
     const date = format(subDays(new Date(), i * 5), "yyyy-MM-dd'T'HH:mm:ss");
     const baseScore = 50 + Math.floor(Math.random() * 40); // Random score between 50-90
+    const sessionId = `session-${userId}-${i}`; // Generate a session ID
     
     const session: TrendData = {
-      id: `session-${userId}-${i}`, // Add unique ID for each session
+      id: sessionId, // Keep for backward compatibility
+      session_id: sessionId, // Add the required session_id property
       session_date: date,
       memory_score: baseScore + Math.floor(Math.random() * 20 - 10),
       attention_score: baseScore + Math.floor(Math.random() * 20 - 10),
@@ -114,6 +116,8 @@ const getUserSession = (user_id, session_id) => {
   if (process.env.NODE_ENV === "development" || !API_BASE) {
     console.log("Using mock session data for specific session");
     const sessions = generateMockSessions(user_id, 1);
+    // Make sure the mock session has the specified ID
+    sessions.data[0].session_id = session_id;
     return Promise.resolve({ data: sessions.data[0] });
   }
   return axios.get(API_BASE + `/sessions/${user_id}/${session_id}`);

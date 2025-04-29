@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -31,7 +30,7 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
   
   // For debugging purposes, log the session object to see its structure
   console.log('MemoryTab - Session data:', session);
-  const sessionId = session?.id;
+  const sessionId = session.session_id;
   console.log('MemoryTab - Using sessionId:', sessionId);
 
   useEffect(() => {
@@ -61,15 +60,6 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
   const details = memoryDetails || session?.memory_details;
   console.log('MemoryTab - Final details to render:', details);
 
-  if (!details) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        <AlertCircle className="h-8 w-8 mx-auto mb-2" />
-        <p>No detailed memory data available for this session</p>
-      </div>
-    );
-  }
-
   if (loading) {
     return (
       <div className="text-center py-8">
@@ -83,6 +73,15 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
       <div className="text-center py-8 text-red-500">
         <AlertCircle className="h-8 w-8 mx-auto mb-2" />
         <p>{error}</p>
+      </div>
+    );
+  }
+
+  if (!details) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <AlertCircle className="h-8 w-8 mx-auto mb-2" />
+        <p>No detailed memory data available for this session</p>
       </div>
     );
   }
