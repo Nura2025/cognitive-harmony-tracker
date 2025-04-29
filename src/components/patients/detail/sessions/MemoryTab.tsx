@@ -29,8 +29,9 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [memoryDetails, setMemoryDetails] = useState<any>(null);
   
-  // Get the session ID from the session data
-  const sessionId = session.id || session.session_id;
+  // Get the session ID - should be present in the session data structure from TrendData
+  // Looking at the mocked data in SessionService, we can see it's potentially in session.id
+  const sessionId = session.id;
 
   useEffect(() => {
     // Only fetch when the component is mounted or when domain is expanded

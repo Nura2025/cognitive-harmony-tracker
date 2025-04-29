@@ -27,8 +27,8 @@ export const AttentionTab: React.FC<AttentionTabProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [attentionDetails, setAttentionDetails] = useState<any>(null);
   
-  // Get the session ID from the session data
-  const sessionId = session.id || session.session_id;
+  // Get the session ID from the TrendData structure
+  const sessionId = session.id;
 
   useEffect(() => {
     // Only fetch when the attention domain is expanded

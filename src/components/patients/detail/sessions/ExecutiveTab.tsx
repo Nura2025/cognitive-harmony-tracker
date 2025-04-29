@@ -27,8 +27,8 @@ export const ExecutiveTab: React.FC<ExecutiveTabProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [executiveDetails, setExecutiveDetails] = useState<any>(null);
   
-  // Get the session ID from the session data
-  const sessionId = session.id || session.session_id;
+  // Get the session ID from the TrendData structure
+  const sessionId = session.id;
 
   useEffect(() => {
     // Only fetch when executive domain is expanded

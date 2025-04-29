@@ -27,8 +27,8 @@ export const ImpulseTab: React.FC<ImpulseTabProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [impulseDetails, setImpulseDetails] = useState<any>(null);
   
-  // Get the session ID from the session data
-  const sessionId = session.id || session.session_id;
+  // Get the session ID from the TrendData structure
+  const sessionId = session.id;
 
   useEffect(() => {
     // Only fetch when impulse domain is expanded
