@@ -27,12 +27,12 @@ export const ExecutiveTab: React.FC<ExecutiveTabProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [executiveDetails, setExecutiveDetails] = useState<any>(null);
   
-  // Use session.id if available from the API, otherwise fallback to mocked data
-  const sessionId = session.id || '3aa2247c-4869-49d7-86ba-9f61f883cddb';
+  // Get the session ID from the session data
+  const sessionId = session.id || session.session_id;
 
   useEffect(() => {
     // Only fetch when executive domain is expanded
-    if (expandedDomain && expandedDomain.includes('executive')) {
+    if (expandedDomain && expandedDomain.includes('executive') && sessionId) {
       setLoading(true);
       setError(null);
       

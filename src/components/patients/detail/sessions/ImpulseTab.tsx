@@ -27,12 +27,12 @@ export const ImpulseTab: React.FC<ImpulseTabProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [impulseDetails, setImpulseDetails] = useState<any>(null);
   
-  // Use session.id if available from the API, otherwise fallback to mocked data
-  const sessionId = session.id || '3aa2247c-4869-49d7-86ba-9f61f883cddb';
+  // Get the session ID from the session data
+  const sessionId = session.id || session.session_id;
 
   useEffect(() => {
     // Only fetch when impulse domain is expanded
-    if (expandedDomain && expandedDomain.includes('impulse')) {
+    if (expandedDomain && expandedDomain.includes('impulse') && sessionId) {
       setLoading(true);
       setError(null);
       

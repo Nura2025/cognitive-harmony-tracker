@@ -27,12 +27,12 @@ export const AttentionTab: React.FC<AttentionTabProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [attentionDetails, setAttentionDetails] = useState<any>(null);
   
-  // Use session.id if available from the API, otherwise fallback to mocked data
-  const sessionId = session.id || '3aa2247c-4869-49d7-86ba-9f61f883cddb';
+  // Get the session ID from the session data
+  const sessionId = session.id || session.session_id;
 
   useEffect(() => {
     // Only fetch when the attention domain is expanded
-    if (expandedDomain && expandedDomain.includes('attention')) {
+    if (expandedDomain && expandedDomain.includes('attention') && sessionId) {
       setLoading(true);
       setError(null);
       

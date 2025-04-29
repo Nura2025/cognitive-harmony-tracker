@@ -29,12 +29,12 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [memoryDetails, setMemoryDetails] = useState<any>(null);
   
-  // Use session.id if available from the API, otherwise fallback to mocked data
-  const sessionId = session.id || '3aa2247c-4869-49d7-86ba-9f61f883cddb';
+  // Get the session ID from the session data
+  const sessionId = session.id || session.session_id;
 
   useEffect(() => {
     // Only fetch when the component is mounted or when domain is expanded
-    if (expandedDomain) {
+    if (expandedDomain && sessionId) {
       setLoading(true);
       setError(null);
       
