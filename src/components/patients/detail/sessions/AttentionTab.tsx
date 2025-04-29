@@ -150,4 +150,4 @@ export const AttentionTab: React.FC<AttentionTabProps> = ({
       )}
     </div>
   );
-}
+};

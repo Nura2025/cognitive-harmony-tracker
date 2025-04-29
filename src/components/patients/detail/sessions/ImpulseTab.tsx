@@ -28,9 +28,7 @@ export const ImpulseTab: React.FC<ImpulseTabProps> = ({
   const [impulseDetails, setImpulseDetails] = useState<any>(null);
   
   // Get the session ID directly from the session_id property
-  console.log('ImpulseTab - Session data:', session);
   const sessionId = session.session_id;
-  console.log('ImpulseTab - Using sessionId:', sessionId);
 
   useEffect(() => {
     // Only fetch when impulse domain is expanded
@@ -57,7 +55,6 @@ export const ImpulseTab: React.FC<ImpulseTabProps> = ({
 
   // Fallback to session data if API fetch fails or isn't expanded yet
   const details = impulseDetails || session?.impulse_details;
-  console.log('ImpulseTab - Final details to render:', details);
 
   if (loading) {
     return (
