@@ -2,8 +2,10 @@
 import React from 'react';
 import { DomainComparison } from '@/components/analysis/DomainComparison';
 import { PerformanceTrend } from '@/components/analysis/PerformanceTrend';
+import { CognitiveDomain } from '@/components/analysis/CognitiveDomain';
 import { CognitiveDomainGrid } from './CognitiveDomainGrid';
 import { CognitiveDomainMetrics } from '@/utils/types/patientTypes';
+import { AnalysisLoading } from './AnalysisLoading';
 
 interface AnalysisContentProps {
   patientMetrics: CognitiveDomainMetrics | null;
@@ -12,7 +14,6 @@ interface AnalysisContentProps {
   performanceTrendData: Array<{date: string; score: number;}>;
   domainTrendData: Record<string, any>;
   isLoadingDomainData: boolean;
-  patientId?: string;
 }
 
 export const AnalysisContent: React.FC<AnalysisContentProps> = ({
@@ -21,8 +22,7 @@ export const AnalysisContent: React.FC<AnalysisContentProps> = ({
   subtypeData,
   performanceTrendData,
   domainTrendData,
-  isLoadingDomainData,
-  patientId
+  isLoadingDomainData
 }) => {
   return (
     <div className="space-y-8 animate-fade-in">
@@ -32,7 +32,6 @@ export const AnalysisContent: React.FC<AnalysisContentProps> = ({
             patientData={patientMetrics}
             normativeData={normativeData}
             subtypeData={subtypeData}
-            patientId={patientId}
           />
         )}
         <PerformanceTrend 

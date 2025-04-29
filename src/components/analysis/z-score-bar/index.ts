@@ -1,2 +1,0 @@
-
-export { ZScoreBar } from './ZScoreBar';
