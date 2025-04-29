@@ -16,6 +16,8 @@ import Sessions from "./pages/Sessions";
 import Analysis from "./pages/Analysis";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import MyAccount from "./pages/MyAccount";
+import Settings from "./pages/Settings";
 import PrivateRoute from "./utils/PrivateRoute";
 import AuthService from "./services/auth";
 
@@ -77,6 +79,20 @@ const App = () => {
                   <PrivateRoute>
                     <Layout>
                       <Reports />
+                    </Layout>
+                  </PrivateRoute>
+                } />
+                <Route path="/my-account" element={
+                  <PrivateRoute>
+                    <Layout>
+                      <MyAccount />
+                    </Layout>
+                  </PrivateRoute>
+                } />
+                <Route path="/settings" element={
+                  <PrivateRoute>
+                    <Layout>
+                      <Settings />
                     </Layout>
                   </PrivateRoute>
                 } />
