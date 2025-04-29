@@ -49,3 +49,4 @@ export const CognitiveDomainGrid: React.FC<CognitiveDomainGridProps> = ({
     </>
   );
 };
+

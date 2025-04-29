@@ -16,3 +16,4 @@ export const AnalysisLoading: React.FC = () => {
     </Card>
   );
 };
+
