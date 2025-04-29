@@ -3,6 +3,7 @@ import React from 'react';
 import { CognitiveDomain } from '@/components/analysis/CognitiveDomain';
 import { CognitiveDomainMetrics } from '@/utils/types/patientTypes';
 import { AnalysisLoading } from './AnalysisLoading';
+import { PerformanceTrend } from '@/components/analysis/PerformanceTrend';
 
 interface CognitiveDomainGridProps {
   patientMetrics: CognitiveDomainMetrics | null;
@@ -22,31 +23,34 @@ export const CognitiveDomainGrid: React.FC<CognitiveDomainGridProps> = ({
   return (
     <>
       <div className="grid gap-6 md:grid-cols-2">
-        <CognitiveDomain 
-          domain="attention"
-          score={patientMetrics?.attention || 0}
-          trendData={domainTrendData.attention || []}
+        <PerformanceTrend 
+          data={domainTrendData.attention || []}
+          title="Attention Domain"
+          description="Focus and sustained attention"
+          showDuration={true}
         />
-        <CognitiveDomain 
-          domain="memory"
-          score={patientMetrics?.memory || 0}
-          trendData={domainTrendData.memory || []}
+        <PerformanceTrend 
+          data={domainTrendData.memory || []}
+          title="Memory Domain"
+          description="Working and visual memory tasks"
+          showDuration={true}
         />
       </div>
       
       <div className="grid gap-6 md:grid-cols-2">
-        <CognitiveDomain 
-          domain="executiveFunction"
-          score={patientMetrics?.executiveFunction || 0}
-          trendData={domainTrendData.executiveFunction || []}
+        <PerformanceTrend 
+          data={domainTrendData.executiveFunction || []}
+          title="Executive Function Domain"
+          description="Planning and cognitive flexibility"
+          showDuration={true}
         />
-        <CognitiveDomain 
-          domain="behavioral"
-          score={patientMetrics?.behavioral || 0}
-          trendData={domainTrendData.behavioral || []}
+        <PerformanceTrend 
+          data={domainTrendData.behavioral || []}
+          title="Impulse Control Domain"
+          description="Response inhibition and control"
+          showDuration={true}
         />
       </div>
     </>
   );
 };
-
