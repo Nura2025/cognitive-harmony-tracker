@@ -30,10 +30,10 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
         <LanguageProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+          <BrowserRouter>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
               <Routes>
                 {/* Public routes */}
                 <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/" replace />} />
@@ -100,8 +100,8 @@ const App = () => {
                 {/* 404 route */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
+            </TooltipProvider>
+          </BrowserRouter>
         </LanguageProvider>
       </ThemeProvider>
     </QueryClientProvider>
