@@ -31,14 +31,14 @@ export const ImpulseTab: React.FC<ImpulseTabProps> = ({
   const sessionId = session.session_id;
 
   useEffect(() => {
-    // Only fetch when impulse domain is expanded
-    if (expandedDomain && expandedDomain.includes('impulse') && sessionId) {
+    // Only fetch when impulse domain is expanded and we don't already have the data
+    if (expandedDomain === 'impulse' && sessionId && !impulseDetails) {
       setLoading(true);
       setError(null);
       
       console.log('ImpulseTab - Fetching impulse details for session ID:', sessionId);
       
-      SessionService.getSessionDomainDetails(sessionId, 'impulse_control')
+      SessionService.getSessionDomainDetails(sessionId, 'behavioral')
         .then(data => {
           console.log('ImpulseTab - Fetched impulse details:', data);
           setImpulseDetails(data);
@@ -51,7 +51,7 @@ export const ImpulseTab: React.FC<ImpulseTabProps> = ({
           setLoading(false);
         });
     }
-  }, [expandedDomain, sessionId]);
+  }, [expandedDomain, sessionId, impulseDetails]);
 
   // Fallback to session data if API fetch fails or isn't expanded yet
   const details = impulseDetails || session?.impulse_details;

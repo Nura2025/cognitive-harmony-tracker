@@ -31,12 +31,12 @@ export const ExecutiveTab: React.FC<ExecutiveTabProps> = ({
   const sessionId = session.session_id;
 
   useEffect(() => {
-    // Only fetch when executive domain is expanded
-    if (expandedDomain && expandedDomain.includes('executive') && sessionId) {
+    // Only fetch when executive domain is expanded and we don't already have the data
+    if (expandedDomain === 'executive' && sessionId && !executiveDetails) {
       setLoading(true);
       setError(null);
       
-      SessionService.getSessionDomainDetails(sessionId, 'executive_function')
+      SessionService.getSessionDomainDetails(sessionId, 'executive')
         .then(data => {
           setExecutiveDetails(data);
           console.log('Fetched executive function details:', data);
@@ -49,7 +49,7 @@ export const ExecutiveTab: React.FC<ExecutiveTabProps> = ({
           setLoading(false);
         });
     }
-  }, [expandedDomain, sessionId]);
+  }, [expandedDomain, sessionId, executiveDetails]);
 
   // Fallback to session data if API fetch fails or isn't expanded yet
   const details = executiveDetails || session.executive_details;

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -52,13 +53,20 @@ export const PatientAnalysis: React.FC<PatientAnalysisProps> = ({ trendGraph, ha
       
       console.log('PatientAnalysis - Fetching domain details for session ID:', sessionId);
       
+      // Define the domain mapping between API endpoint names and our state keys
+      const domainMapping = {
+        'attention': 'attention',
+        'memory': 'memory',
+        'executive': 'executiveFunction',
+        'behavioral': 'behavioral'
+      };
+      
       // Fetch all domain data in parallel with a single batch of requests
-      const domainPromises = [
-        { domain: 'attention', promise: SessionService.getSessionDomainDetails(sessionId, 'attention') },
-        { domain: 'memory', promise: SessionService.getSessionDomainDetails(sessionId, 'memory') },
-        { domain: 'executive', promise: SessionService.getSessionDomainDetails(sessionId, 'executive') },
-        { domain: 'behavioral', promise: SessionService.getSessionDomainDetails(sessionId, 'behavioral') }
-      ];
+      const domainPromises = Object.entries(domainMapping).map(([apiDomain, stateDomain]) => ({
+        apiDomain,
+        stateDomain,
+        promise: SessionService.getSessionDomainDetails(sessionId, apiDomain)
+      }));
       
       // Use Promise.allSettled to handle both successful and failed promises
       Promise.allSettled(domainPromises.map(item => item.promise))
@@ -73,17 +81,15 @@ export const PatientAnalysis: React.FC<PatientAnalysisProps> = ({ trendGraph, ha
           
           // Process results, keeping track of which succeeded and which failed
           results.forEach((result, index) => {
-            const domainName = domainPromises[index].domain;
-            const mappedDomain = domainName === 'executive' ? 'executiveFunction' : 
-                               domainName === 'behavioral' ? 'behavioral' : domainName;
+            const { apiDomain, stateDomain } = domainPromises[index];
             
             if (result.status === 'fulfilled' && result.value) {
-              console.log(`PatientAnalysis - Successfully fetched ${domainName} data:`, result.value);
-              newDomainData[mappedDomain] = result.value.trendData || [];
+              console.log(`PatientAnalysis - Successfully fetched ${apiDomain} data:`, result.value);
+              newDomainData[stateDomain] = result.value.trendData || [];
             } else {
-              console.error(`PatientAnalysis - Failed to fetch ${domainName} data:`, 
+              console.error(`PatientAnalysis - Failed to fetch ${apiDomain} data:`, 
                 result.status === 'rejected' ? result.reason : 'No data returned');
-              newDomainData[mappedDomain] = [];
+              newDomainData[stateDomain] = [];
             }
           });
           

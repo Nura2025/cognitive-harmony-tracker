@@ -19,7 +19,7 @@ export const SessionTabProvider: React.FC<SessionTabProviderProps> = ({
   expandedDomain,
   toggleDomainDetails
 }) => {
-  const [activeTab, setActiveTab] = useState('memory');
+  const [activeTab, setActiveTab] = useState<string>(expandedDomain || 'memory');
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -29,7 +29,7 @@ export const SessionTabProvider: React.FC<SessionTabProviderProps> = ({
 
   return (
     <Tabs 
-      defaultValue="memory" 
+      defaultValue={expandedDomain || 'memory'} 
       className="w-full"
       onValueChange={handleTabChange}
       value={activeTab}

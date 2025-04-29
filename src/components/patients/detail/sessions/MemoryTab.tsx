@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { AlertCircle, ChevronDown, ChevronUp, Info } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -29,17 +28,15 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
   formatPercentile,
   getClassificationStyle
 }) => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [memoryDetails, setMemoryDetails] = useState<any>(null);
   
   const sessionId = session.session_id;
-  console.log('MemoryTab - Session data:', session);
-  console.log('MemoryTab - Using sessionId:', sessionId);
 
-  // Fetch memory details when the component mounts
+  // Only fetch when memory domain is expanded and we don't already have the data
   useEffect(() => {
-    if (sessionId) {
+    if (expandedDomain === 'memory' && sessionId && !memoryDetails) {
       setLoading(true);
       setError(null);
       
@@ -62,11 +59,10 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
           setLoading(false);
         });
     }
-  }, [sessionId]);
+  }, [expandedDomain, sessionId, memoryDetails]);
 
   // Combine fetched data with session data if available
   const details = memoryDetails || (session.memory_details || null);
-  console.log('MemoryTab - Final details to render:', details);
 
   if (loading) {
     return (
