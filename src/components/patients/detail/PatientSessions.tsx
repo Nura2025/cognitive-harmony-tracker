@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { format, parseISO } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { AlertCircle, ChevronDown, ChevronUp, Search, Filter, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TrendData } from '@/services/patient';
 import { 
@@ -16,6 +17,13 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface PatientSessionsProps {
   trendGraph: TrendData[];
@@ -25,16 +33,91 @@ interface PatientSessionsProps {
 export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, hasTrendData }) => {
   const [selectedSessionIndex, setSelectedSessionIndex] = useState<number | null>(null);
   const [expandedDomain, setExpandedDomain] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc"); // Default to newest first
+  const [scoreFilter, setScoreFilter] = useState<string>("all");
+  const [dateRangeFilter, setDateRangeFilter] = useState<string>("all");
   
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const sessionsPerPage = 3;
-  const totalPages = Math.ceil((trendGraph?.length || 0) / sessionsPerPage);
+  
+  // First, sort the sessions by date
+  const sortedSessions = useMemo(() => {
+    if (!trendGraph?.length) return [];
+    
+    return [...trendGraph].sort((a, b) => {
+      const dateA = new Date(a.session_date).getTime();
+      const dateB = new Date(b.session_date).getTime();
+      return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
+    });
+  }, [trendGraph, sortOrder]);
+  
+  // Apply filters (search and score)
+  const filteredSessions = useMemo(() => {
+    if (!sortedSessions?.length) return [];
+    
+    let filtered = [...sortedSessions];
+    
+    // Apply search query filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(session => {
+        const date = format(parseISO(session.session_date), "MMM d, yyyy").toLowerCase();
+        return date.includes(query);
+      });
+    }
+    
+    // Apply score filter
+    if (scoreFilter !== "all") {
+      const minScore = parseInt(scoreFilter);
+      filtered = filtered.filter(session => {
+        // Filter based on average of all scores
+        const avgScore = (session.memory_score + session.attention_score + 
+                         session.impulse_score + session.executive_score) / 4;
+        return avgScore >= minScore;
+      });
+    }
+    
+    // Apply date range filter
+    if (dateRangeFilter !== "all") {
+      const now = new Date();
+      let cutoffDate = new Date();
+      
+      switch (dateRangeFilter) {
+        case "week":
+          cutoffDate.setDate(now.getDate() - 7);
+          break;
+        case "month":
+          cutoffDate.setMonth(now.getMonth() - 1);
+          break;
+        case "quarter":
+          cutoffDate.setMonth(now.getMonth() - 3);
+          break;
+        case "year":
+          cutoffDate.setFullYear(now.getFullYear() - 1);
+          break;
+      }
+      
+      filtered = filtered.filter(session => {
+        const sessionDate = new Date(session.session_date);
+        return sessionDate >= cutoffDate;
+      });
+    }
+    
+    return filtered;
+  }, [sortedSessions, searchQuery, scoreFilter, dateRangeFilter]);
   
   // Get current sessions for pagination
+  const totalPages = Math.ceil((filteredSessions?.length || 0) / sessionsPerPage);
   const indexOfLastSession = currentPage * sessionsPerPage;
   const indexOfFirstSession = indexOfLastSession - sessionsPerPage;
-  const currentSessions = trendGraph?.slice(indexOfFirstSession, indexOfLastSession) || [];
+  const currentSessions = filteredSessions?.slice(indexOfFirstSession, indexOfLastSession) || [];
+
+  // Reset pagination when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, scoreFilter, dateRangeFilter, sortOrder]);
 
   // Format score for display
   const formatScore = (score: number) => {
@@ -78,13 +161,6 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
     }
   };
 
-  const domainNames: Record<string, string> = {
-    memory: "Memory",
-    attention: "Attention",
-    impulse_control: "Impulse Control",
-    executive_function: "Executive Function"
-  };
-
   // Format classification with appropriate styling
   const getClassificationStyle = (classification: string) => {
     switch (classification?.toLowerCase()) {
@@ -109,13 +185,31 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
     setCurrentPage(pageNumber);
     setSelectedSessionIndex(null); // Reset selected session when changing pages
   };
+  
+  // Toggle sort order
+  const toggleSortOrder = () => {
+    setSortOrder(sortOrder === "desc" ? "asc" : "desc");
+  };
 
   return (
-    <Card className="glass">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-medium">Session Details</CardTitle>
+    <Card className="glass shadow-md border-0">
+      <CardHeader className="pb-2 border-b">
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-lg font-medium">Session Details</CardTitle>
+          <div className="flex space-x-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={toggleSortOrder}
+              className="flex items-center gap-1 text-xs"
+            >
+              {sortOrder === "desc" ? "Newest First" : "Oldest First"}
+              {sortOrder === "desc" ? <ChevronDown className="h-3 w-3" /> : <ChevronUp className="h-3 w-3" />}
+            </Button>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-4">
         {!hasTrendData ? (
           <div className="p-8 text-center h-64 flex flex-col justify-center items-center">
             <AlertCircle className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
@@ -128,21 +222,94 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
           </div>
         ) : (
           <div className="space-y-4">
+            {/* Search and filters */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  type="search"
+                  placeholder="Search sessions..." 
+                  className="pl-9"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              
+              <Select value={scoreFilter} onValueChange={setScoreFilter}>
+                <SelectTrigger className="w-full">
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4 text-muted-foreground" /> 
+                    <SelectValue placeholder="Filter by score" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All scores</SelectItem>
+                  <SelectItem value="80">Excellent (80+)</SelectItem>
+                  <SelectItem value="60">Good (60+)</SelectItem>
+                  <SelectItem value="40">Average (40+)</SelectItem>
+                  <SelectItem value="0">All scores</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select value={dateRangeFilter} onValueChange={setDateRangeFilter}>
+                <SelectTrigger className="w-full">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <SelectValue placeholder="Filter by date" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All time</SelectItem>
+                  <SelectItem value="week">Past week</SelectItem>
+                  <SelectItem value="month">Past month</SelectItem>
+                  <SelectItem value="quarter">Past 3 months</SelectItem>
+                  <SelectItem value="year">Past year</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {/* No results message */}
+            {filteredSessions.length === 0 && (
+              <div className="text-center p-8 border rounded-md bg-muted/20">
+                <AlertCircle className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                <h3 className="font-medium text-lg">No matching sessions</h3>
+                <p className="text-muted-foreground mb-4">Try adjusting your filters or search query.</p>
+                <div className="flex justify-center space-x-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setScoreFilter("all");
+                      setDateRangeFilter("all");
+                    }}
+                  >
+                    Clear filters
+                  </Button>
+                </div>
+              </div>
+            )}
+            
+            {/* Session cards */}
             {currentSessions.map((session, idx) => (
               <div 
                 key={idx} 
-                className="border rounded-md overflow-hidden"
+                className="border rounded-md overflow-hidden shadow-sm transition-all hover:shadow-md"
               >
                 <div 
-                  className={`p-3 hover:bg-accent/50 transition-colors ${selectedSessionIndex === idx ? 'bg-accent/50' : ''}`}
+                  className={`p-3 hover:bg-accent/30 transition-colors cursor-pointer ${selectedSessionIndex === idx ? 'bg-accent/50' : 'bg-card'}`}
                   onClick={() => toggleSessionDetails(idx)}
                 >
-                  <div className="flex justify-between items-center cursor-pointer">
+                  <div className="flex justify-between items-center">
                     <div>
                       <p className="text-sm font-medium">
                         {format(parseISO(session.session_date), "MMM d, yyyy")}
                       </p>
-                      <p className="text-xs text-muted-foreground">Session {indexOfFirstSession + idx + 1}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Session {sortOrder === "desc" 
+                          ? totalPages * sessionsPerPage - indexOfFirstSession - idx 
+                          : indexOfFirstSession + idx + 1}
+                      </p>
                     </div>
                     <div className="flex items-center space-x-2 lg:space-x-4">
                       <div className="grid grid-cols-4 gap-2 md:gap-4">
@@ -186,34 +353,35 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
                         <TabsTrigger value="executive">Executive</TabsTrigger>
                       </TabsList>
                       
-                      <TabsContent value="memory" className="space-y-4">
+                      {/* Memory Tab */}
+                      <TabsContent value="memory" className="space-y-4 animate-fade-in">
                         {session.memory_details ? (
                           <div className="space-y-4">
-                            <div className="flex justify-between bg-muted/50 p-3 rounded-md">
-                              <div>
-                                <div className="text-sm font-medium">Overall Score</div>
-                                <div className={`text-lg font-bold ${getScoreColor(session.memory_details.overall_score)}`}>
+                            <div className="grid grid-cols-3 gap-3 bg-muted/40 p-3 rounded-md">
+                              <div className="text-center p-2 bg-background rounded shadow-sm">
+                                <div className="text-xs text-muted-foreground">Overall Score</div>
+                                <div className={`text-xl font-bold ${getScoreColor(session.memory_details.overall_score)}`}>
                                   {formatScore(session.memory_details.overall_score)}
                                 </div>
                               </div>
-                              <div className="text-right">
-                                <div className="text-sm font-medium">Percentile</div>
-                                <div className="text-lg font-bold">
+                              <div className="text-center p-2 bg-background rounded shadow-sm">
+                                <div className="text-xs text-muted-foreground">Percentile</div>
+                                <div className="text-xl font-bold">
                                   {formatPercentile(session.memory_details.percentile)}
                                 </div>
                               </div>
-                              <div>
-                                <div className="text-sm font-medium">Classification</div>
-                                <span className={`px-2 py-1 rounded text-xs font-medium ${getClassificationStyle(session.memory_details.classification)}`}>
+                              <div className="text-center p-2 bg-background rounded shadow-sm">
+                                <div className="text-xs text-muted-foreground">Classification</div>
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getClassificationStyle(session.memory_details.classification)}`}>
                                   {session.memory_details.classification}
                                 </span>
                               </div>
                             </div>
                             
                             <div>
-                              <div className="font-medium mb-2">Components</div>
+                              <div className="font-medium mb-3 text-sm">Components</div>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="border rounded-md p-3">
+                                <div className="border rounded-md p-3 bg-background shadow-sm">
                                   <div className="flex justify-between mb-2">
                                     <span className="font-medium">Working Memory</span>
                                     <span className={`font-bold ${getScoreColor(session.memory_details.components.working_memory.score)}`}>
@@ -231,7 +399,7 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
                                   </Button>
                                   
                                   {expandedDomain === 'working_memory' && (
-                                    <div className="mt-2">
+                                    <div className="mt-2 animate-fade-in">
                                       <Table>
                                         <TableHeader>
                                           <TableRow>
@@ -254,7 +422,7 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
                                   )}
                                 </div>
                                 
-                                <div className="border rounded-md p-3">
+                                <div className="border rounded-md p-3 bg-background shadow-sm">
                                   <div className="flex justify-between mb-2">
                                     <span className="font-medium">Visual Memory</span>
                                     <span className={`font-bold ${getScoreColor(session.memory_details.components.visual_memory.score)}`}>
@@ -272,7 +440,7 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
                                   </Button>
                                   
                                   {expandedDomain === 'visual_memory' && (
-                                    <div className="mt-2">
+                                    <div className="mt-2 animate-fade-in">
                                       <Table>
                                         <TableHeader>
                                           <TableRow>
@@ -297,27 +465,29 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
                               </div>
                             </div>
                             
-                            <div>
-                              <div className="text-sm font-medium mb-1">Tasks Used</div>
-                              <div className="flex flex-wrap gap-2">
-                                {session.memory_details.tasks_used?.map((task, i) => (
-                                  <span key={i} className="bg-muted px-2 py-1 rounded text-xs">
-                                    {task}
-                                  </span>
-                                ))}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <div className="text-sm font-medium mb-2">Tasks Used</div>
+                                <div className="flex flex-wrap gap-2">
+                                  {session.memory_details.tasks_used?.map((task, i) => (
+                                    <span key={i} className="bg-primary/10 px-2 py-1 rounded-full text-xs font-medium text-primary">
+                                      {task}
+                                    </span>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                            
-                            <div>
-                              <div className="text-sm font-medium mb-1">Data Completeness</div>
-                              <div className="w-full bg-muted rounded-full h-2.5">
-                                <div 
-                                  className="bg-blue-600 h-2.5 rounded-full" 
-                                  style={{ width: `${session.memory_details.data_completeness}%` }}
-                                ></div>
-                              </div>
-                              <div className="text-xs text-muted-foreground mt-1">
-                                {session.memory_details.data_completeness}% complete
+                              
+                              <div>
+                                <div className="text-sm font-medium mb-2">Data Completeness</div>
+                                <div className="w-full bg-muted rounded-full h-2.5">
+                                  <div 
+                                    className="bg-primary h-2.5 rounded-full" 
+                                    style={{ width: `${session.memory_details.data_completeness}%` }}
+                                  ></div>
+                                </div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {session.memory_details.data_completeness}% complete
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -329,34 +499,35 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
                         )}
                       </TabsContent>
                       
-                      <TabsContent value="attention" className="space-y-4">
+                      {/* Attention Tab */}
+                      <TabsContent value="attention" className="space-y-4 animate-fade-in">
                         {session.attention_details ? (
                           <div className="space-y-4">
-                            <div className="flex justify-between bg-muted/50 p-3 rounded-md">
-                              <div>
-                                <div className="text-sm font-medium">Overall Score</div>
-                                <div className={`text-lg font-bold ${getScoreColor(session.attention_details.overall_score)}`}>
+                            <div className="grid grid-cols-3 gap-3 bg-muted/40 p-3 rounded-md">
+                              <div className="text-center p-2 bg-background rounded shadow-sm">
+                                <div className="text-xs text-muted-foreground">Overall Score</div>
+                                <div className={`text-xl font-bold ${getScoreColor(session.attention_details.overall_score)}`}>
                                   {formatScore(session.attention_details.overall_score)}
                                 </div>
                               </div>
-                              <div className="text-right">
-                                <div className="text-sm font-medium">Percentile</div>
-                                <div className="text-lg font-bold">
+                              <div className="text-center p-2 bg-background rounded shadow-sm">
+                                <div className="text-xs text-muted-foreground">Percentile</div>
+                                <div className="text-xl font-bold">
                                   {formatPercentile(session.attention_details.percentile)}
                                 </div>
                               </div>
-                              <div>
-                                <div className="text-sm font-medium">Classification</div>
-                                <span className={`px-2 py-1 rounded text-xs font-medium ${getClassificationStyle(session.attention_details.classification)}`}>
+                              <div className="text-center p-2 bg-background rounded shadow-sm">
+                                <div className="text-xs text-muted-foreground">Classification</div>
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getClassificationStyle(session.attention_details.classification)}`}>
                                   {session.attention_details.classification}
                                 </span>
                               </div>
                             </div>
                             
                             <div>
-                              <div className="font-medium mb-2">Components</div>
+                              <div className="font-medium mb-3 text-sm">Components</div>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="border rounded-md p-3">
+                                <div className="border rounded-md p-3 bg-background shadow-sm">
                                   <div className="flex justify-between">
                                     <span className="font-medium">Crop Score</span>
                                     <span className={`font-bold ${getScoreColor(session.attention_details.components.crop_score)}`}>
@@ -365,7 +536,7 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
                                   </div>
                                 </div>
                                 
-                                <div className="border rounded-md p-3">
+                                <div className="border rounded-md p-3 bg-background shadow-sm">
                                   <div className="flex justify-between">
                                     <span className="font-medium">Sequence Score</span>
                                     <span className={`font-bold ${getScoreColor(session.attention_details.components.sequence_score)}`}>
@@ -384,35 +555,36 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
                         )}
                       </TabsContent>
                       
-                      <TabsContent value="impulse" className="space-y-4">
+                      {/* Impulse Tab */}
+                      <TabsContent value="impulse" className="space-y-4 animate-fade-in">
                         {session.impulse_details ? (
                           <div className="space-y-4">
-                            <div className="flex justify-between bg-muted/50 p-3 rounded-md">
-                              <div>
-                                <div className="text-sm font-medium">Overall Score</div>
-                                <div className={`text-lg font-bold ${getScoreColor(session.impulse_details.overall_score)}`}>
+                            <div className="grid grid-cols-3 gap-3 bg-muted/40 p-3 rounded-md">
+                              <div className="text-center p-2 bg-background rounded shadow-sm">
+                                <div className="text-xs text-muted-foreground">Overall Score</div>
+                                <div className={`text-xl font-bold ${getScoreColor(session.impulse_details.overall_score)}`}>
                                   {formatScore(session.impulse_details.overall_score)}
                                 </div>
                               </div>
-                              <div className="text-right">
-                                <div className="text-sm font-medium">Percentile</div>
-                                <div className="text-lg font-bold">
+                              <div className="text-center p-2 bg-background rounded shadow-sm">
+                                <div className="text-xs text-muted-foreground">Percentile</div>
+                                <div className="text-xl font-bold">
                                   {formatPercentile(session.impulse_details.percentile)}
                                 </div>
                               </div>
-                              <div>
-                                <div className="text-sm font-medium">Classification</div>
-                                <span className={`px-2 py-1 rounded text-xs font-medium ${getClassificationStyle(session.impulse_details.classification)}`}>
+                              <div className="text-center p-2 bg-background rounded shadow-sm">
+                                <div className="text-xs text-muted-foreground">Classification</div>
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getClassificationStyle(session.impulse_details.classification)}`}>
                                   {session.impulse_details.classification}
                                 </span>
                               </div>
                             </div>
                             
                             <div>
-                              <div className="font-medium mb-2">Components</div>
+                              <div className="font-medium mb-3 text-sm">Components</div>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {Object.entries(session.impulse_details.components || {}).map(([key, value]) => (
-                                  <div key={key} className="border rounded-md p-3">
+                                  <div key={key} className="border rounded-md p-3 bg-background shadow-sm">
                                     <div className="flex justify-between">
                                       <span className="font-medium capitalize">{key.replace(/_/g, ' ')}</span>
                                       <span className={`font-bold ${getScoreColor(typeof value === 'number' ? value : 0)}`}>
@@ -424,27 +596,29 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
                               </div>
                             </div>
                             
-                            <div>
-                              <div className="text-sm font-medium mb-1">Games Used</div>
-                              <div className="flex flex-wrap gap-2">
-                                {session.impulse_details.games_used?.map((game, i) => (
-                                  <span key={i} className="bg-muted px-2 py-1 rounded text-xs">
-                                    {game}
-                                  </span>
-                                ))}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div>
+                                <div className="text-sm font-medium mb-2">Games Used</div>
+                                <div className="flex flex-wrap gap-2">
+                                  {session.impulse_details.games_used?.map((game, i) => (
+                                    <span key={i} className="bg-primary/10 px-2 py-1 rounded-full text-xs font-medium text-primary">
+                                      {game}
+                                    </span>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                            
-                            <div>
-                              <div className="text-sm font-medium mb-1">Data Completeness</div>
-                              <div className="w-full bg-muted rounded-full h-2.5">
-                                <div 
-                                  className="bg-blue-600 h-2.5 rounded-full" 
-                                  style={{ width: `${session.impulse_details.data_completeness}%` }}
-                                ></div>
-                              </div>
-                              <div className="text-xs text-muted-foreground mt-1">
-                                {session.impulse_details.data_completeness}% complete
+                              
+                              <div>
+                                <div className="text-sm font-medium mb-2">Data Completeness</div>
+                                <div className="w-full bg-muted rounded-full h-2.5">
+                                  <div 
+                                    className="bg-primary h-2.5 rounded-full" 
+                                    style={{ width: `${session.impulse_details.data_completeness}%` }}
+                                  ></div>
+                                </div>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {session.impulse_details.data_completeness}% complete
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -456,35 +630,36 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
                         )}
                       </TabsContent>
                       
-                      <TabsContent value="executive" className="space-y-4">
+                      {/* Executive Tab */}
+                      <TabsContent value="executive" className="space-y-4 animate-fade-in">
                         {session.executive_details ? (
                           <div className="space-y-4">
-                            <div className="flex justify-between bg-muted/50 p-3 rounded-md">
-                              <div>
-                                <div className="text-sm font-medium">Overall Score</div>
-                                <div className={`text-lg font-bold ${getScoreColor(session.executive_details.overall_score)}`}>
+                            <div className="grid grid-cols-3 gap-3 bg-muted/40 p-3 rounded-md">
+                              <div className="text-center p-2 bg-background rounded shadow-sm">
+                                <div className="text-xs text-muted-foreground">Overall Score</div>
+                                <div className={`text-xl font-bold ${getScoreColor(session.executive_details.overall_score)}`}>
                                   {formatScore(session.executive_details.overall_score)}
                                 </div>
                               </div>
-                              <div className="text-right">
-                                <div className="text-sm font-medium">Percentile</div>
-                                <div className="text-lg font-bold">
+                              <div className="text-center p-2 bg-background rounded shadow-sm">
+                                <div className="text-xs text-muted-foreground">Percentile</div>
+                                <div className="text-xl font-bold">
                                   {formatPercentile(session.executive_details.percentile)}
                                 </div>
                               </div>
-                              <div>
-                                <div className="text-sm font-medium">Classification</div>
-                                <span className={`px-2 py-1 rounded text-xs font-medium ${getClassificationStyle(session.executive_details.classification)}`}>
+                              <div className="text-center p-2 bg-background rounded shadow-sm">
+                                <div className="text-xs text-muted-foreground">Classification</div>
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getClassificationStyle(session.executive_details.classification)}`}>
                                   {session.executive_details.classification}
                                 </span>
                               </div>
                             </div>
                             
                             <div>
-                              <div className="font-medium mb-2">Domain Contributions</div>
+                              <div className="font-medium mb-3 text-sm">Domain Contributions</div>
                               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 {Object.entries(session.executive_details.components || {}).map(([key, value]) => (
-                                  <div key={key} className="border rounded-md p-3">
+                                  <div key={key} className="border rounded-md p-3 bg-background shadow-sm">
                                     <div className="flex justify-between">
                                       <span className="font-medium capitalize">{key.replace(/_contribution/g, '').replace(/_/g, ' ')}</span>
                                       <span className={`font-bold ${getScoreColor(typeof value === 'number' ? value : 0)}`}>
@@ -497,9 +672,9 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
                             </div>
                             
                             <div>
-                              <div className="text-sm font-medium mb-1">Profile Pattern</div>
-                              <div className="bg-muted/50 p-3 rounded-md">
-                                <p>{session.executive_details.profile_pattern}</p>
+                              <div className="text-sm font-medium mb-2">Profile Pattern</div>
+                              <div className="bg-muted/20 p-3 rounded-md">
+                                <p className="text-sm">{session.executive_details.profile_pattern}</p>
                               </div>
                             </div>
                           </div>
@@ -518,7 +693,7 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
             
             {/* Pagination */}
             {totalPages > 1 && (
-              <Pagination className="mt-4">
+              <Pagination className="mt-6">
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious 
@@ -566,6 +741,13 @@ export const PatientSessions: React.FC<PatientSessionsProps> = ({ trendGraph, ha
                   </PaginationItem>
                 </PaginationContent>
               </Pagination>
+            )}
+            
+            {/* Show empty state if filtered has results but current page has none */}
+            {filteredSessions.length > 0 && currentSessions.length === 0 && (
+              <div className="text-center p-8">
+                <p className="text-muted-foreground">No sessions on this page.</p>
+              </div>
             )}
           </div>
         )}
