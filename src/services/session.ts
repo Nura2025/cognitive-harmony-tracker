@@ -115,10 +115,22 @@ const getUserSession = (user_id, session_id) => {
   return axios.get(API_BASE + `/sessions/${user_id}/${session_id}`);
 };
 
+// New function to get domain-specific component details
+const getSessionDomainDetails = async (sessionId: string, domain: string) => {
+  try {
+    const response = await axios.get(`${API_BASE}/api/cognitive/component-details/${sessionId}?domain=${domain}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching ${domain} details for session ${sessionId}:`, error);
+    throw error;
+  }
+};
+
 const SessionService = {
   addSession,
   getUserSessions,
   getUserSession,
+  getSessionDomainDetails,
 };
 
 export default SessionService;

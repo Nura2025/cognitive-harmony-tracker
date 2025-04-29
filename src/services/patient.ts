@@ -1,3 +1,4 @@
+
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { API_BASE } from "./config"; // Make sure this points to your backend URL
 
@@ -68,6 +69,7 @@ interface ExecutiveDetails {
 }
 
 export interface TrendData {
+  id?: string; // Added optional id field for API data
   session_date: string;
   attention_score: number;
   memory_score: number;

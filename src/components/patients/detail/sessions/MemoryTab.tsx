@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { TrendData } from '@/services/patient';
+import SessionService from '@/services/session';
 
 interface MemoryTabProps {
   session: TrendData;
@@ -24,7 +25,38 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
   formatPercentile,
   getClassificationStyle
 }) => {
-  if (!session.memory_details) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [memoryDetails, setMemoryDetails] = useState<any>(null);
+  
+  // Use session.id if available from the API, otherwise fallback to mocked data
+  const sessionId = session.id || '3aa2247c-4869-49d7-86ba-9f61f883cddb';
+
+  useEffect(() => {
+    // Only fetch when the component is mounted or when domain is expanded
+    if (expandedDomain) {
+      setLoading(true);
+      setError(null);
+      
+      SessionService.getSessionDomainDetails(sessionId, 'memory')
+        .then(data => {
+          setMemoryDetails(data);
+          console.log('Fetched memory details:', data);
+        })
+        .catch(err => {
+          console.error('Error fetching memory details:', err);
+          setError('Failed to load memory details.');
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [expandedDomain, sessionId]);
+
+  // Fallback to session data if API fetch fails or isn't expanded yet
+  const details = memoryDetails || session.memory_details;
+
+  if (!details) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         <AlertCircle className="h-8 w-8 mx-auto mb-2" />
@@ -38,20 +70,20 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
       <div className="grid grid-cols-3 gap-3 bg-muted/40 p-3 rounded-md">
         <div className="text-center p-2 bg-background rounded shadow-sm">
           <div className="text-xs text-muted-foreground">Overall Score</div>
-          <div className={`text-xl font-bold ${getScoreColor(session.memory_details.overall_score)}`}>
-            {formatScore(session.memory_details.overall_score)}
+          <div className={`text-xl font-bold ${getScoreColor(details.overall_score)}`}>
+            {formatScore(details.overall_score)}
           </div>
         </div>
         <div className="text-center p-2 bg-background rounded shadow-sm">
           <div className="text-xs text-muted-foreground">Percentile</div>
           <div className="text-xl font-bold">
-            {formatPercentile(session.memory_details.percentile)}
+            {formatPercentile(details.percentile)}
           </div>
         </div>
         <div className="text-center p-2 bg-background rounded shadow-sm">
           <div className="text-xs text-muted-foreground">Classification</div>
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getClassificationStyle(session.memory_details.classification)}`}>
-            {session.memory_details.classification}
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getClassificationStyle(details.classification)}`}>
+            {details.classification}
           </span>
         </div>
       </div>
@@ -59,87 +91,103 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
       <div>
         <div className="font-medium mb-3 text-sm">Components</div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="border rounded-md p-3 bg-background shadow-sm">
-            <div className="flex justify-between mb-2">
-              <span className="font-medium">Working Memory</span>
-              <span className={`font-bold ${getScoreColor(session.memory_details.components.working_memory.score)}`}>
-                {formatScore(session.memory_details.components.working_memory.score)}
-              </span>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="w-full" 
-              onClick={() => toggleDomainDetails('working_memory')}
-            >
-              {expandedDomain === 'working_memory' ? 'Hide Details' : 'Show Details'}
-              {expandedDomain === 'working_memory' ? <ChevronUp className="ml-2 h-4 w-4" /> : <ChevronDown className="ml-2 h-4 w-4" />}
-            </Button>
-            
-            {expandedDomain === 'working_memory' && (
-              <div className="mt-2 animate-fade-in">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Component</TableHead>
-                      <TableHead>Value</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {Object.entries(session.memory_details.components.working_memory.components || {}).map(([key, value]) => (
-                      <TableRow key={key}>
-                        <TableCell className="capitalize">{key.replace(/_/g, ' ')}</TableCell>
-                        <TableCell>
-                          {typeof value === 'number' ? formatScore(value as number) : String(value)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+          {details.components && (
+            <>
+              <div className="border rounded-md p-3 bg-background shadow-sm">
+                <div className="flex justify-between mb-2">
+                  <span className="font-medium">Working Memory</span>
+                  <span className={`font-bold ${getScoreColor(details.components.working_memory?.score || 0)}`}>
+                    {formatScore(details.components.working_memory?.score || 0)}
+                  </span>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full" 
+                  onClick={() => toggleDomainDetails('working_memory')}
+                >
+                  {expandedDomain === 'working_memory' ? 'Hide Details' : 'Show Details'}
+                  {expandedDomain === 'working_memory' ? <ChevronUp className="ml-2 h-4 w-4" /> : <ChevronDown className="ml-2 h-4 w-4" />}
+                </Button>
+                
+                {expandedDomain === 'working_memory' && (
+                  <div className="mt-2 animate-fade-in">
+                    {loading ? (
+                      <div className="text-center py-4">Loading details...</div>
+                    ) : error ? (
+                      <div className="text-center py-4 text-red-500">{error}</div>
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Component</TableHead>
+                            <TableHead>Value</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {details.components.working_memory?.components && Object.entries(details.components.working_memory.components).map(([key, value]) => (
+                            <TableRow key={key}>
+                              <TableCell className="capitalize">{key.replace(/_/g, ' ')}</TableCell>
+                              <TableCell>
+                                {typeof value === 'number' ? formatScore(value as number) : String(value)}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    )}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-          
-          <div className="border rounded-md p-3 bg-background shadow-sm">
-            <div className="flex justify-between mb-2">
-              <span className="font-medium">Visual Memory</span>
-              <span className={`font-bold ${getScoreColor(session.memory_details.components.visual_memory.score)}`}>
-                {formatScore(session.memory_details.components.visual_memory.score)}
-              </span>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="w-full" 
-              onClick={() => toggleDomainDetails('visual_memory')}
-            >
-              {expandedDomain === 'visual_memory' ? 'Hide Details' : 'Show Details'}
-              {expandedDomain === 'visual_memory' ? <ChevronUp className="ml-2 h-4 w-4" /> : <ChevronDown className="ml-2 h-4 w-4" />}
-            </Button>
-            
-            {expandedDomain === 'visual_memory' && (
-              <div className="mt-2 animate-fade-in">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Component</TableHead>
-                      <TableHead>Value</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {Object.entries(session.memory_details.components.visual_memory.components || {}).map(([key, value]) => (
-                      <TableRow key={key}>
-                        <TableCell className="capitalize">{key.replace(/_/g, ' ')}</TableCell>
-                        <TableCell>
-                          {typeof value === 'number' ? formatScore(value as number) : String(value)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+              
+              <div className="border rounded-md p-3 bg-background shadow-sm">
+                <div className="flex justify-between mb-2">
+                  <span className="font-medium">Visual Memory</span>
+                  <span className={`font-bold ${getScoreColor(details.components.visual_memory?.score || 0)}`}>
+                    {formatScore(details.components.visual_memory?.score || 0)}
+                  </span>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full" 
+                  onClick={() => toggleDomainDetails('visual_memory')}
+                >
+                  {expandedDomain === 'visual_memory' ? 'Hide Details' : 'Show Details'}
+                  {expandedDomain === 'visual_memory' ? <ChevronUp className="ml-2 h-4 w-4" /> : <ChevronDown className="ml-2 h-4 w-4" />}
+                </Button>
+                
+                {expandedDomain === 'visual_memory' && (
+                  <div className="mt-2 animate-fade-in">
+                    {loading ? (
+                      <div className="text-center py-4">Loading details...</div>
+                    ) : error ? (
+                      <div className="text-center py-4 text-red-500">{error}</div>
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Component</TableHead>
+                            <TableHead>Value</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {details.components.visual_memory?.components && Object.entries(details.components.visual_memory.components).map(([key, value]) => (
+                            <TableRow key={key}>
+                              <TableCell className="capitalize">{key.replace(/_/g, ' ')}</TableCell>
+                              <TableCell>
+                                {typeof value === 'number' ? formatScore(value as number) : String(value)}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    )}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </>
+          )}
         </div>
       </div>
       
@@ -147,7 +195,7 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
         <div>
           <div className="text-sm font-medium mb-2">Tasks Used</div>
           <div className="flex flex-wrap gap-2">
-            {session.memory_details.tasks_used?.map((task, i) => (
+            {details.tasks_used?.map((task, i) => (
               <span key={i} className="bg-primary/10 px-2 py-1 rounded-full text-xs font-medium text-primary">
                 {task}
               </span>
@@ -160,11 +208,11 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
           <div className="w-full bg-muted rounded-full h-2.5">
             <div 
               className="bg-primary h-2.5 rounded-full" 
-              style={{ width: `${session.memory_details.data_completeness}%` }}
+              style={{ width: `${details.data_completeness}%` }}
             ></div>
           </div>
           <div className="text-xs text-muted-foreground mt-1">
-            {session.memory_details.data_completeness}% complete
+            {details.data_completeness}% complete
           </div>
         </div>
       </div>
