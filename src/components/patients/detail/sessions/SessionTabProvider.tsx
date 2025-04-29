@@ -45,6 +45,8 @@ export const SessionTabProvider: React.FC<SessionTabProviderProps> = ({
       <TabsContent value="attention">
         <AttentionTab 
           session={session}
+          expandedDomain={expandedDomain}
+          toggleDomainDetails={toggleDomainDetails}
           getScoreColor={getScoreColor}
           formatScore={formatScore}
           formatPercentile={formatPercentile}
@@ -56,6 +58,8 @@ export const SessionTabProvider: React.FC<SessionTabProviderProps> = ({
       <TabsContent value="impulse">
         <ImpulseTab 
           session={session}
+          expandedDomain={expandedDomain}
+          toggleDomainDetails={toggleDomainDetails}
           getScoreColor={getScoreColor}
           formatScore={formatScore}
           formatPercentile={formatPercentile}
@@ -67,6 +71,8 @@ export const SessionTabProvider: React.FC<SessionTabProviderProps> = ({
       <TabsContent value="executive">
         <ExecutiveTab 
           session={session}
+          expandedDomain={expandedDomain}
+          toggleDomainDetails={toggleDomainDetails}
           getScoreColor={getScoreColor}
           formatScore={formatScore}
           formatPercentile={formatPercentile}

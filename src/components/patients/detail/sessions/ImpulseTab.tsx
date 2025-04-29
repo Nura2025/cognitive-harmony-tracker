@@ -1,10 +1,13 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { TrendData } from '@/services/patient';
+import SessionService from '@/services/session';
 
 interface ImpulseTabProps {
   session: TrendData;
+  expandedDomain: string | null;
+  toggleDomainDetails: (domain: string) => void;
   getScoreColor: (score: number) => string;
   formatScore: (score: number) => number;
   formatPercentile: (percentile: number) => string;
@@ -13,12 +16,45 @@ interface ImpulseTabProps {
 
 export const ImpulseTab: React.FC<ImpulseTabProps> = ({
   session,
+  expandedDomain,
+  toggleDomainDetails,
   getScoreColor,
   formatScore,
   formatPercentile,
   getClassificationStyle
 }) => {
-  if (!session.impulse_details) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [impulseDetails, setImpulseDetails] = useState<any>(null);
+  
+  // Use session.id if available from the API, otherwise fallback to mocked data
+  const sessionId = session.id || '3aa2247c-4869-49d7-86ba-9f61f883cddb';
+
+  useEffect(() => {
+    // Only fetch when impulse domain is expanded
+    if (expandedDomain && expandedDomain.includes('impulse')) {
+      setLoading(true);
+      setError(null);
+      
+      SessionService.getSessionDomainDetails(sessionId, 'impulse_control')
+        .then(data => {
+          setImpulseDetails(data);
+          console.log('Fetched impulse details:', data);
+        })
+        .catch(err => {
+          console.error('Error fetching impulse details:', err);
+          setError('Failed to load impulse control details.');
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [expandedDomain, sessionId]);
+
+  // Fallback to session data if API fetch fails or isn't expanded yet
+  const details = impulseDetails || session.impulse_details;
+
+  if (!details) {
     return (
       <div className="text-center py-8 text-muted-foreground">
         <AlertCircle className="h-8 w-8 mx-auto mb-2" />
@@ -32,20 +68,20 @@ export const ImpulseTab: React.FC<ImpulseTabProps> = ({
       <div className="grid grid-cols-3 gap-3 bg-muted/40 p-3 rounded-md">
         <div className="text-center p-2 bg-background rounded shadow-sm">
           <div className="text-xs text-muted-foreground">Overall Score</div>
-          <div className={`text-xl font-bold ${getScoreColor(session.impulse_details.overall_score)}`}>
-            {formatScore(session.impulse_details.overall_score)}
+          <div className={`text-xl font-bold ${getScoreColor(details.overall_score)}`}>
+            {formatScore(details.overall_score)}
           </div>
         </div>
         <div className="text-center p-2 bg-background rounded shadow-sm">
           <div className="text-xs text-muted-foreground">Percentile</div>
           <div className="text-xl font-bold">
-            {formatPercentile(session.impulse_details.percentile)}
+            {formatPercentile(details.percentile)}
           </div>
         </div>
         <div className="text-center p-2 bg-background rounded shadow-sm">
           <div className="text-xs text-muted-foreground">Classification</div>
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getClassificationStyle(session.impulse_details.classification)}`}>
-            {session.impulse_details.classification}
+          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getClassificationStyle(details.classification)}`}>
+            {details.classification}
           </span>
         </div>
       </div>
@@ -53,7 +89,7 @@ export const ImpulseTab: React.FC<ImpulseTabProps> = ({
       <div>
         <div className="font-medium mb-3 text-sm">Components</div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {Object.entries(session.impulse_details.components || {}).map(([key, value]) => (
+          {details.components && Object.entries(details.components || {}).map(([key, value]) => (
             <div key={key} className="border rounded-md p-3 bg-background shadow-sm">
               <div className="flex justify-between">
                 <span className="font-medium capitalize">{key.replace(/_/g, ' ')}</span>
@@ -70,7 +106,7 @@ export const ImpulseTab: React.FC<ImpulseTabProps> = ({
         <div>
           <div className="text-sm font-medium mb-2">Games Used</div>
           <div className="flex flex-wrap gap-2">
-            {session.impulse_details.games_used?.map((game, i) => (
+            {details.games_used?.map((game, i) => (
               <span key={i} className="bg-primary/10 px-2 py-1 rounded-full text-xs font-medium text-primary">
                 {game}
               </span>
@@ -83,14 +119,14 @@ export const ImpulseTab: React.FC<ImpulseTabProps> = ({
           <div className="w-full bg-muted rounded-full h-2.5">
             <div 
               className="bg-primary h-2.5 rounded-full" 
-              style={{ width: `${session.impulse_details.data_completeness}%` }}
+              style={{ width: `${details.data_completeness * 100}%` }}
             ></div>
           </div>
           <div className="text-xs text-muted-foreground mt-1">
-            {session.impulse_details.data_completeness}% complete
+            {Math.round(details.data_completeness * 100)}% complete
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
