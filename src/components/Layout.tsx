@@ -27,15 +27,8 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className={`min-h-screen flex w-full bg-background ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
         <Sidebar>
           <div className="flex flex-col h-full">
-            <div className="flex items-center h-16 px-4 border-b border-sidebar-border">
-              <div className="flex items-center">
-                <img 
-                  src="/lovable-uploads/f06d0441-78f1-457a-a7f0-bcdfc0333b05.png" 
-                  alt="NURA Logo" 
-                  className="h-10 mr-2"
-                />
-                <h1 className="text-xl font-bold text-sidebar-foreground hidden md:block">NURA</h1>
-              </div>
+            <div className="flex items-center h-16 px-6 border-b border-sidebar-border">
+              <h1 className="text-xl font-bold text-sidebar-foreground">NURA</h1>
             </div>
             
             <SidebarContent className="p-2">
