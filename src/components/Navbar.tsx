@@ -27,7 +27,8 @@ export const Navbar: React.FC = () => {
   const handleLogout = () => {
     AuthService.logout();
     toast.success(t('logoutSuccess'));
-    navigate('/login');
+    // Redirect to landing page on logout
+    navigate('/');
   };
   
   return (
@@ -90,3 +91,4 @@ export const Navbar: React.FC = () => {
     </div>
   );
 };
+
