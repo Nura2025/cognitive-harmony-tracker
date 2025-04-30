@@ -62,8 +62,8 @@ const login = async (data: LoginData): Promise<AuthResponse> => {
     return response.data;
   } catch (error: any) {
     console.error("Login error:", error);
-    const errorMessage = error.response?.data?.message || "Login failed. Please check your credentials.";
-    toast.error(errorMessage);
+    const errorMessage = error.response?.data?.message || "Invalid email or password. Please try again.";
+    // Don't show toast here, we'll handle it in the component
     throw error;
   }
 };
@@ -120,9 +120,6 @@ const logout = () => {
       .replace(/^ +/, '')
       .replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
   });
-  
-  // Optional: Redirect to login page or home
-  window.location.href = '/';
 };
 
 // Get current user function

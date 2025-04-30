@@ -13,12 +13,17 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Reset any previous errors
+    setError('');
+    
     if (!email || !password) {
+      setError("Please enter both email and password");
       toast.error("Please enter both email and password");
       return;
     }
@@ -28,10 +33,17 @@ const Login = () => {
     try {
       await AuthService.login({ email, password });
       toast.success("Login successful!");
-      navigate('/');
-    } catch (error) {
-      // Error is handled in AuthService
-      console.error(error);
+      // Redirect to dashboard on successful login
+      navigate('/dashboard');
+    } catch (error: any) {
+      // Extract error message from the error object
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          "Invalid email or password. Please try again.";
+      
+      setError(errorMessage);
+      toast.error(errorMessage);
+      console.error("Login failed:", error);
     } finally {
       setLoading(false);
     }
@@ -91,6 +103,12 @@ const Login = () => {
           
           <form onSubmit={handleLogin}>
             <CardContent className="space-y-5">
+              {error && (
+                <div className="p-3 text-sm bg-destructive/10 border border-destructive/30 text-destructive rounded-md">
+                  {error}
+                </div>
+              )}
+              
               <div className="relative">
                 <div className="absolute left-3 top-3 text-muted-foreground">
                   <Mail className="h-5 w-5" />
