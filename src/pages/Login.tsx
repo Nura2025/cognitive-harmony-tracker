@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import AuthService from '@/services/auth';
 
@@ -50,12 +50,12 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/40 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0A2342] to-[#121212] px-4">
       <div className="w-full max-w-md">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
+          <div className="w-16 h-16 bg-[#5EF38C]/20 rounded-xl flex items-center justify-center mb-4">
             <svg 
-              className="w-10 h-10 text-primary" 
+              className="w-10 h-10 text-[#5EF38C]" 
               viewBox="0 0 24 24" 
               fill="none" 
               xmlns="http://www.w3.org/2000/svg"
@@ -88,99 +88,109 @@ const Login = () => {
               />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold mb-1">NeuroCog Clinic</h1>
-          <p className="text-muted-foreground text-sm">Cognitive assessment platform</p>
+          <h1 className="text-3xl font-bold mb-1 text-[#5EF38C] pixel-font">NURA Games</h1>
+          <p className="text-gray-300 text-sm">Cognitive assessment platform</p>
         </div>
         
-        <Card className="border-2 border-primary/20 shadow-lg overflow-hidden">
-          <div className="absolute h-2 bg-gradient-to-r from-primary/60 via-primary to-primary/60 w-full top-0 left-0 rounded-t-lg"></div>
-          <CardHeader className="space-y-1 text-center pt-8">
-            <CardTitle className="text-2xl font-semibold">Sign In</CardTitle>
-            <CardDescription>
-              Enter your credentials to access your account
-            </CardDescription>
-          </CardHeader>
-          
-          <form onSubmit={handleLogin}>
-            <CardContent className="space-y-5">
-              {error && (
-                <div className="p-3 text-sm bg-destructive/10 border border-destructive/30 text-destructive rounded-md">
-                  {error}
+        <Card className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border overflow-hidden">
+          <div className="bg-black p-6 rounded-lg h-full">
+            <CardHeader className="space-y-1 text-center">
+              <CardTitle className="text-2xl font-semibold text-white">Sign In</CardTitle>
+              <CardDescription className="text-gray-400">
+                Enter your credentials to access your account
+              </CardDescription>
+            </CardHeader>
+            
+            <form onSubmit={handleLogin}>
+              <CardContent className="space-y-5">
+                {error && (
+                  <div className="p-3 text-sm bg-red-500/20 border border-red-500/30 text-red-400 rounded-md">
+                    {error}
+                  </div>
+                )}
+                
+                <div className="relative">
+                  <div className="absolute left-3 top-3 text-gray-500">
+                    <Mail className="h-5 w-5" />
+                  </div>
+                  <Input
+                    className="pl-10 h-12 text-base bg-[#222] border border-[#444] text-white focus:border-[#5EF38C]"
+                    placeholder="Email address"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
                 </div>
-              )}
-              
-              <div className="relative">
-                <div className="absolute left-3 top-3 text-muted-foreground">
-                  <Mail className="h-5 w-5" />
+                
+                <div className="relative">
+                  <div className="absolute left-3 top-3 text-gray-500">
+                    <Lock className="h-5 w-5" />
+                  </div>
+                  <Input
+                    className="pl-10 pr-10 h-12 text-base bg-[#222] border border-[#444] text-white focus:border-[#5EF38C]"
+                    placeholder="Password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-3 text-gray-500 hover:text-gray-300"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
                 </div>
-                <Input
-                  className="pl-10 h-12 text-base"
-                  placeholder="Email address"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+                
+                <Button 
+                  className="w-full py-6 text-base font-medium bg-[#5EF38C] text-[#0A2342] hover:bg-[#4DD77C]" 
+                  type="submit" 
                   disabled={loading}
-                />
-              </div>
-              
-              <div className="relative">
-                <div className="absolute left-3 top-3 text-muted-foreground">
-                  <Lock className="h-5 w-5" />
-                </div>
-                <Input
-                  className="pl-10 pr-10 h-12 text-base"
-                  placeholder="Password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  disabled={loading}
-                />
-                <button
-                  type="button"
-                  className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
-                  onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
+                  {loading ? "Signing In..." : "Sign In"}
+                </Button>
+                
+                <div className="flex items-center my-4">
+                  <div className="flex-1 border-t border-[#444]"></div>
+                  <div className="px-4 text-xs text-gray-400">OR</div>
+                  <div className="flex-1 border-t border-[#444]"></div>
+                </div>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full border border-[#5EF38C] text-[#5EF38C] hover:bg-[#5EF38C]/20 py-6" 
+                  type="button"
+                  disabled={loading}
+                  onClick={() => navigate('/register')}
+                >
+                  Create an account
+                </Button>
+              </CardContent>
+            </form>
+            
+            <CardFooter className="flex flex-col space-y-4 pt-0">
+              <div className="text-center text-xs text-gray-400">
+                Secure access to patient cognitive assessment data
               </div>
               
               <Button 
-                className="w-full py-6 text-base font-medium" 
-                type="submit" 
-                disabled={loading}
+                variant="ghost" 
+                className="mt-2 text-gray-400 hover:text-[#5EF38C] hover:bg-transparent" 
+                onClick={() => navigate('/')}
               >
-                {loading ? "Signing In..." : "Sign In"}
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Landing Page
               </Button>
-              
-              <div className="flex items-center my-4">
-                <div className="flex-1 border-t border-border"></div>
-                <div className="px-4 text-xs text-muted-foreground">OR</div>
-                <div className="flex-1 border-t border-border"></div>
-              </div>
-              
-              <Button 
-                variant="outline" 
-                className="w-full" 
-                type="button"
-                disabled={loading}
-                onClick={() => navigate('/register')}
-              >
-                Create an account
-              </Button>
-            </CardContent>
-          </form>
-          
-          <CardFooter className="flex flex-col space-y-2 pt-0">
-            <div className="text-center text-xs text-muted-foreground">
-              Secure access to patient cognitive assessment data
-            </div>
-          </CardFooter>
+            </CardFooter>
+          </div>
         </Card>
         
-        <div className="text-center mt-6 text-sm text-muted-foreground">
-          © 2025 NeuroCog Clinic. All rights reserved.
+        <div className="text-center mt-6 text-sm text-gray-400">
+          © 2025 NURA Games. All rights reserved.
         </div>
       </div>
     </div>

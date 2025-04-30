@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Lock, Mail, User, Building, Stethoscope, CreditCard } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, User, Building, Stethoscope, CreditCard, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import AuthService from '@/services/auth';
 
@@ -18,26 +18,31 @@ const Register = () => {
   const [clinicName, setClinicName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   
   const navigate = useNavigate();
 
   const validateForm = () => {
     if (!name || !email || !password || !confirmPassword) {
+      setError("Please fill in all required fields");
       toast.error("Please fill in all required fields");
       return false;
     }
     
     if (password !== confirmPassword) {
+      setError("Passwords do not match");
       toast.error("Passwords do not match");
       return false;
     }
     
     if (password.length < 8) {
+      setError("Password must be at least 8 characters long");
       toast.error("Password must be at least 8 characters long");
       return false;
     }
     
     if (!specialty || !licenseNumber) {
+      setError("Please provide your specialty and license number");
       toast.error("Please provide your specialty and license number");
       return false;
     }
@@ -47,6 +52,8 @@ const Register = () => {
 
   const handleRegistration = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    setError('');
     
     if (!validateForm()) {
       return;
@@ -65,22 +72,26 @@ const Register = () => {
       });
       
       toast.success("Registration successful!");
-      navigate('/');
-    } catch (error) {
-      // Error is handled in AuthService
-      console.error(error);
+      navigate('/dashboard');
+    } catch (error: any) {
+      // Extract error message
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          "Registration failed. Please try again.";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/40 px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0A2342] to-[#121212] px-4 py-8">
       <div className="w-full max-w-md">
         <div className="flex flex-col items-center mb-6">
-          <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
+          <div className="w-16 h-16 bg-[#5EF38C]/20 rounded-xl flex items-center justify-center mb-4">
             <svg 
-              className="w-10 h-10 text-primary" 
+              className="w-10 h-10 text-[#5EF38C]" 
               viewBox="0 0 24 24" 
               fill="none" 
               xmlns="http://www.w3.org/2000/svg"
@@ -113,156 +124,172 @@ const Register = () => {
               />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold mb-1">NeuroCog Clinic</h1>
-          <p className="text-muted-foreground text-sm">Cognitive assessment platform</p>
+          <h1 className="text-3xl font-bold mb-1 text-[#5EF38C] pixel-font">NURA Games</h1>
+          <p className="text-gray-300 text-sm">Cognitive assessment platform</p>
         </div>
         
-        <Card className="border-2 border-primary/20 shadow-lg overflow-hidden">
-          <div className="absolute h-2 bg-gradient-to-r from-primary/60 via-primary to-primary/60 w-full top-0 left-0 rounded-t-lg"></div>
-          <CardHeader className="space-y-1 text-center pt-8">
-            <CardTitle className="text-2xl font-semibold">Clinician Registration</CardTitle>
-            <CardDescription>
-              Register to access the cognitive assessment platform
-            </CardDescription>
-          </CardHeader>
-          
-          <form onSubmit={handleRegistration}>
-            <CardContent className="space-y-4">
-              <div className="relative">
-                <div className="absolute left-3 top-3 text-muted-foreground">
-                  <User className="h-4 w-4" />
-                </div>
-                <Input
-                  className="pl-10"
-                  placeholder="Full Name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  disabled={loading}
-                />
-              </div>
+        <Card className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border overflow-hidden">
+          <div className="bg-black p-6 rounded-lg h-full">
+            <CardHeader className="space-y-1 text-center">
+              <CardTitle className="text-2xl font-semibold text-white">Clinician Registration</CardTitle>
+              <CardDescription className="text-gray-400">
+                Register to access the cognitive assessment platform
+              </CardDescription>
+            </CardHeader>
+            
+            <form onSubmit={handleRegistration}>
+              <CardContent className="space-y-4">
+                {error && (
+                  <div className="p-3 text-sm bg-red-500/20 border border-red-500/30 text-red-400 rounded-md">
+                    {error}
+                  </div>
+                )}
               
-              <div className="relative">
-                <div className="absolute left-3 top-3 text-muted-foreground">
-                  <Mail className="h-4 w-4" />
+                <div className="relative">
+                  <div className="absolute left-3 top-3 text-gray-500">
+                    <User className="h-4 w-4" />
+                  </div>
+                  <Input
+                    className="pl-10 bg-[#222] border border-[#444] text-white focus:border-[#5EF38C]"
+                    placeholder="Full Name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
                 </div>
-                <Input
-                  className="pl-10"
-                  placeholder="Email address"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  disabled={loading}
-                />
-              </div>
-              
-              <div className="relative">
-                <div className="absolute left-3 top-3 text-muted-foreground">
-                  <Lock className="h-4 w-4" />
+                
+                <div className="relative">
+                  <div className="absolute left-3 top-3 text-gray-500">
+                    <Mail className="h-4 w-4" />
+                  </div>
+                  <Input
+                    className="pl-10 bg-[#222] border border-[#444] text-white focus:border-[#5EF38C]"
+                    placeholder="Email address"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
                 </div>
-                <Input
-                  className="pl-10 pr-10"
-                  placeholder="Password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
+                
+                <div className="relative">
+                  <div className="absolute left-3 top-3 text-gray-500">
+                    <Lock className="h-4 w-4" />
+                  </div>
+                  <Input
+                    className="pl-10 pr-10 bg-[#222] border border-[#444] text-white focus:border-[#5EF38C]"
+                    placeholder="Password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-3 text-gray-500 hover:text-gray-300"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                
+                <div className="relative">
+                  <div className="absolute left-3 top-3 text-gray-500">
+                    <Lock className="h-4 w-4" />
+                  </div>
+                  <Input
+                    className="pl-10 bg-[#222] border border-[#444] text-white focus:border-[#5EF38C]"
+                    placeholder="Confirm Password"
+                    type={showPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+                
+                <div className="relative">
+                  <div className="absolute left-3 top-3 text-gray-500">
+                    <Stethoscope className="h-4 w-4" />
+                  </div>
+                  <Input
+                    className="pl-10 bg-[#222] border border-[#444] text-white focus:border-[#5EF38C]"
+                    placeholder="Medical Specialty"
+                    value={specialty}
+                    onChange={(e) => setSpecialty(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+                
+                <div className="relative">
+                  <div className="absolute left-3 top-3 text-gray-500">
+                    <CreditCard className="h-4 w-4" />
+                  </div>
+                  <Input
+                    className="pl-10 bg-[#222] border border-[#444] text-white focus:border-[#5EF38C]"
+                    placeholder="License Number"
+                    value={licenseNumber}
+                    onChange={(e) => setLicenseNumber(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+                
+                <div className="relative">
+                  <div className="absolute left-3 top-3 text-gray-500">
+                    <Building className="h-4 w-4" />
+                  </div>
+                  <Input
+                    className="pl-10 bg-[#222] border border-[#444] text-white focus:border-[#5EF38C]"
+                    placeholder="Clinic Name (Optional)"
+                    value={clinicName}
+                    onChange={(e) => setClinicName(e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
+                
+                <Button 
+                  className="w-full font-medium mt-2 bg-[#5EF38C] text-[#0A2342] hover:bg-[#4DD77C] py-6" 
+                  type="submit" 
                   disabled={loading}
-                />
-                <button
-                  type="button"
-                  className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"
-                  onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
+                  {loading ? "Creating Account..." : "Create Clinician Account"}
+                </Button>
+              </CardContent>
+            </form>
+            
+            <CardFooter className="flex flex-col space-y-4">
+              <div className="text-center text-sm">
+                Already have an account?{" "}
+                <Link 
+                  to="/login" 
+                  className="text-[#5EF38C] font-medium hover:underline"
+                >
+                  Sign In
+                </Link>
               </div>
-              
-              <div className="relative">
-                <div className="absolute left-3 top-3 text-muted-foreground">
-                  <Lock className="h-4 w-4" />
-                </div>
-                <Input
-                  className="pl-10"
-                  placeholder="Confirm Password"
-                  type={showPassword ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  disabled={loading}
-                />
-              </div>
-              
-              <div className="relative">
-                <div className="absolute left-3 top-3 text-muted-foreground">
-                  <Stethoscope className="h-4 w-4" />
-                </div>
-                <Input
-                  className="pl-10"
-                  placeholder="Medical Specialty"
-                  value={specialty}
-                  onChange={(e) => setSpecialty(e.target.value)}
-                  required
-                  disabled={loading}
-                />
-              </div>
-              
-              <div className="relative">
-                <div className="absolute left-3 top-3 text-muted-foreground">
-                  <CreditCard className="h-4 w-4" />
-                </div>
-                <Input
-                  className="pl-10"
-                  placeholder="License Number"
-                  value={licenseNumber}
-                  onChange={(e) => setLicenseNumber(e.target.value)}
-                  required
-                  disabled={loading}
-                />
-              </div>
-              
-              <div className="relative">
-                <div className="absolute left-3 top-3 text-muted-foreground">
-                  <Building className="h-4 w-4" />
-                </div>
-                <Input
-                  className="pl-10"
-                  placeholder="Clinic Name (Optional)"
-                  value={clinicName}
-                  onChange={(e) => setClinicName(e.target.value)}
-                  disabled={loading}
-                />
+              <div className="text-center text-xs text-gray-500">
+                By registering, you agree to our Terms of Service and Privacy Policy.
               </div>
               
               <Button 
-                className="w-full font-medium mt-2" 
-                type="submit" 
-                disabled={loading}
+                variant="ghost" 
+                className="mt-2 text-gray-400 hover:text-[#5EF38C] hover:bg-transparent" 
+                onClick={() => navigate('/')}
               >
-                {loading ? "Creating Account..." : "Create Clinician Account"}
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Landing Page
               </Button>
-            </CardContent>
-          </form>
-          
-          <CardFooter className="flex flex-col space-y-2">
-            <div className="text-center text-sm">
-              Already have an account?{" "}
-              <Link 
-                to="/login" 
-                className="text-primary font-medium hover:underline"
-              >
-                Sign In
-              </Link>
-            </div>
-            <div className="text-center text-xs text-muted-foreground">
-              By registering, you agree to our Terms of Service and Privacy Policy.
-            </div>
-          </CardFooter>
+            </CardFooter>
+          </div>
         </Card>
         
-        <div className="text-center mt-6 text-sm text-muted-foreground">
-          © 2025 NeuroCog Clinic. All rights reserved.
+        <div className="text-center mt-6 text-sm text-gray-400">
+          © 2025 NURA Games. All rights reserved.
         </div>
       </div>
     </div>
