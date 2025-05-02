@@ -1,5 +1,7 @@
+
 import { PatientFilters } from "@/components/patients/PatientFilters";
 import { PatientList } from "@/components/patients/PatientList";
+import AddPatientDialog from "@/components/patients/AddPatientDialog";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import PatientService from "@/services/patient"; // your API service
@@ -8,10 +10,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
-// Define the patient interface based on API response
-// Remove the local Patient interface and import the correct one
-import type { Patient } from "@/components/patients/PatientList";
+// Import Patient type
+import type { Patient } from "@/utils/types/patientTypes";
 
 const Patients = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,6 +23,7 @@ const Patients = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retrying, setRetrying] = useState(false);
+  const [addPatientOpen, setAddPatientOpen] = useState(false);
   const { t, language } = useLanguage();
   const navigate = useNavigate();
 
@@ -129,6 +132,26 @@ const Patients = () => {
     fetchPatients();
   };
 
+  const handleAddPatient = async (data: any) => {
+    try {
+      // Normally you would call an API here
+      console.log("Adding patient:", data);
+      
+      // Example implementation:
+      // const result = await PatientService.addPatient(data);
+      
+      // For now, let's just show a success message
+      toast.success("Patient added successfully!");
+      setAddPatientOpen(false);
+      
+      // Refresh the patient list
+      fetchPatients();
+    } catch (error) {
+      console.error("Failed to add patient:", error);
+      toast.error("Failed to add patient. Please try again.");
+    }
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -205,6 +228,7 @@ const Patients = () => {
 
         <Button
           className={`gap-1.5 ${language === "ar" ? "flex-row-reverse" : ""}`}
+          onClick={() => setAddPatientOpen(true)}
         >
           <PlusCircle className="h-4 w-4" />
           <span>{t("addPatient")}</span>
@@ -221,8 +245,13 @@ const Patients = () => {
 
       <PatientList
         patients={filteredPatients}
-        metrics={{}} // 🔁 Replace or remove metricsMap if unused
-        // onPatientClick={handlePatientClick}
+        metrics={{}}
+      />
+      
+      <AddPatientDialog 
+        open={addPatientOpen} 
+        onOpenChange={setAddPatientOpen}
+        onSubmit={handleAddPatient}
       />
     </div>
   );
