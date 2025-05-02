@@ -76,7 +76,7 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="">
               <FormField control={form.control} name="first_name" render={({
               field
             }) => <FormItem>
@@ -133,7 +133,7 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
             <div className="mx-0 py-0 px-0">
               <FormField control={form.control} name="date_of_birth" render={({
               field
-            }) => <FormItem className="flex flex-col center">
+            }) => <FormItem className="">
                     <FormLabel>{t("Date of Birth")}</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
@@ -153,7 +153,7 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
               
               <FormField control={form.control} name="gender" render={({
               field
-            }) => <FormItem className="flex flex-col center">
+            }) => <FormItem className="">
                     <FormLabel>{t("Gender")}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
