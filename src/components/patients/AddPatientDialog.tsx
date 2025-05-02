@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -76,7 +77,7 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
         
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <div className="">
+            <div className="grid grid-cols-2 gap-4">
               <FormField control={form.control} name="first_name" render={({
               field
             }) => <FormItem>
@@ -130,15 +131,15 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                   <FormMessage />
                 </FormItem>} />
             
-            <div className="mx-0 py-0 px-0">
+            <div className="grid grid-cols-2 gap-4">
               <FormField control={form.control} name="date_of_birth" render={({
               field
-            }) => <FormItem className="">
+            }) => <FormItem>
                     <FormLabel>{t("Date of Birth")}</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
-                          <Button variant={"outline"} className={cn("pl-10 relative text-left font-normal h-10", !field.value && "text-muted-foreground")}>
+                          <Button variant={"outline"} className={cn("pl-10 relative text-left font-normal h-10 w-full", !field.value && "text-muted-foreground")}>
                             <CalendarIcon className="absolute left-3 top-2.5 h-4 w-4" />
                             {field.value ? format(field.value, "PPP") : <span>{t("select Date")}</span>}
                           </Button>
@@ -153,7 +154,7 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
               
               <FormField control={form.control} name="gender" render={({
               field
-            }) => <FormItem className="">
+            }) => <FormItem>
                     <FormLabel>{t("Gender")}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
@@ -164,6 +165,7 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                       <SelectContent>
                         <SelectItem value="Male">{t("male")}</SelectItem>
                         <SelectItem value="Female">{t("female")}</SelectItem>
+                        <SelectItem value="Other">{t("other")}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

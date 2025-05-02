@@ -18,6 +18,7 @@ export const generatePatients = (count: number = 10): Patient[] => {
     
     return {
       id: `P${1000 + i}`,
+      user_id: `user_${1000 + i}`, // Adding the required user_id field
       name: `${randomChoice(firstNames)} ${randomChoice(lastNames)}`,
       age: randomInt(6, 17),
       gender: randomChoice(genders),
