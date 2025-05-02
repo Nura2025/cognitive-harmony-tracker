@@ -36,7 +36,7 @@ const Patients = () => {
       const clinicianId = "77a87318-00e6-4124-90ab-c0e72c3b2597"; // Replace with real clinician ID from auth
       const patientData = await PatientService.getPatientsByClinician(clinicianId);
       
-      // Process the data to add derived fields
+      // Process the data to add derived fields and ensure user_id is set
       const patientList = patientData.map((p: any) => {
         const birthDate = new Date(p.date_of_birth);
         const today = new Date();
@@ -49,6 +49,7 @@ const Patients = () => {
         
         return {
           ...p,
+          user_id: p.user_id || p.id, // Ensure user_id is set, fallback to id if needed
           name: `${p.first_name} ${p.last_name}`,
           age,
           adhdSubtype: p.adhd_subtype,
@@ -140,12 +141,29 @@ const Patients = () => {
       // Example implementation:
       // const result = await PatientService.addPatient(data);
       
-      // For now, let's just show a success message
+      // For now, let's create a mock patient with the required fields
+      const newPatient = {
+        user_id: `temp-${Date.now()}`, // Generate a temporary ID
+        first_name: data.first_name,
+        last_name: data.last_name,
+        name: `${data.first_name} ${data.last_name}`,
+        date_of_birth: data.date_of_birth.toISOString().split('T')[0],
+        gender: data.gender,
+        age: Math.floor((new Date().getTime() - new Date(data.date_of_birth).getTime()) / (365.25 * 24 * 60 * 60 * 1000)),
+        adhdSubtype: null,
+        assessmentCount: 0,
+        lastAssessment: null,
+        email: data.email,
+        phone_number: data.phone_number,
+        username: data.username
+      };
+      
+      // Add the new patient to the list (simulating API response)
+      setPatients(prev => [...prev, newPatient]);
+      setFilteredPatients(prev => [...prev, newPatient]);
+      
       toast.success("Patient added successfully!");
       setAddPatientOpen(false);
-      
-      // Refresh the patient list
-      fetchPatients();
     } catch (error) {
       console.error("Failed to add patient:", error);
       toast.error("Failed to add patient. Please try again.");

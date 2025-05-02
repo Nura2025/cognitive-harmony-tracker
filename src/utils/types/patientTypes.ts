@@ -2,14 +2,21 @@
 // Type definitions for patient and assessment data
 
 export interface Patient {
-  id: string;
+  id?: string; // Keep for backward compatibility
+  user_id: string; // Add this field to match the PatientList component's expectation
   name: string;
   age: number;
   gender: 'Male' | 'Female' | 'Other';
-  diagnosisDate: string;
-  adhdSubtype: 'Inattentive' | 'Hyperactive-Impulsive' | 'Combined';
-  assessmentCount: number;
-  lastAssessment: string;
+  diagnosisDate?: string;
+  adhdSubtype?: 'Inattentive' | 'Hyperactive-Impulsive' | 'Combined' | null;
+  assessmentCount?: number;
+  lastAssessment?: string | null;
+  first_name?: string;
+  last_name?: string;
+  date_of_birth?: string;
+  phone_number?: string;
+  email?: string;
+  username?: string;
 }
 
 export interface CognitiveDomain {
