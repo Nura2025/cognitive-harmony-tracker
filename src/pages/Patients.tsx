@@ -33,7 +33,7 @@ const Patients = () => {
       setLoading(true);
       setError(null);
       
-      const clinicianId = "77a87318-00e6-4124-90ab-c0e72c3b2597"; // Replace with real clinician ID from auth
+      const clinicianId = "48526669-c799-4642-8fb9-93110a8bc2f8"; // Replace with real clinician ID from auth
       const patientData = await PatientService.getPatientsByClinician(clinicianId);
       
       // Process the data to add derived fields and ensure user_id is set
