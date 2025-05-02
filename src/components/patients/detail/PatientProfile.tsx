@@ -88,7 +88,7 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Left Card */}
+        {/* Left Card - Patient Information */}
         <Card className="glass">
           <CardContent className="pt-6">
             <div className="flex flex-col items-center gap-4">
@@ -97,8 +97,8 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({
                   <User className="h-12 w-12 text-primary" />
                 </div>
               </div>
-              <h2 className="text-2xl font-bold">{gender}</h2>
-              <p className="text-muted-foreground">{gender}</p>
+              <h2 className="text-2xl font-bold">Patient Profile</h2>
+              <p className="text-muted-foreground">Age Group: {patientAgeGroup}</p>
             </div>
 
             <Separator className="my-6" />
@@ -107,6 +107,11 @@ export const PatientProfile: React.FC<PatientProfileProps> = ({
               <div>
                 <h3 className="text-sm text-muted-foreground mb-1">Age</h3>
                 <p className="font-medium">{age} years</p>
+              </div>
+              
+              <div>
+                <h3 className="text-sm text-muted-foreground mb-1">Gender</h3>
+                <p className="font-medium">{gender}</p>
               </div>
 
               <div>
