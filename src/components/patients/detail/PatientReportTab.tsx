@@ -1,18 +1,59 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { FileText } from 'lucide-react';
+import { ReportGenerator } from '@/components/reports/ReportGenerator';
+import { PatientReports } from '@/components/reports/PatientReports';
+import { ReportType } from '@/utils/types/patientTypes';
+import { mockReports } from '@/utils/mockData/reportData';
 
-export const PatientReportTab: React.FC = () => {
+interface PatientReportTabProps {
+  patientId: string;
+  patientName: string;
+}
+
+export const PatientReportTab: React.FC<PatientReportTabProps> = ({ patientId, patientName }) => {
+  const [reports, setReports] = useState<ReportType[]>(() => mockReports(patientId));
+  
+  // Function to handle adding a new report
+  const handleAddReport = (newReport: ReportType) => {
+    setReports(prevReports => [newReport, ...prevReports]);
+  };
+  
+  // Placeholder function for viewing a report
+  const handleViewReport = (report: ReportType) => {
+    console.log('Viewing report:', report);
+    // In a real application, this would navigate to or show a detailed report view
+  };
+  
   return (
-    <Card className="glass">
-      <CardContent className="pt-6 flex flex-col items-center justify-center h-64">
-        <FileText className="h-10 w-10 text-muted-foreground mb-2" />
-        <h3 className="text-lg font-medium mb-1">Reports Coming Soon</h3>
-        <p className="text-muted-foreground text-center">
-          Patient reports are currently under development and will be available soon.
-        </p>
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <PatientReports 
+            reports={reports} 
+            onViewReport={handleViewReport} 
+          />
+        </div>
+        <div>
+          <ReportGenerator 
+            patient={{ user_id: patientId, name: patientName, age: 0, gender: 'Male' }}
+            metrics={{
+              patientId: patientId,
+              date: new Date().toISOString(),
+              attention: 75,
+              memory: 65,
+              executiveFunction: 80,
+              behavioral: 70,
+              percentile: 72,
+              sessionsDuration: 120,
+              sessionsCompleted: 12,
+              progress: 8,
+              clinicalConcerns: [],
+            }}
+            onReportGenerate={handleAddReport}
+          />
+        </div>
+      </div>
+    </div>
   );
 };

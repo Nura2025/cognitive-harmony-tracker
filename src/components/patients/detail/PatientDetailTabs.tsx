@@ -80,7 +80,10 @@ export const PatientDetailTabs: React.FC<PatientDetailTabsProps> = ({
       </TabsContent>
 
       <TabsContent value="reports">
-        <PatientReportTab />
+        <PatientReportTab 
+          patientId={patientId}
+          patientName={patientName}
+        />
       </TabsContent>
     </Tabs>
   );

@@ -11,7 +11,7 @@ import {
 import { Navbar } from '@/components/Navbar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Link } from 'react-router-dom';
-import { LayoutDashboard, Users, BarChart, Calendar, FileText } from 'lucide-react';
+import { LayoutDashboard, Users, BarChart, Calendar } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface LayoutProps {
@@ -62,14 +62,6 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <Link to="/sessions" className={language === 'ar' ? 'flex flex-row-reverse items-center w-full' : ''}>
                       <Calendar />
                       <span>{t('sessions')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip={t('reports')}>
-                    <Link to="/reports" className={language === 'ar' ? 'flex flex-row-reverse items-center w-full' : ''}>
-                      <FileText />
-                      <span>{t('reports')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
