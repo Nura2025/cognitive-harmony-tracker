@@ -89,9 +89,9 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{t("addNewPatient")}</DialogTitle>
+          <DialogTitle>{t("Add New Patient")}</DialogTitle>
           <DialogDescription>
-            {t("fillPatientDetails")}
+            {t("Fill Patient Details")}
           </DialogDescription>
         </DialogHeader>
         
@@ -103,11 +103,11 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                 name="first_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("firstName")}</FormLabel>
+                    <FormLabel>{t("First Name")}</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input className="pl-10" placeholder={t("enterFirstName")} {...field} />
+                        <Input className="pl-10" placeholder={t("Enter first name")} {...field} />
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -120,11 +120,11 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                 name="last_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("lastName")}</FormLabel>
+                    <FormLabel>{t("Last Name")}</FormLabel>
                     <FormControl>
                       <div className="relative">
                         <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input className="pl-10" placeholder={t("enterLastName")} {...field} />
+                        <Input className="pl-10" placeholder={t("Enter last name")} {...field} />
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -138,11 +138,11 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("email")}</FormLabel>
+                  <FormLabel>{t("Email")}</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input className="pl-10" type="email" placeholder={t("enterEmail")} {...field} />
+                      <Input className="pl-10" type="email" placeholder={t("Enter Email")} {...field} />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -155,11 +155,11 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("username")}</FormLabel>
+                  <FormLabel>{t("Username")}</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input className="pl-10" placeholder={t("enterUsername")} {...field} />
+                      <Input className="pl-10" placeholder={t("Enter username")} {...field} />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -173,7 +173,7 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                 name="date_of_birth"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>{t("dateOfBirth")}</FormLabel>
+                    <FormLabel>{t("Date of Birth")}</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -188,7 +188,7 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                             {field.value ? (
                               format(field.value, "PPP")
                             ) : (
-                              <span>{t("selectDate")}</span>
+                              <span>{t("select Date")}</span>
                             )}
                           </Button>
                         </FormControl>
@@ -216,17 +216,16 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                 name="gender"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("gender")}</FormLabel>
+                    <FormLabel>{t("Gender")}</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder={t("selectGender")} />
+                          <SelectValue placeholder={t("Select gender")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="Male">{t("male")}</SelectItem>
                         <SelectItem value="Female">{t("female")}</SelectItem>
-                        <SelectItem value="Other">{t("other")}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -240,11 +239,11 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
               name="phone_number"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("phoneNumber")}</FormLabel>
+                  <FormLabel>{t("Phone Number")}</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input className="pl-10" placeholder={t("enterPhoneNumber")} {...field} />
+                      <Input className="pl-10" placeholder={t("Enter phone number")} {...field} />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -256,7 +255,7 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
               <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
                 {t("cancel")}
               </Button>
-              <Button type="submit">{t("savePatient")}</Button>
+              <Button type="submit">{t("Add")}</Button>
             </DialogFooter>
           </form>
         </Form>
