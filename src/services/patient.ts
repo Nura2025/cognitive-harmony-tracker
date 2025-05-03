@@ -112,14 +112,6 @@ interface PatientListItem {
   // Add any other fields returned by the /patients endpoint
 }
 
-// Define the structure for patient invitation response
-export interface PatientInvitation {
-  invitation_id: string;
-  email: string;
-  status: 'pending' | 'accepted' | 'rejected';
-  created_at: string;
-}
-
 // Add error handling wrapper
 const handleApiError = (error: unknown, context: string = "API Request") => {
   if (axios.isAxiosError(error)) {
@@ -157,67 +149,11 @@ const getPatientsByClinician = async (clinicianId: string): Promise<PatientListI
   }
 };
 
-// Invite a patient (send invitation email)
-const invitePatient = async (clinicianId: string, patientData: any): Promise<PatientInvitation> => {
-  try {
-    const response: AxiosResponse<PatientInvitation> = await axios.post(
-      `${API_BASE}/${clinicianId}/patients/invite`, 
-      patientData
-    );
-    return response.data;
-  } catch (error) {
-    return handleApiError(error, "invitePatient");
-  }
-};
-
-// Mock function to simulate invitation acceptance (for development)
-const simulateInviteAcceptance = async (invitationId: string): Promise<PatientInvitation> => {
-  // This is just for testing/development
-  console.log(`Simulating acceptance of invitation: ${invitationId}`);
-  
-  // In a real environment, this would be triggered by the patient accepting via email
-  return {
-    invitation_id: invitationId,
-    email: "patient@example.com",
-    status: 'accepted',
-    created_at: new Date().toISOString()
-  };
-};
-
-// Get all patient invitations for a clinician
-const getPatientInvitations = async (clinicianId: string): Promise<PatientInvitation[]> => {
-  try {
-    const response: AxiosResponse<PatientInvitation[]> = await axios.get(
-      `${API_BASE}/${clinicianId}/patients/invitations`
-    );
-    return response.data;
-  } catch (error) {
-    // In development, return mock data if API fails
-    if (process.env.NODE_ENV === 'development') {
-      return [
-        {
-          invitation_id: "inv-1",
-          email: "patient1@example.com",
-          status: 'pending',
-          created_at: new Date().toISOString()
-        },
-        {
-          invitation_id: "inv-2",
-          email: "patient2@example.com",
-          status: 'accepted',
-          created_at: new Date(Date.now() - 86400000).toISOString()
-        }
-      ];
-    }
-    return handleApiError(error, "getPatientInvitations");
-  }
-};
-
-// Fetch a specific patient's details (might not be needed if profile endpoint is used)
+// Fetch a specific patient's details
 const getPatientById = async (clinicianId: string, patientId: string) => {
   try {
     const response = await axios.get(`${API_BASE}/${clinicianId}/patients/${patientId}`);
-    return response.data; // Adjust type based on actual response
+    return response.data;
   } catch (error) {
     return handleApiError(error, "getPatientById");
   }
@@ -239,9 +175,6 @@ const PatientService = {
   getPatientsByClinician,
   getPatientById,
   getPatientProfile,
-  invitePatient,
-  getPatientInvitations,
-  simulateInviteAcceptance, // For testing only
 };
 
 export default PatientService;
