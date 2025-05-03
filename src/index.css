@@ -126,6 +126,10 @@
   }
 
   /* RTL specific adjustments */
+  [dir="rtl"] {
+    text-align: right;
+  }
+
   [dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
     --tw-space-x-reverse: 1;
   }
@@ -170,6 +174,24 @@
   
   [dir="rtl"] .text-right {
     text-align: left;
+  }
+  
+  [dir="rtl"] .left-3 {
+    left: auto;
+    right: 0.75rem;
+  }
+  
+  [dir="rtl"] .right-3 {
+    right: auto;
+    left: 0.75rem;
+  }
+
+  [dir="rtl"] .flex-row-reverse {
+    flex-direction: row;
+  }
+  
+  [dir="rtl"] .flex-row {
+    flex-direction: row-reverse;
   }
   
   /* Navigation menu RTL adjustments */
@@ -272,6 +294,62 @@
 }
 
 /* RTL-specific overrides for shadcn components */
+[dir="rtl"] {
+  /* Dropdown menus */
+  .radix-dropdown-menu-content {
+    direction: rtl;
+    text-align: right;
+  }
+
+  /* Form elements */
+  input, textarea {
+    text-align: inherit;
+  }
+
+  /* Icon positioning */
+  svg + span:not(.absolute) {
+    margin-left: 0;
+    margin-right: 0.5rem;
+  }
+
+  /* Button icons */
+  button svg:not(.absolute) + span {
+    margin-left: 0;
+    margin-right: 0.5rem;
+  }
+
+  /* General layout */
+  .grid-flow-col {
+    grid-auto-flow: column-reverse;
+  }
+
+  .justify-start {
+    justify-content: flex-end;
+  }
+
+  .justify-end {
+    justify-content: flex-start;
+  }
+  
+  /* Dialog/Modal positioning */
+  .dialog-content, .sheet-content {
+    direction: rtl;
+  }
+
+  /* Tabs */
+  .tabs-list {
+    flex-direction: row-reverse;
+  }
+}
+
+/* RTL card adjustments */
+[dir="rtl"] .card-header, 
+[dir="rtl"] .card-content, 
+[dir="rtl"] .card-footer {
+  text-align: right;
+}
+
+/* RTL for navigation elements */
 [dir="rtl"] .navigation-menu-trigger .chevron {
   margin-left: 0;
   margin-right: 8px;
@@ -279,15 +357,4 @@
 
 [dir="rtl"] .navigation-menu-content {
   transform-origin: top right;
-}
-
-/* To ensure icons are aligned properly in RTL */
-[dir="rtl"] svg + span:not(.absolute) {
-  margin-left: 0;
-  margin-right: 0.5rem;
-}
-
-[dir="rtl"] .radix-dropdown-menu-content {
-  direction: rtl;
-  text-align: right;
 }

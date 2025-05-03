@@ -22,7 +22,7 @@ const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({ report, pat
   const currentUser = AuthService.getCurrentUser();
   
   // Safety check for metrics - ensure we have valid data
-  const metrics = report.data?.metrics || {
+  const metrics = report?.data?.metrics || {
     attention: 0,
     memory: 0,
     executiveFunction: 0,
@@ -33,7 +33,7 @@ const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({ report, pat
     progress: 0
   };
   
-  const formattedDate = report.data?.date 
+  const formattedDate = report?.data?.date 
     ? format(new Date(report.data.date), 'PPP') 
     : format(new Date(), 'PPP');
 
@@ -124,12 +124,12 @@ const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({ report, pat
               <CardHeader>
                 <CardTitle className={language === 'ar' ? 'text-right' : 'text-left'}>
                   {t('attention')}
-                  <MetricTooltip content={t('attentionExplanation')} />
+                  <MetricTooltip explanation={t('attentionExplanation')} />
                 </CardTitle>
               </CardHeader>
               <CardContent className={language === 'ar' ? 'text-right' : 'text-left'}>
                 <p>
-                  {report.data?.summary?.attention || 
+                  {report?.data?.summary?.attention || 
                     "The patient demonstrates improved sustained attention compared to initial assessment, with decreased omission errors and increased response consistency."}
                 </p>
               </CardContent>
@@ -139,12 +139,12 @@ const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({ report, pat
               <CardHeader>
                 <CardTitle className={language === 'ar' ? 'text-right' : 'text-left'}>
                   {t('memory')}
-                  <MetricTooltip content={t('memoryExplanation')} />
+                  <MetricTooltip explanation={t('memoryExplanation')} />
                 </CardTitle>
               </CardHeader>
               <CardContent className={language === 'ar' ? 'text-right' : 'text-left'}>
                 <p>
-                  {report.data?.summary?.memory || 
+                  {report?.data?.summary?.memory || 
                     "Working memory capacity has shown moderate improvement, with better performance in sequence recall and pattern recognition tasks."}
                 </p>
               </CardContent>
@@ -154,12 +154,12 @@ const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({ report, pat
               <CardHeader>
                 <CardTitle className={language === 'ar' ? 'text-right' : 'text-left'}>
                   {t('executiveFunction')}
-                  <MetricTooltip content={t('executiveFunctionExplanation')} />
+                  <MetricTooltip explanation={t('executiveFunctionExplanation')} />
                 </CardTitle>
               </CardHeader>
               <CardContent className={language === 'ar' ? 'text-right' : 'text-left'}>
                 <p>
-                  {report.data?.summary?.executiveFunction || 
+                  {report?.data?.summary?.executiveFunction || 
                     "Executive function metrics show improvement in cognitive flexibility and planning abilities."}
                 </p>
               </CardContent>
@@ -169,12 +169,12 @@ const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({ report, pat
               <CardHeader>
                 <CardTitle className={language === 'ar' ? 'text-right' : 'text-left'}>
                   {t('overall')}
-                  <MetricTooltip content={t('overallExplanation')} />
+                  <MetricTooltip explanation={t('overallExplanation')} />
                 </CardTitle>
               </CardHeader>
               <CardContent className={language === 'ar' ? 'text-right' : 'text-left'}>
                 <p>
-                  {report.data?.summary?.overall || 
+                  {report?.data?.summary?.overall || 
                     "Overall cognitive performance has improved by approximately 7 percentile points since beginning the training program."}
                 </p>
               </CardContent>
@@ -201,7 +201,7 @@ const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({ report, pat
             <CardContent>
               <ScrollArea className="h-[300px]">
                 <div className={`space-y-4 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                  {report.data?.recommendations ? (
+                  {report?.data?.recommendations ? (
                     report.data.recommendations.map((recommendation, index) => (
                       <div key={index} className="pb-3 border-b last:border-0">
                         <p className="mb-1 font-medium">{recommendation.title}</p>

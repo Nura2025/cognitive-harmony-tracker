@@ -33,7 +33,7 @@ export const Navbar: React.FC = () => {
   
   return (
     <div className="h-16 border-b border-border flex items-center justify-between px-4 bg-background z-10">
-      <div className={`flex items-center ${language === 'ar' ? 'flex-row-reverse space-x-reverse' : 'space-x-4'}`}>
+      <div className={`flex items-center ${language === 'ar' ? 'flex-row-reverse' : ''} ${language === 'ar' ? 'space-x-reverse' : 'space-x-4'}`}>
         <SidebarTrigger className="lg:hidden" />
         <div className="relative w-[300px]">
           <Search className={`absolute ${language === 'ar' ? 'right-2' : 'left-2'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground`} />
@@ -62,7 +62,7 @@ export const Navbar: React.FC = () => {
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative flex items-center gap-2">
+            <Button variant="ghost" className={`relative flex items-center gap-2 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
               <UserCircle className="h-6 w-6 text-muted-foreground" />
               <div className={`hidden md:block ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                 <p className="text-sm font-medium">{user?.name || "User"}</p>
@@ -70,7 +70,7 @@ export const Navbar: React.FC = () => {
               </div>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align={language === 'ar' ? 'start' : 'end'} className="w-56">
+          <DropdownMenuContent align={language === 'ar' ? 'start' : 'end'} className={`w-56 ${language === 'ar' ? 'text-right' : ''}`}>
             <DropdownMenuLabel>{t('account')}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>

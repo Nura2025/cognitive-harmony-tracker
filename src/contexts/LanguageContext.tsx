@@ -12,11 +12,21 @@ interface LanguageContextType {
 // Translation dictionary with improved Arabic translations
 const translations: Record<Language, Record<string, string>> = {
   en: {
+    // Dashboard and Navigation
     dashboard: 'Dashboard',
+    overview: 'Overview',
     patients: 'Patients',
     analysis: 'Analysis',
     sessions: 'Sessions',
     reports: 'Reports',
+    recentActivity: 'Recent Activity',
+    upcomingSessions: 'Upcoming Sessions',
+    patientProgress: 'Patient Progress',
+    viewAll: 'View All',
+    todaysSessions: 'Today\'s Sessions',
+    noSessions: 'No sessions scheduled for today',
+    
+    // Common UI elements
     darkMode: 'Dark Mode',
     connected: 'Connected',
     search: 'Search patients, sessions...',
@@ -81,16 +91,6 @@ const translations: Record<Language, Record<string, string>> = {
     retry: 'Retry',
     retrying: 'Retrying',
 
-    // Dashboard and Navigation
-    dashboard: 'Dashboard',
-    overview: 'Overview',
-    recentActivity: 'Recent Activity',
-    upcomingSessions: 'Upcoming Sessions',
-    patientProgress: 'Patient Progress',
-    viewAll: 'View All',
-    todaysSessions: 'Today\'s Sessions',
-    noSessions: 'No sessions scheduled for today',
-
     // Session related
     sessionDetails: 'Session Details',
     duration: 'Duration',
@@ -120,17 +120,26 @@ const translations: Record<Language, Record<string, string>> = {
     delete: 'Delete',
     view: 'View',
     confirm: 'Confirm',
-    cancel: 'Cancel',
     back: 'Back',
     next: 'Next',
     submit: 'Submit',
   },
   ar: {
+    // Dashboard and Navigation
     dashboard: 'لوحة المعلومات',
+    overview: 'نظرة عامة',
     patients: 'المرضى',
     analysis: 'التحليل',
     sessions: 'الجلسات',
     reports: 'التقارير',
+    recentActivity: 'النشاط الأخير',
+    upcomingSessions: 'الجلسات القادمة',
+    patientProgress: 'تقدم المريض',
+    viewAll: 'عرض الكل',
+    todaysSessions: 'جلسات اليوم',
+    noSessions: 'لا توجد جلسات مجدولة لليوم',
+    
+    // Common UI elements
     darkMode: 'الوضع المظلم',
     connected: 'متصل',
     search: 'بحث عن المرضى، الجلسات...',
@@ -195,15 +204,6 @@ const translations: Record<Language, Record<string, string>> = {
     retry: 'إعادة المحاولة',
     retrying: 'جاري إعادة المحاولة',
 
-    // Dashboard and Navigation
-    overview: 'نظرة عامة',
-    recentActivity: 'النشاط الأخير',
-    upcomingSessions: 'الجلسات القادمة',
-    patientProgress: 'تقدم المريض',
-    viewAll: 'عرض الكل',
-    todaysSessions: 'جلسات اليوم',
-    noSessions: 'لا توجد جلسات مجدولة لليوم',
-
     // Session related
     sessionDetails: 'تفاصيل الجلسة',
     duration: 'المدة',
@@ -233,7 +233,6 @@ const translations: Record<Language, Record<string, string>> = {
     delete: 'حذف',
     view: 'عرض',
     confirm: 'تأكيد',
-    cancel: 'إلغاء',
     back: 'رجوع',
     next: 'التالي',
     submit: 'إرسال',

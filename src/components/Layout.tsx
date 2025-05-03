@@ -83,7 +83,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
         
         <div className="flex flex-col flex-1">
           <Navbar />
-          <main className="flex-1 p-6 overflow-auto">
+          <main className={`flex-1 p-6 overflow-auto ${language === 'ar' ? 'rtl' : 'ltr'}`}>
             {children}
           </main>
         </div>

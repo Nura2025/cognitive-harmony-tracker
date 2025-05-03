@@ -42,7 +42,7 @@ export const PatientFilters: React.FC<PatientFiltersProps> = ({
           placeholder={t('searchPatientsByName')}
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className={`${language === 'ar' ? 'pr-9 text-right' : 'pl-9'} bg-background/80 border-muted h-10`}
+          className={`${language === 'ar' ? 'pr-9 text-right' : 'pl-9'}`}
           dir={language === 'ar' ? 'rtl' : 'ltr'}
         />
       </div>
@@ -57,8 +57,8 @@ export const PatientFilters: React.FC<PatientFiltersProps> = ({
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align={language === 'ar' ? 'start' : 'end'} className="w-56">
-          <DropdownMenuLabel className={language === 'ar' ? 'text-right' : ''}>{t('adhdSubtypes')}</DropdownMenuLabel>
+        <DropdownMenuContent align={language === 'ar' ? 'start' : 'end'} className={`w-56 ${language === 'ar' ? 'text-right' : ''}`}>
+          <DropdownMenuLabel>{t('adhdSubtypes')}</DropdownMenuLabel>
           {adhdSubtypes.map(subtype => (
             <DropdownMenuCheckboxItem
               key={subtype}
@@ -71,7 +71,7 @@ export const PatientFilters: React.FC<PatientFiltersProps> = ({
           ))}
           
           <DropdownMenuSeparator />
-          <DropdownMenuLabel className={language === 'ar' ? 'text-right' : ''}>{t('ageRange')}</DropdownMenuLabel>
+          <DropdownMenuLabel>{t('ageRange')}</DropdownMenuLabel>
           {ageRanges.map(range => (
             <DropdownMenuCheckboxItem
               key={range}

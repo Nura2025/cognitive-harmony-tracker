@@ -10,19 +10,22 @@ import { useLanguage } from "@/contexts/LanguageContext"
 const NavigationMenu = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Root>
->(({ className, children, ...props }, ref) => (
-  <NavigationMenuPrimitive.Root
-    ref={ref}
-    className={cn(
-      "relative z-10 flex max-w-max flex-1 items-center justify-center",
-      className
-    )}
-    {...props}
-  >
-    {children}
-    <NavigationMenuViewport />
-  </NavigationMenuPrimitive.Root>
-))
+>(({ className, children, ...props }, ref) => {
+  const { language } = useLanguage();
+  return (
+    <NavigationMenuPrimitive.Root
+      ref={ref}
+      className={cn(
+        "relative z-10 flex max-w-max flex-1 items-center justify-center",
+        className
+      )}
+      {...props}
+    >
+      {children}
+      <NavigationMenuViewport />
+    </NavigationMenuPrimitive.Root>
+  )
+})
 NavigationMenu.displayName = NavigationMenuPrimitive.Root.displayName
 
 const NavigationMenuList = React.forwardRef<
@@ -35,7 +38,7 @@ const NavigationMenuList = React.forwardRef<
       ref={ref}
       className={cn(
         "group flex flex-1 list-none items-center justify-center",
-        language === 'ar' ? "space-x-reverse" : "space-x-1",
+        language === 'ar' ? "flex-row-reverse space-x-reverse" : "space-x-1",
         className
       )}
       {...props}

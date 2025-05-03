@@ -16,7 +16,7 @@ export function LanguageToggle() {
       variant="ghost"
       size="sm"
       onClick={toggleLanguage}
-      className="text-sm font-medium flex items-center gap-1.5"
+      className={`text-sm font-medium flex items-center gap-1.5 ${language === 'ar' ? 'flex-row-reverse' : ''}`}
       title={language === 'en' ? 'العربية' : 'English'}
       aria-label={language === 'en' ? 'Switch to Arabic' : 'Switch to English'}
     >

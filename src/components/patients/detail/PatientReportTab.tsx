@@ -5,12 +5,9 @@ import { ReportGenerator } from '@/components/reports/ReportGenerator';
 import { PatientReports } from '@/components/reports/PatientReports';
 import { ReportType } from '@/utils/types/patientTypes';
 import { mockReports } from '@/utils/mockData/reportData';
-import axios from 'axios';
-import { API_BASE } from '@/services/config';
 import { toast } from "@/hooks/use-toast";
 import ReportVisualizations from '@/components/reports/ReportVisualizations';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Sheet, SheetContent, SheetClose } from '@/components/ui/sheet';
 import { X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -86,7 +83,7 @@ export const PatientReportTab: React.FC<PatientReportTabProps> = ({ patientId, p
   
   return (
     <div className="space-y-6">
-      <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+      <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${language === 'ar' ? 'lg:rtl' : ''}`}>
         <div className="lg:col-span-2">
           <PatientReports 
             reports={reports} 
