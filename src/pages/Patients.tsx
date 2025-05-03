@@ -1,3 +1,4 @@
+
 import { PatientFilters } from "@/components/patients/PatientFilters";
 import { PatientList } from "@/components/patients/PatientList";
 import { Button } from "@/components/ui/button";
@@ -5,10 +6,10 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import PatientService from "@/services/patient"; 
 import { PlusCircle, AlertCircle, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import AddPatientDialog from "@/components/patients/AddPatientDialog";
 
 // Import Patient type
 import type { Patient } from "@/components/patients/PatientList";
@@ -21,8 +22,8 @@ const Patients = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retrying, setRetrying] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const { t, language } = useLanguage();
-  const navigate = useNavigate();
 
   // ✅ Fetch patients from API
   const fetchPatients = async () => {
@@ -128,6 +129,54 @@ const Patients = () => {
     fetchPatients();
   };
 
+  const handleAddPatient = async (patientData: any) => {
+    try {
+      // In a real app, you would call your API to create the patient
+      // For now, we'll simulate adding the patient to our local state
+      const clinicianId = "48526669-c799-4642-8fb9-93110a8bc2f8";
+      
+      // Calculate age based on date of birth
+      const birthDate = new Date(patientData.date_of_birth);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      
+      // Create a new patient with the calculated fields
+      const newPatient = {
+        user_id: `temp-${Date.now()}`, // In a real app, the API would return a real ID
+        first_name: patientData.first_name,
+        last_name: patientData.last_name,
+        name: `${patientData.first_name} ${patientData.last_name}`,
+        date_of_birth: patientData.date_of_birth.toISOString().split('T')[0],
+        age,
+        adhdSubtype: null,
+        gender: patientData.gender,
+        email: patientData.email,
+        username: patientData.username,
+        phone_number: patientData.phone_number,
+        assessmentCount: 0,
+        lastAssessment: null
+      };
+      
+      // Add the new patient to our local state
+      setPatients(prevPatients => [newPatient, ...prevPatients]);
+      
+      // Close the dialog
+      setAddDialogOpen(false);
+      
+      // Show a success message
+      toast.success(t("Patient invitation sent successfully"));
+      
+    } catch (error) {
+      console.error("Failed to add patient:", error);
+      toast.error(t("Failed to add patient"));
+    }
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -206,7 +255,7 @@ const Patients = () => {
 
         <Button
           className={`gap-1.5 ${language === "ar" ? "flex-row-reverse" : ""}`}
-          onClick={() => navigate("/patients/add")}
+          onClick={() => setAddDialogOpen(true)}
         >
           <PlusCircle className="h-4 w-4" />
           <span>{t("addPatient")}</span>
@@ -224,6 +273,12 @@ const Patients = () => {
       <PatientList
         patients={filteredPatients}
         metrics={{}}
+      />
+      
+      <AddPatientDialog 
+        open={addDialogOpen}
+        onOpenChange={setAddDialogOpen}
+        onSubmit={handleAddPatient}
       />
     </div>
   );

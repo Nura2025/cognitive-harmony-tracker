@@ -159,6 +159,16 @@ const getPatientById = async (clinicianId: string, patientId: string) => {
   }
 };
 
+// Add a new patient
+const addPatient = async (clinicianId: string, patientData: any) => {
+  try {
+    const response = await axios.post(`${API_BASE}/${clinicianId}/patients`, patientData);
+    return response.data;
+  } catch (error) {
+    return handleApiError(error, "addPatient");
+  }
+};
+
 // Fetch the comprehensive cognitive profile for a patient
 const getPatientProfile = async (userId: string): Promise<PatientProfile> => {
   try {
@@ -175,6 +185,7 @@ const PatientService = {
   getPatientsByClinician,
   getPatientById,
   getPatientProfile,
+  addPatient
 };
 
 export default PatientService;

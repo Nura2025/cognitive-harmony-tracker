@@ -78,15 +78,15 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
     }
   });
 
+  // Reset the form when the dialog closes
   useEffect(() => {
     if (!open) {
       form.reset();
     }
-  }, [open]);
+  }, [open, form]);
 
   const handleSubmit = (data: FormData) => {
     onSubmit(data);
-    form.reset();
   };
 
   return (
@@ -224,6 +224,7 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                       <SelectContent>
                         <SelectItem value="Male">{t("male")}</SelectItem>
                         <SelectItem value="Female">{t("female")}</SelectItem>
+                        <SelectItem value="Other">{t("other")}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
