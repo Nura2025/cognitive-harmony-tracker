@@ -30,8 +30,9 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({
         <TooltipContent 
           side="top" 
           align="center" 
-          className="max-w-[200px] sm:max-w-[300px] text-xs sm:text-sm z-50"
-          sideOffset={5}
+          className="max-w-[250px] sm:max-w-[350px] text-xs sm:text-sm z-[100]"
+          sideOffset={10}
+          avoidCollisions={true}
         >
           <p>{text}</p>
         </TooltipContent>

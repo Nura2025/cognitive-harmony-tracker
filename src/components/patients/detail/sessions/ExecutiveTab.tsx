@@ -1,14 +1,9 @@
 
 import { TrendData } from "@/services/patient";
 import SessionService from "@/services/session";
-import { AlertCircle, Info } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
 
 interface ExecutiveTabProps {
   session: TrendData;
@@ -120,18 +115,10 @@ export const ExecutiveTab: React.FC<ExecutiveTabProps> = ({
       <div>
         <div className="font-medium mb-3 text-sm flex items-center gap-1">
           <span>Domain Contributions</span>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="max-w-xs">
-                  Individual components of executive function that contribute to the overall score
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <InfoTooltip 
+            text="Individual components of executive function that contribute to the overall score" 
+            size="sm" 
+          />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {Object.entries(details.components || {}).map(([key, value]) => (
@@ -144,18 +131,10 @@ export const ExecutiveTab: React.FC<ExecutiveTabProps> = ({
                   <span className="font-medium capitalize">
                     {key.replace(/_contribution/g, "").replace(/_/g, " ")}
                   </span>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p className="max-w-xs">
-                          {getComponentDescription(key.replace(/_contribution/g, ""))}
-                        </p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  <InfoTooltip 
+                    text={getComponentDescription(key.replace(/_contribution/g, ""))}
+                    size="sm"
+                  />
                 </div>
                 <span
                   className={`font-bold ${getScoreColor(
@@ -176,18 +155,10 @@ export const ExecutiveTab: React.FC<ExecutiveTabProps> = ({
         <div>
           <div className="text-sm font-medium mb-2 flex items-center gap-1">
             <span>Profile Pattern</span>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="max-w-xs">
-                    A characteristic pattern of strengths and weaknesses across executive function abilities
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <InfoTooltip 
+              text="A characteristic pattern of strengths and weaknesses across executive function abilities"
+              size="sm"
+            />
           </div>
           <div className="bg-muted/20 p-3 rounded-md">
             <p className="text-sm">{details.profile_pattern}</p>
@@ -199,18 +170,10 @@ export const ExecutiveTab: React.FC<ExecutiveTabProps> = ({
         <div>
           <div className="text-sm font-medium mb-2 flex items-center gap-1">
             <span>Data Completeness</span>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="max-w-xs">
-                    Percentage of expected data points that were successfully collected
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <InfoTooltip 
+              text="Percentage of expected data points that were successfully collected"
+              size="sm"
+            />
           </div>
           <div className="w-full bg-muted rounded-full h-2.5">
             <div
