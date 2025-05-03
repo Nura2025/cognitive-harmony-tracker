@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,6 +25,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+// Properly import the jsPDF and html2canvas libraries
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -40,6 +40,7 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
   metrics,
   onReportGenerate
 }) => {
+  
   const [reportType, setReportType] = useState<ReportType['type']>('clinical');
   const [includeSections, setIncludeSections] = useState({
     overview: true,
