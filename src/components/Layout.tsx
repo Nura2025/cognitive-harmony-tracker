@@ -35,7 +35,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip={t('dashboard')}>
-                    <Link to="/" className={language === 'ar' ? 'flex flex-row-reverse items-center w-full' : ''}>
+                    <Link to="/dashboard" className={language === 'ar' ? 'flex flex-row-reverse items-center w-full' : ''}>
                       <LayoutDashboard />
                       <span>{t('dashboard')}</span>
                     </Link>
