@@ -4,7 +4,7 @@ import { PatientList } from "@/components/patients/PatientList";
 import AddPatientDialog from "@/components/patients/AddPatientDialog";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import PatientService from "@/services/patient"; // your API service
+import PatientService, { PatientInvitation } from "@/services/patient"; // Updated import
 import { PlusCircle, AlertCircle, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +20,7 @@ const Patients = () => {
   const [activeFilters, setActiveFilters] = useState<Record<string, boolean>>({});
   const [patients, setPatients] = useState<Patient[]>([]);
   const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
+  const [invitations, setInvitations] = useState<PatientInvitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retrying, setRetrying] = useState(false);
@@ -35,6 +36,7 @@ const Patients = () => {
       
       const clinicianId = "48526669-c799-4642-8fb9-93110a8bc2f8"; // Replace with real clinician ID from auth
       const patientData = await PatientService.getPatientsByClinician(clinicianId);
+      const invitationData = await PatientService.getPatientInvitations(clinicianId);
       
       // Process the data to add derived fields and ensure user_id is set
       const patientList = patientData.map((p: any) => {
@@ -58,6 +60,19 @@ const Patients = () => {
       
       setPatients(patientList);
       setFilteredPatients(patientList);
+      setInvitations(invitationData);
+
+      // Check for any recently accepted invitations to show notification
+      const recentlyAccepted = invitationData.filter(
+        inv => inv.status === 'accepted' && 
+        new Date(inv.created_at).getTime() > Date.now() - (24 * 60 * 60 * 1000) // Last 24 hours
+      );
+      
+      if (recentlyAccepted.length > 0) {
+        recentlyAccepted.forEach(invitation => {
+          toast.success(`Patient with email ${invitation.email} has accepted your invitation!`);
+        });
+      }
     } catch (error) {
       console.error("Failed to fetch patients:", error);
       setError(error instanceof Error ? error.message : "Failed to fetch patients");
@@ -135,38 +150,42 @@ const Patients = () => {
 
   const handleAddPatient = async (data: any) => {
     try {
-      // Normally you would call an API here
-      console.log("Adding patient:", data);
+      const clinicianId = "48526669-c799-4642-8fb9-93110a8bc2f8"; // Replace with real clinician ID from auth
       
-      // Example implementation:
-      // const result = await PatientService.addPatient(data);
-      
-      // For now, let's create a mock patient with the required fields
-      const newPatient = {
-        user_id: `temp-${Date.now()}`, // Generate a temporary ID
+      // Call invitePatient instead of adding directly
+      const invitationResult = await PatientService.invitePatient(clinicianId, {
+        email: data.email,
         first_name: data.first_name,
         last_name: data.last_name,
-        name: `${data.first_name} ${data.last_name}`,
         date_of_birth: data.date_of_birth.toISOString().split('T')[0],
         gender: data.gender,
-        age: Math.floor((new Date().getTime() - new Date(data.date_of_birth).getTime()) / (365.25 * 24 * 60 * 60 * 1000)),
-        adhdSubtype: null,
-        assessmentCount: 0,
-        lastAssessment: null,
-        email: data.email,
         phone_number: data.phone_number,
         username: data.username
-      };
+      });
       
-      // Add the new patient to the list (simulating API response)
-      setPatients(prev => [...prev, newPatient]);
-      setFilteredPatients(prev => [...prev, newPatient]);
+      toast.success(`Invitation sent to ${data.email}!`, {
+        description: "They will receive an email with instructions to accept."
+      });
       
-      toast.success("Patient added successfully!");
+      // Add the new invitation to the list
+      setInvitations(prev => [...prev, invitationResult]);
+      
+      // Close the dialog
       setAddPatientOpen(false);
+      
+      // For development/demo purposes only:
+      // This simulates the patient accepting the invitation after 5 seconds
+      if (process.env.NODE_ENV === 'development') {
+        setTimeout(async () => {
+          await PatientService.simulateInviteAcceptance(invitationResult.invitation_id);
+          toast.success(`${data.first_name} ${data.last_name} has accepted your invitation!`);
+          // Refresh the patient list to include the newly accepted patient
+          fetchPatients();
+        }, 5000);
+      }
     } catch (error) {
-      console.error("Failed to add patient:", error);
-      toast.error("Failed to add patient. Please try again.");
+      console.error("Failed to invite patient:", error);
+      toast.error("Failed to send patient invitation. Please try again.");
     }
   };
 
@@ -232,6 +251,9 @@ const Patients = () => {
     );
   }
 
+  // Get pending invitations count
+  const pendingInvitations = invitations.filter(inv => inv.status === 'pending').length;
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div
@@ -241,7 +263,14 @@ const Patients = () => {
       >
         <div className={language === "ar" ? "text-right" : "text-left"}>
           <h1 className="text-3xl font-bold mb-1">{t("patients")}</h1>
-          <p className="text-muted-foreground">{t("managePatientProfiles")}</p>
+          <p className="text-muted-foreground">
+            {t("managePatientProfiles")}
+            {pendingInvitations > 0 && (
+              <span className="ml-2 text-primary font-medium">
+                ({pendingInvitations} pending invitation{pendingInvitations !== 1 ? 's' : ''})
+              </span>
+            )}
+          </p>
         </div>
 
         <Button

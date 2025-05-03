@@ -1,3 +1,4 @@
+
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -92,8 +93,10 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{t("Add New Patient")}</DialogTitle>
-          <DialogDescription>{t("Fill Patient Details")}</DialogDescription>
+          <DialogTitle>{t("Invite New Patient")}</DialogTitle>
+          <DialogDescription>
+            {t("Enter patient details to send them an invitation email.")}
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -250,7 +253,7 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
               <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
                 {t("cancel")}
               </Button>
-              <Button type="submit">{t("Add")}</Button>
+              <Button type="submit">{t("Send Invitation")}</Button>
             </DialogFooter>
           </form>
         </Form>
