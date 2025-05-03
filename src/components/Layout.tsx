@@ -29,7 +29,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <div className={`min-h-screen flex w-full bg-background ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
-        <Sidebar>
+        <Sidebar side={language === 'ar' ? 'right' : 'left'}>
           <div className="flex flex-col h-full">
             <div className={`flex items-center h-16 px-6 border-b border-sidebar-border ${language === 'ar' ? 'justify-end' : ''}`}>
               <h1 className="text-xl font-bold text-sidebar-foreground">NURA</h1>

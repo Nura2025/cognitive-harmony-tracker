@@ -218,11 +218,24 @@
 
 /* Glass effect components */
 .glass {
-  @apply bg-white/70 dark:bg-gray-900/70 backdrop-blur-sm border border-white/20 dark:border-gray-800/30 shadow-glass transition-all duration-300;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.dark .glass {
+  background-color: rgba(17, 25, 40, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .glass:hover {
-  @apply shadow-glass-hover;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.dark .glass:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
 }
 
 /* Animations */
@@ -303,52 +316,49 @@
 }
 
 /* RTL-specific overrides for shadcn components */
-[dir="rtl"] {
-  /* Dropdown menus */
-  .radix-dropdown-menu-content {
-    direction: rtl;
-    text-align: right;
-  }
+[dir="rtl"] .radix-dropdown-menu-content {
+  direction: rtl;
+  text-align: right;
+}
 
-  /* Form elements */
-  input, textarea {
-    text-align: inherit;
-  }
+/* Form elements */
+[dir="rtl"] input, [dir="rtl"] textarea {
+  text-align: inherit;
+}
 
-  /* Icon positioning */
-  svg + span:not(.absolute) {
-    margin-left: 0;
-    margin-right: 0.5rem;
-  }
+/* Icon positioning */
+[dir="rtl"] svg + span:not(.absolute) {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
 
-  /* Button icons */
-  button svg:not(.absolute) + span {
-    margin-left: 0;
-    margin-right: 0.5rem;
-  }
+/* Button icons */
+[dir="rtl"] button svg:not(.absolute) + span {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
 
-  /* General layout */
-  .grid-flow-col {
-    grid-auto-flow: column-reverse;
-  }
+/* General layout */
+[dir="rtl"] .grid-flow-col {
+  grid-auto-flow: column-reverse;
+}
 
-  .justify-start {
-    justify-content: flex-end;
-  }
+[dir="rtl"] .justify-start {
+  justify-content: flex-end;
+}
 
-  .justify-end {
-    justify-content: flex-start;
-  }
+[dir="rtl"] .justify-end {
+  justify-content: flex-start;
+}
   
-  /* Dialog/Modal positioning */
-  .dialog-content, .sheet-content {
-    direction: rtl;
-  }
+/* Dialog/Modal positioning */
+[dir="rtl"] .dialog-content, [dir="rtl"] .sheet-content {
+  direction: rtl;
+}
 
-  /* Tabs */
-  .tabs-list {
-    flex-direction: row-reverse;
-  }
+/* Tabs */
+[dir="rtl"] .tabs-list {
+  flex-direction: row-reverse;
 }
 
 /* RTL card adjustments */
