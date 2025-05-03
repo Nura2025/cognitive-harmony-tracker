@@ -21,12 +21,22 @@ export const SessionTabProvider: React.FC<SessionTabProviderProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<string>('memory');
 
-  // Set the expandedDomain to the active tab when component mounts
+  // Set the active tab based on expandedDomain when it changes
   useEffect(() => {
-    if (activeTab && activeTab !== expandedDomain) {
+    if (expandedDomain && ['memory', 'attention', 'impulse', 'executive'].includes(expandedDomain)) {
+      setActiveTab(expandedDomain);
+    } else if (!expandedDomain && activeTab) {
+      // If expandedDomain is null but we have an activeTab, set that domain as expanded
       toggleDomainDetails(activeTab);
     }
-  }, [activeTab, expandedDomain, toggleDomainDetails]);
+  }, [expandedDomain, activeTab, toggleDomainDetails]);
+
+  // When component first mounts, ensure a domain is expanded
+  useEffect(() => {
+    if (!expandedDomain && activeTab) {
+      toggleDomainDetails(activeTab);
+    }
+  }, []);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);

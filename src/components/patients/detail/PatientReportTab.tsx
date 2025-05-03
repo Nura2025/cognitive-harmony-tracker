@@ -25,6 +25,7 @@ export const PatientReportTab: React.FC<PatientReportTabProps> = ({ patientId, p
   // Function to handle adding a new report
   const handleAddReport = (newReport: ReportType) => {
     setReports(prevReports => [newReport, ...prevReports]);
+    setSelectedReport(newReport); // Auto-select the newly generated report
   };
   
   // Function to handle viewing a report
