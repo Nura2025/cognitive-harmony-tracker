@@ -34,30 +34,30 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = ({
   
   return (
     <Card className="glass">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">{title}</CardTitle>
+      <CardHeader className="pb-1 sm:pb-2 p-3 sm:p-6">
+        <CardTitle className="text-base sm:text-lg">{title}</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-3 gap-4 mb-6">
+      <CardContent className="p-3 sm:p-6 pt-0 sm:pt-0">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">Total Sessions</span>
-            <span className="text-xl font-semibold">{totalSessions}</span>
+            <span className="text-base sm:text-xl font-semibold">{totalSessions}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">Total Duration</span>
-            <span className="text-xl font-semibold">{formatDuration(totalDuration)}</span>
+            <span className="text-base sm:text-xl font-semibold">{formatDuration(totalDuration)}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">Average Score</span>
-            <span className="text-xl font-semibold">{averageScore}%</span>
+            <span className="text-base sm:text-xl font-semibold">{averageScore}%</span>
           </div>
         </div>
         
-        <div className="h-[250px] w-full">
+        <div className="h-[200px] sm:h-[250px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={timelineData}
-              margin={{ top: 20, right: 5, left: 0, bottom: 0 }}
+              margin={{ top: 20, right: 0, left: -20, bottom: 0 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
               <XAxis 
@@ -70,6 +70,7 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = ({
                 }}
                 stroke="hsl(var(--muted-foreground))"
                 tickMargin={10}
+                tick={{ fontSize: '10px' }}
               />
               <YAxis 
                 axisLine={false} 
@@ -77,6 +78,8 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = ({
                 domain={[0, 100]}
                 stroke="hsl(var(--muted-foreground))"
                 tickMargin={10}
+                tick={{ fontSize: '10px' }}
+                width={30}
               />
               <Tooltip
                 contentStyle={{
@@ -84,17 +87,20 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = ({
                   borderColor: 'hsl(var(--border))',
                   boxShadow: 'var(--shadow)',
                   borderRadius: 'var(--radius)',
-                  color: 'hsl(var(--foreground))'
+                  color: 'hsl(var(--foreground))',
+                  fontSize: '12px',
+                  padding: '8px'
                 }}
                 formatter={(value: number) => [`${value}%`, 'Score']}
+                labelStyle={{ fontSize: '11px' }}
               />
               <Line
                 type="monotone"
                 dataKey="score"
                 stroke="hsl(var(--primary))"
                 strokeWidth={2}
-                activeDot={{ r: 6, strokeWidth: 2, stroke: 'hsl(var(--background))' }}
-                dot={{ r: 1 }}
+                activeDot={{ r: 4, strokeWidth: 2, stroke: 'hsl(var(--background))' }}
+                dot={{ r: 0 }}
               />
             </LineChart>
           </ResponsiveContainer>

@@ -19,7 +19,7 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({
   size = 'md',
   className = '',
 }) => {
-  const iconSize = size === 'sm' ? 'h-3.5 w-3.5' : 'h-4 w-4';
+  const iconSize = size === 'sm' ? 'h-3 w-3 sm:h-3.5 sm:w-3.5' : 'h-3.5 w-3.5 sm:h-4 sm:w-4';
   
   return (
     <TooltipProvider>
@@ -27,8 +27,8 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({
         <TooltipTrigger asChild>
           <Info className={`${iconSize} text-muted-foreground cursor-help ${className}`} />
         </TooltipTrigger>
-        <TooltipContent side="top" className="max-w-xs">
-          <p className="text-sm">{text}</p>
+        <TooltipContent side="top" className="max-w-[150px] sm:max-w-xs text-xs sm:text-sm">
+          <p>{text}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

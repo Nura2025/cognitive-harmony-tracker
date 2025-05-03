@@ -60,55 +60,55 @@ export const PatientCard: React.FC<PatientCardProps> = ({
       className="glass cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-md hover:translate-y-[-2px]"
       onClick={() => onClick(patient.user_id)}
     >
-      <div className="h-2 bg-gradient-to-r from-primary/80 to-primary"></div>
-      <CardContent className="pt-5">
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4 gap-2">
+      <div className="h-1.5 sm:h-2 bg-gradient-to-r from-primary/80 to-primary"></div>
+      <CardContent className="p-3 sm:p-5">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 sm:mb-4 gap-2">
           <div>
-            <h3 className="font-semibold text-lg line-clamp-1">{patient.name}</h3>
-            <div className="flex items-center text-muted-foreground text-sm mt-1">
-              <User className="mr-1 h-3.5 w-3.5" />
+            <h3 className="font-semibold text-sm sm:text-lg line-clamp-1">{patient.name}</h3>
+            <div className="flex items-center text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1">
+              <User className="mr-1 h-3 w-3 sm:h-3.5 sm:w-3.5" />
               <span>
                 {patient.age ? `${patient.age} y/o ` : ''}
                 {patient.gender ? patient.gender.charAt(0) : ''}
               </span>
             </div>
           </div>
-          <Badge variant={getScoreBadgeVariant(percentile)} className="whitespace-nowrap">
+          <Badge variant={getScoreBadgeVariant(percentile)} className="text-xs sm:text-sm whitespace-nowrap">
             {formatPercentile(percentile)} Percentile
           </Badge>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mt-3 sm:mt-5">
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">ADHD Subtype</span>
-            <span className="font-medium">{patient.adhd_subtype || 'Not Specified'}</span>
+            <span className="font-medium text-xs sm:text-sm">{patient.adhd_subtype || 'Not Specified'}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">Progress</span>
-            <span className="font-medium">+{progress}% Last 30d</span>
+            <span className="font-medium text-xs sm:text-sm">+{progress}% Last 30d</span>
           </div>
-          <div className="flex items-center text-sm">
-            <CalendarDays className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
+          <div className="flex items-center">
+            <CalendarDays className="mr-1.5 h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" />
             <span className="text-xs">
               Last session: {formatLastSession(patient.last_session_date)}
             </span>
           </div>
-          <div className="flex items-center text-sm">
-            <Clock className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
+          <div className="flex items-center">
+            <Clock className="mr-1.5 h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" />
             <span className="text-xs">
               {patient.total_sessions || 0} sessions
             </span>
           </div>
         </div>
         
-        <div className="mt-5">
-          <div className="flex items-center justify-between mb-1.5">
+        <div className="mt-3 sm:mt-5">
+          <div className="flex items-center justify-between mb-1 sm:mb-1.5">
             <span className="text-xs text-muted-foreground">Cognitive Score</span>
             <span className={`text-xs font-medium ${getScoreColorClass(percentile)}`}>
               {percentile}%
             </span>
           </div>
-          <Progress value={percentile} className="h-1.5" />
+          <Progress value={percentile} className="h-1 sm:h-1.5" />
         </div>
       </CardContent>
     </Card>

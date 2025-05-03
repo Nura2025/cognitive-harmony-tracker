@@ -147,33 +147,33 @@ const Dashboard = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="space-y-8 animate-fade-in">
+      <div className="space-y-6 sm:space-y-8 animate-fade-in px-2 sm:px-0">
         <div>
-          <h1 className="text-3xl font-bold mb-1">Dashboard</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-1">Dashboard</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Overview of cognitive assessment data and patient metrics
           </p>
         </div>
         
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-4">
           {[1, 2, 3, 4].map(i => (
             <Skeleton key={i} className="h-24 w-full" />
           ))}
         </div>
         
-        <div className="grid gap-6 md:grid-cols-2">
-          <Skeleton className="h-80 w-full" />
-          <Skeleton className="h-80 w-full" />
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
+          <Skeleton className="h-64 sm:h-80 w-full" />
+          <Skeleton className="h-64 sm:h-80 w-full" />
         </div>
         
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Recent Patients</h2>
+            <h2 className="text-lg sm:text-xl font-semibold">Recent Patients</h2>
           </div>
           
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {[1, 2, 3, 4].map(i => (
-              <Skeleton key={i} className="h-56 w-full" />
+              <Skeleton key={i} className="h-48 sm:h-56 w-full" />
             ))}
           </div>
         </div>
@@ -182,19 +182,19 @@ const Dashboard = () => {
   }
   
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 sm:space-y-8 animate-fade-in px-2 sm:px-0">
       <div>
-        <h1 className="text-3xl font-bold mb-1">Dashboard</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-1">Dashboard</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Overview of cognitive assessment data and patient metrics
         </p>
       </div>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-4">
         <StatusCard 
           title="Total Patients"
           value={totalPatients}
-          icon={<Users className="h-5 w-5" />}
+          icon={<Users className="h-4 sm:h-5 w-4 sm:w-5" />}
           tooltip="Total number of patients under your care"
         />
         <StatusCard 
@@ -202,38 +202,38 @@ const Dashboard = () => {
           value={averagePercentile}
           isPercentile={true}
           change={{ value: 12, isImprovement: true }}
-          icon={<Brain className="h-5 w-5" />}
+          icon={<Brain className="h-4 sm:h-5 w-4 sm:w-5" />}
           tooltip="Average cognitive performance across all patients relative to their age group"
         />
         <StatusCard 
           title="Session Count"
           value={totalSessions}
           change={{ value: 8, isImprovement: true }}
-          icon={<LineChart className="h-5 w-5" />}
+          icon={<LineChart className="h-4 sm:h-5 w-4 sm:w-5" />}
           tooltip="Total number of assessment sessions conducted"
         />
         <StatusCard 
           title="Total Assessment Time"
           value={`${totalMinutes} mins`}
-          icon={<Clock className="h-5 w-5" />}
+          icon={<Clock className="h-4 sm:h-5 w-4 sm:w-5" />}
           tooltip="Cumulative time spent across all assessment sessions"
         />
       </div>
       
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
         <DomainChart domainData={domainData} />
         <SessionTimeline sessions={sessionData.slice(0, 10)} />
       </div>
       
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Recent Patients</h2>
-          <Button variant="outline" size="sm" onClick={handleViewAllPatients}>
+          <h2 className="text-lg sm:text-xl font-semibold">Recent Patients</h2>
+          <Button variant="outline" size="sm" onClick={handleViewAllPatients} className="text-xs sm:text-sm">
             View all patients
           </Button>
         </div>
         
-        <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {patients.map(patient => (
             <PatientCard 
               key={patient.user_id} 

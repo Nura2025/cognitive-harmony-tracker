@@ -27,37 +27,38 @@ export const StatusCard: React.FC<StatusCardProps> = ({
   
   return (
     <Card className="glass overflow-hidden">
-      <CardContent className="p-6">
+      <CardContent className="p-3 sm:p-6">
         <div className="flex justify-between items-start">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+          <div className="w-full">
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1">
               {title}
               {tooltip && <InfoTooltip text={tooltip} size="sm" />}
             </p>
-            <h4 className={`text-2xl font-bold mt-1 ${colorClass}`}>
+            <h4 className={`text-lg sm:text-2xl font-bold mt-1 ${colorClass} truncate`}>
               {formattedValue}
-              {isPercentile && ' Percentile'}
+              {isPercentile && <span className="hidden sm:inline"> Percentile</span>}
+              {isPercentile && <span className="sm:hidden"> %ile</span>}
             </h4>
             
             {change && (
-              <div className="flex items-center mt-2">
+              <div className="flex items-center mt-1 sm:mt-2">
                 {change.isImprovement ? (
-                  <div className="flex items-center text-emerald-600 text-sm">
+                  <div className="flex items-center text-emerald-600 text-xs sm:text-sm">
                     <ArrowUp className="h-3 w-3 mr-1" />
                     <span>{change.value}%</span>
                   </div>
                 ) : (
-                  <div className="flex items-center text-red-600 text-sm">
+                  <div className="flex items-center text-red-600 text-xs sm:text-sm">
                     <ArrowDown className="h-3 w-3 mr-1" />
                     <span>{change.value}%</span>
                   </div>
                 )}
-                <span className="text-muted-foreground text-xs ml-1.5">from last month</span>
+                <span className="text-muted-foreground text-xs ml-1.5 hidden sm:inline">from last month</span>
               </div>
             )}
           </div>
           
-          <div className="p-2 rounded-md bg-primary/10 text-primary">
+          <div className="p-1.5 sm:p-2 rounded-md bg-primary/10 text-primary flex-shrink-0 ml-2">
             {icon}
           </div>
         </div>

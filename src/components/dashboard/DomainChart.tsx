@@ -54,18 +54,18 @@ export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
 
   return (
     <Card className="glass">
-      <CardHeader className="pb-2">
-        <div className="flex items-center gap-2">
-          <CardTitle className="text-lg">Cognitive Domain Trends</CardTitle>
+      <CardHeader className="pb-1 sm:pb-2 p-3 sm:p-6">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <CardTitle className="text-base sm:text-lg">Cognitive Domain Trends</CardTitle>
           <InfoTooltip text="Performance trends across different cognitive domains over time" />
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="flex flex-wrap gap-3 mb-3">
+      <CardContent className="p-3 sm:p-6 pt-0 sm:pt-0">
+        <div className="flex flex-wrap gap-2 sm:gap-3 mb-2 sm:mb-3">
           {(Object.keys(domainData) as (keyof typeof domainData)[]).map(domain => (
             <div key={domain} className="flex items-center">
               <div 
-                className="w-3 h-3 rounded-full mr-1.5" 
+                className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full mr-1 sm:mr-1.5" 
                 style={{ backgroundColor: domainColors[domain] }}
               />
               <span className="text-xs flex items-center gap-1">
@@ -79,11 +79,11 @@ export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
           ))}
         </div>
         
-        <div className="h-[300px] w-full pt-4">
+        <div className="h-[200px] sm:h-[300px] w-full pt-2 sm:pt-4">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={chartData}
-              margin={{ top: 20, right: 5, left: 0, bottom: 0 }}
+              margin={{ top: 20, right: 0, left: -20, bottom: 0 }}
             >
               <defs>
                 {(Object.keys(domainData) as (keyof typeof domainData)[]).map(domain => (
@@ -98,15 +98,18 @@ export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
                 dataKey="day" 
                 axisLine={false} 
                 tickLine={false} 
-                tickMargin={10}
+                tickMargin={8}
                 stroke="hsl(var(--muted-foreground))"
+                tick={{ fontSize: '10px' }}
               />
               <YAxis 
                 axisLine={false} 
                 tickLine={false} 
                 domain={[0, 100]} 
-                tickMargin={10}
+                tickMargin={8}
                 stroke="hsl(var(--muted-foreground))"
+                tick={{ fontSize: '10px' }}
+                width={30}
               />
               <Tooltip
                 contentStyle={{
@@ -114,13 +117,15 @@ export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
                   borderColor: 'hsl(var(--border))',
                   boxShadow: 'var(--shadow)',
                   borderRadius: 'var(--radius)',
-                  color: 'hsl(var(--foreground))'
+                  color: 'hsl(var(--foreground))',
+                  fontSize: '12px',
+                  padding: '8px'
                 }}
-                itemStyle={{ padding: '2px 0' }}
+                itemStyle={{ padding: '1px 0', fontSize: '11px' }}
                 formatter={(value: number) => [`${value}%`, '']}
                 labelFormatter={(day) => `Day ${day}`}
+                labelStyle={{ fontSize: '11px' }}
               />
-              {/* Use a fixed numeric value instead of a variable for ReferenceLine */}
               <ReferenceLine y={60} stroke="hsl(var(--muted))" strokeDasharray="3 3" />
               
               {(Object.keys(domainData) as (keyof typeof domainData)[]).map(domain => (
@@ -131,8 +136,8 @@ export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
                   stroke={domainColors[domain]}
                   fillOpacity={1}
                   fill={`url(#gradient-${domain})`}
-                  strokeWidth={2}
-                  activeDot={{ r: 6, strokeWidth: 2, stroke: 'hsl(var(--background))' }}
+                  strokeWidth={1.5}
+                  activeDot={{ r: 4, strokeWidth: 2, stroke: 'hsl(var(--background))' }}
                 />
               ))}
             </AreaChart>
