@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { 
   Sidebar, 
   SidebarContent,
@@ -13,6 +13,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { Link } from 'react-router-dom';
 import { LayoutDashboard, Users, BarChart, Calendar } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSessionTimeout } from '@/services/session-manager';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -21,6 +22,9 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isMobile = useIsMobile();
   const { t, language } = useLanguage();
+  
+  // Initialize session timeout tracking
+  useSessionTimeout();
 
   return (
     <SidebarProvider defaultOpen={!isMobile}>

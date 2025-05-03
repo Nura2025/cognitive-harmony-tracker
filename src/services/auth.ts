@@ -2,6 +2,7 @@
 import axios from "axios";
 import { API_BASE } from "./config";
 import { toast } from "sonner";
+import SessionManager from "./session-manager";
 
 interface AuthResponse {
   user?: any;
@@ -48,6 +49,9 @@ const login = async (data: LoginData): Promise<AuthResponse> => {
       const userInfo = { email: userEmail };
       localStorage.setItem('neurocog_user', JSON.stringify(userInfo));
       
+      // Initialize session management
+      SessionManager.resetTimer();
+      
       return {
         token: response.data.access_token,
         user: userInfo
@@ -56,14 +60,16 @@ const login = async (data: LoginData): Promise<AuthResponse> => {
       // Handle the original format if it's ever returned
       localStorage.setItem('neurocog_token', response.data.token);
       localStorage.setItem('neurocog_user', JSON.stringify(response.data.user));
+      
+      // Initialize session management
+      SessionManager.resetTimer();
+      
       return response.data;
     }
     
     return response.data;
   } catch (error: any) {
     console.error("Login error:", error);
-    const errorMessage = error.response?.data?.message || "Invalid email or password. Please try again.";
-    // Don't show toast here, we'll handle it in the component
     throw error;
   }
 };
@@ -77,6 +83,9 @@ const registerAsPatient = async (data: RegisterPatientData): Promise<AuthRespons
     if (response.data.token) {
       localStorage.setItem('neurocog_token', response.data.token);
       localStorage.setItem('neurocog_user', JSON.stringify(response.data.user));
+      
+      // Initialize session management
+      SessionManager.resetTimer();
     }
     
     return response.data;
@@ -97,6 +106,9 @@ const registerAsClinician = async (data: RegisterClinicianData): Promise<AuthRes
     if (response.data.token) {
       localStorage.setItem('neurocog_token', response.data.token);
       localStorage.setItem('neurocog_user', JSON.stringify(response.data.user));
+      
+      // Initialize session management
+      SessionManager.resetTimer();
     }
     
     return response.data;

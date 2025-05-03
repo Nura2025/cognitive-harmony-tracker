@@ -21,6 +21,7 @@ import MyAccount from "./pages/MyAccount";
 import Settings from "./pages/Settings";
 import PrivateRoute from "./utils/PrivateRoute";
 import AuthService from "./services/auth";
+import SessionTimeoutHandler from "./components/SessionTimeoutHandler";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => {
             <TooltipProvider>
               <Toaster />
               <Sonner />
+              {isAuthenticated && <SessionTimeoutHandler />}
               <Routes>
                 {/* Public routes */}
                 <Route path="/" element={<Landing />} />
