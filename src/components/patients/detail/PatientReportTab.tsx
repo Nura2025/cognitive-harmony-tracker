@@ -8,6 +8,7 @@ import { mockReports } from '@/utils/mockData/reportData';
 import axios from 'axios';
 import { API_BASE } from '@/services/config';
 import { toast } from "@/hooks/use-toast";
+import { ReportVisualizations } from '@/components/reports/ReportVisualizations';
 
 interface PatientReportTabProps {
   patientId: string;
@@ -16,16 +17,16 @@ interface PatientReportTabProps {
 
 export const PatientReportTab: React.FC<PatientReportTabProps> = ({ patientId, patientName }) => {
   const [reports, setReports] = useState<ReportType[]>(() => mockReports(patientId));
+  const [selectedReport, setSelectedReport] = useState<ReportType | null>(null);
   
   // Function to handle adding a new report
   const handleAddReport = (newReport: ReportType) => {
     setReports(prevReports => [newReport, ...prevReports]);
   };
   
-  // Placeholder function for viewing a report
+  // Function to handle viewing a report
   const handleViewReport = (report: ReportType) => {
-    console.log('Viewing report:', report);
-    // In a real application, this would navigate to or show a detailed report view
+    setSelectedReport(report);
   };
   
   // Function to send email with report
@@ -73,34 +74,53 @@ export const PatientReportTab: React.FC<PatientReportTabProps> = ({ patientId, p
   
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <PatientReports 
-            reports={reports} 
-            onViewReport={handleViewReport} 
+      {selectedReport ? (
+        <>
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold">{selectedReport.title}</h2>
+            <button 
+              className="text-sm text-muted-foreground hover:text-primary"
+              onClick={() => setSelectedReport(null)}
+            >
+              Back to reports
+            </button>
+          </div>
+          <ReportVisualizations 
+            report={selectedReport} 
+            patientId={patientId} 
+            patientName={patientName} 
           />
+        </>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <PatientReports 
+              reports={reports} 
+              onViewReport={handleViewReport} 
+            />
+          </div>
+          <div>
+            <ReportGenerator 
+              patient={{ user_id: patientId, name: patientName, age: 0, gender: 'Male' }}
+              metrics={{
+                patientId: patientId,
+                date: new Date().toISOString(),
+                attention: 75,
+                memory: 65,
+                executiveFunction: 80,
+                behavioral: 70,
+                percentile: 72,
+                sessionsDuration: 120,
+                sessionsCompleted: 12,
+                progress: 8,
+                clinicalConcerns: [],
+              }}
+              onReportGenerate={handleAddReport}
+              onSendEmail={sendReportEmail}
+            />
+          </div>
         </div>
-        <div>
-          <ReportGenerator 
-            patient={{ user_id: patientId, name: patientName, age: 0, gender: 'Male' }}
-            metrics={{
-              patientId: patientId,
-              date: new Date().toISOString(),
-              attention: 75,
-              memory: 65,
-              executiveFunction: 80,
-              behavioral: 70,
-              percentile: 72,
-              sessionsDuration: 120,
-              sessionsCompleted: 12,
-              progress: 8,
-              clinicalConcerns: [],
-            }}
-            onReportGenerate={handleAddReport}
-            onSendEmail={sendReportEmail}
-          />
-        </div>
-      </div>
+      )}
     </div>
   );
 };
