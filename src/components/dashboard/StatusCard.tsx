@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowDown, ArrowUp } from 'lucide-react';
 import { formatPercentile, getScoreColorClass } from '@/utils/dataProcessing';
+import { InfoTooltip } from '@/components/ui/info-tooltip';
 
 interface StatusCardProps {
   title: string;
@@ -10,6 +11,7 @@ interface StatusCardProps {
   isPercentile?: boolean;
   change?: { value: number; isImprovement: boolean };
   icon: React.ReactNode;
+  tooltip?: string;
 }
 
 export const StatusCard: React.FC<StatusCardProps> = ({
@@ -17,7 +19,8 @@ export const StatusCard: React.FC<StatusCardProps> = ({
   value,
   isPercentile = false,
   change,
-  icon
+  icon,
+  tooltip
 }) => {
   const formattedValue = isPercentile ? formatPercentile(value as number) : value;
   const colorClass = isPercentile ? getScoreColorClass(value as number) : '';
@@ -27,7 +30,10 @@ export const StatusCard: React.FC<StatusCardProps> = ({
       <CardContent className="p-6">
         <div className="flex justify-between items-start">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
+            <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+              {title}
+              {tooltip && <InfoTooltip text={tooltip} size="sm" />}
+            </p>
             <h4 className={`text-2xl font-bold mt-1 ${colorClass}`}>
               {formattedValue}
               {isPercentile && ' Percentile'}

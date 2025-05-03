@@ -1,7 +1,14 @@
+
 import { TrendData } from "@/services/patient";
 import SessionService from "@/services/session";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Info } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ExecutiveTabProps {
   session: TrendData;
@@ -111,7 +118,21 @@ export const ExecutiveTab: React.FC<ExecutiveTabProps> = ({
       </div>
 
       <div>
-        <div className="font-medium mb-3 text-sm">Domain Contributions</div>
+        <div className="font-medium mb-3 text-sm flex items-center gap-1">
+          <span>Domain Contributions</span>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="max-w-xs">
+                  Individual components of executive function that contribute to the overall score
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {Object.entries(details.components || {}).map(([key, value]) => (
             <div
@@ -119,9 +140,23 @@ export const ExecutiveTab: React.FC<ExecutiveTabProps> = ({
               className="border rounded-md p-3 bg-background shadow-sm"
             >
               <div className="flex justify-between">
-                <span className="font-medium capitalize">
-                  {key.replace(/_contribution/g, "").replace(/_/g, " ")}
-                </span>
+                <div className="flex items-center gap-1">
+                  <span className="font-medium capitalize">
+                    {key.replace(/_contribution/g, "").replace(/_/g, " ")}
+                  </span>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="max-w-xs">
+                          {getComponentDescription(key.replace(/_contribution/g, ""))}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                 <span
                   className={`font-bold ${getScoreColor(
                     typeof value === "number" ? value : 0
@@ -139,7 +174,21 @@ export const ExecutiveTab: React.FC<ExecutiveTabProps> = ({
 
       {details.profile_pattern && (
         <div>
-          <div className="text-sm font-medium mb-2">Profile Pattern</div>
+          <div className="text-sm font-medium mb-2 flex items-center gap-1">
+            <span>Profile Pattern</span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs">
+                    A characteristic pattern of strengths and weaknesses across executive function abilities
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           <div className="bg-muted/20 p-3 rounded-md">
             <p className="text-sm">{details.profile_pattern}</p>
           </div>
@@ -148,7 +197,21 @@ export const ExecutiveTab: React.FC<ExecutiveTabProps> = ({
 
       {typeof details.data_completeness !== "undefined" && (
         <div>
-          <div className="text-sm font-medium mb-2">Data Completeness</div>
+          <div className="text-sm font-medium mb-2 flex items-center gap-1">
+            <span>Data Completeness</span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs">
+                    Percentage of expected data points that were successfully collected
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           <div className="w-full bg-muted rounded-full h-2.5">
             <div
               className="bg-primary h-2.5 rounded-full"
@@ -171,3 +234,21 @@ export const ExecutiveTab: React.FC<ExecutiveTabProps> = ({
     </div>
   );
 };
+
+// Helper function to provide descriptions for different executive function components
+function getComponentDescription(component: string): string {
+  const descriptions: Record<string, string> = {
+    "working memory": "Ability to hold information in mind and mentally work with it",
+    "planning": "Ability to identify steps needed to reach a goal and organize actions accordingly",
+    "cognitive flexibility": "Ability to switch thinking between concepts or adapt behavior to new situations",
+    "inhibition": "Ability to control impulses and resist distractions",
+    "organization": "Ability to arrange information and materials in a systematic way",
+    "task monitoring": "Ability to evaluate performance during or after task completion",
+    "emotional control": "Ability to manage emotional responses appropriately",
+    "self regulation": "Ability to monitor and control one's own behavior and emotional reactions",
+    "initiation": "Ability to begin an activity and independently generate ideas",
+  };
+
+  return descriptions[component.toLowerCase()] || 
+    "A component of executive functioning that contributes to overall cognitive control and management";
+}

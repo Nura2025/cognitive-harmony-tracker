@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 import { CognitiveDomain } from '@/utils/mockData';
 import { getDomainName } from '@/utils/dataProcessing';
+import { InfoTooltip } from '@/components/ui/info-tooltip';
 
 interface DomainChartProps {
   domainData: {
@@ -43,10 +44,21 @@ export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
     behavioral: 'hsl(var(--cognitive-behavioral))'
   };
 
+  // Domain descriptions for tooltips
+  const domainDescriptions = {
+    attention: "Ability to focus on specific stimuli while ignoring distractions",
+    memory: "Capacity to encode, store, and retrieve information",
+    executiveFunction: "Higher-order cognitive processes that control and coordinate other cognitive abilities",
+    behavioral: "Impulse control and self-regulation behaviors"
+  };
+
   return (
     <Card className="glass">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg">Cognitive Domain Trends</CardTitle>
+        <div className="flex items-center gap-2">
+          <CardTitle className="text-lg">Cognitive Domain Trends</CardTitle>
+          <InfoTooltip text="Performance trends across different cognitive domains over time" />
+        </div>
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-3 mb-3">
@@ -56,7 +68,13 @@ export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
                 className="w-3 h-3 rounded-full mr-1.5" 
                 style={{ backgroundColor: domainColors[domain] }}
               />
-              <span className="text-xs">{getDomainName(domain as keyof CognitiveDomain)}</span>
+              <span className="text-xs flex items-center gap-1">
+                {getDomainName(domain as keyof CognitiveDomain)}
+                <InfoTooltip 
+                  text={domainDescriptions[domain]} 
+                  size="sm"
+                />
+              </span>
             </div>
           ))}
         </div>

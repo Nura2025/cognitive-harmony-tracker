@@ -195,6 +195,7 @@ const Dashboard = () => {
           title="Total Patients"
           value={totalPatients}
           icon={<Users className="h-5 w-5" />}
+          tooltip="Total number of patients under your care"
         />
         <StatusCard 
           title="Average Percentile"
@@ -202,22 +203,25 @@ const Dashboard = () => {
           isPercentile={true}
           change={{ value: 12, isImprovement: true }}
           icon={<Brain className="h-5 w-5" />}
+          tooltip="Average cognitive performance across all patients relative to their age group"
         />
         <StatusCard 
           title="Session Count"
           value={totalSessions}
           change={{ value: 8, isImprovement: true }}
           icon={<LineChart className="h-5 w-5" />}
+          tooltip="Total number of assessment sessions conducted"
         />
         <StatusCard 
           title="Total Assessment Time"
           value={`${totalMinutes} mins`}
           icon={<Clock className="h-5 w-5" />}
+          tooltip="Cumulative time spent across all assessment sessions"
         />
       </div>
       
       <div className="grid gap-6 md:grid-cols-2">
-        <DomainChart domainData={domainTrendData} />
+        <DomainChart domainTrendData={domainTrendData} />
         <SessionTimeline sessions={sessionData.slice(0, 10)} />
       </div>
       
