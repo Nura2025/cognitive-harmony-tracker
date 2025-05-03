@@ -26,7 +26,7 @@ const Dashboard = () => {
   const [totalMinutes, setTotalMinutes] = useState(0);
   
   // Generate domain trends for the dashboard chart (using mock data for now)
-  const domainTrendData = {
+  const domainData = {
     attention: Array(10).fill(0).map((_, i) => 50 + Math.random() * 30),
     memory: Array(10).fill(0).map((_, i) => 55 + Math.random() * 25),
     executiveFunction: Array(10).fill(0).map((_, i) => 45 + Math.random() * 35),
@@ -221,7 +221,7 @@ const Dashboard = () => {
       </div>
       
       <div className="grid gap-6 md:grid-cols-2">
-        <DomainChart domainTrendData={domainTrendData} />
+        <DomainChart domainData={domainData} />
         <SessionTimeline sessions={sessionData.slice(0, 10)} />
       </div>
       
