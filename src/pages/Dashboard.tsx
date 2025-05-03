@@ -147,7 +147,7 @@ const Dashboard = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="space-y-6 sm:space-y-8 animate-fade-in px-2 sm:px-0">
+      <div className="space-y-6 sm:space-y-8 animate-fade-in p-2 sm:p-4 md:p-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold mb-1">Dashboard</h1>
           <p className="text-sm sm:text-base text-muted-foreground">
@@ -155,7 +155,7 @@ const Dashboard = () => {
           </p>
         </div>
         
-        <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
           {[1, 2, 3, 4].map(i => (
             <Skeleton key={i} className="h-24 w-full" />
           ))}
@@ -182,7 +182,7 @@ const Dashboard = () => {
   }
   
   return (
-    <div className="space-y-6 sm:space-y-8 animate-fade-in px-2 sm:px-0">
+    <div className="space-y-6 sm:space-y-8 animate-fade-in p-2 sm:p-4 md:p-6 overflow-x-hidden">
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold mb-1">Dashboard</h1>
         <p className="text-sm sm:text-base text-muted-foreground">
@@ -190,7 +190,7 @@ const Dashboard = () => {
         </p>
       </div>
       
-      <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 md:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <StatusCard 
           title="Total Patients"
           value={totalPatients}
@@ -226,7 +226,7 @@ const Dashboard = () => {
       </div>
       
       <div>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <h2 className="text-lg sm:text-xl font-semibold">Recent Patients</h2>
           <Button variant="outline" size="sm" onClick={handleViewAllPatients} className="text-xs sm:text-sm">
             View all patients

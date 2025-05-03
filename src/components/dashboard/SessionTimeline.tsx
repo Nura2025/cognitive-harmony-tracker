@@ -41,15 +41,15 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = ({
         <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">Total Sessions</span>
-            <span className="text-base sm:text-xl font-semibold">{totalSessions}</span>
+            <span className="text-base sm:text-xl font-semibold truncate">{totalSessions}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">Total Duration</span>
-            <span className="text-base sm:text-xl font-semibold">{formatDuration(totalDuration)}</span>
+            <span className="text-base sm:text-xl font-semibold truncate">{formatDuration(totalDuration)}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">Average Score</span>
-            <span className="text-base sm:text-xl font-semibold">{averageScore}%</span>
+            <span className="text-base sm:text-xl font-semibold truncate">{averageScore}%</span>
           </div>
         </div>
         
@@ -57,7 +57,7 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = ({
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={timelineData}
-              margin={{ top: 20, right: 0, left: -20, bottom: 0 }}
+              margin={{ top: 20, right: 0, left: 0, bottom: 0 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
               <XAxis 
@@ -89,10 +89,12 @@ export const SessionTimeline: React.FC<SessionTimelineProps> = ({
                   borderRadius: 'var(--radius)',
                   color: 'hsl(var(--foreground))',
                   fontSize: '12px',
-                  padding: '8px'
+                  padding: '8px',
+                  zIndex: 1000
                 }}
                 formatter={(value: number) => [`${value}%`, 'Score']}
                 labelStyle={{ fontSize: '11px' }}
+                wrapperStyle={{ zIndex: 1000 }}
               />
               <Line
                 type="monotone"

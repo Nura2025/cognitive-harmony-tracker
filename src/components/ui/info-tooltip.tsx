@@ -25,16 +25,18 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({
     <TooltipProvider>
       <Tooltip delayDuration={200}>
         <TooltipTrigger asChild>
-          <Info className={`${iconSize} text-muted-foreground cursor-help ${className}`} />
+          <span className="inline-flex">
+            <Info className={`${iconSize} text-muted-foreground cursor-help ${className}`} />
+          </span>
         </TooltipTrigger>
         <TooltipContent 
           side="top" 
           align="center" 
-          className="max-w-[250px] sm:max-w-[350px] text-xs sm:text-sm z-[100]"
+          className="max-w-[250px] sm:max-w-[350px] text-xs sm:text-sm z-[1000]"
           sideOffset={10}
           avoidCollisions={true}
         >
-          <p>{text}</p>
+          {text}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

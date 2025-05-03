@@ -63,11 +63,11 @@ export const PatientCard: React.FC<PatientCardProps> = ({
       <div className="h-1.5 sm:h-2 bg-gradient-to-r from-primary/80 to-primary"></div>
       <CardContent className="p-3 sm:p-5">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3 sm:mb-4 gap-2">
-          <div>
-            <h3 className="font-semibold text-sm sm:text-lg line-clamp-1">{patient.name}</h3>
-            <div className="flex items-center text-muted-foreground text-xs sm:text-sm mt-0.5 sm:mt-1">
-              <User className="mr-1 h-3 w-3 sm:h-3.5 sm:w-3.5" />
-              <span>
+          <div className="min-w-0 max-w-full sm:max-w-[60%]">
+            <h3 className="font-semibold text-sm sm:text-base line-clamp-1">{patient.name}</h3>
+            <div className="flex items-center text-muted-foreground text-xs mt-0.5 sm:mt-1">
+              <User className="mr-1 h-3 w-3 sm:h-3.5 sm:w-3.5 flex-shrink-0" />
+              <span className="truncate">
                 {patient.age ? `${patient.age} y/o ` : ''}
                 {patient.gender ? patient.gender.charAt(0) : ''}
               </span>
@@ -81,20 +81,20 @@ export const PatientCard: React.FC<PatientCardProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mt-3 sm:mt-5">
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">ADHD Subtype</span>
-            <span className="font-medium text-xs sm:text-sm">{patient.adhd_subtype || 'Not Specified'}</span>
+            <span className="font-medium text-xs sm:text-sm truncate">{patient.adhdSubtype || 'Not Specified'}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">Progress</span>
             <span className="font-medium text-xs sm:text-sm">+{progress}% Last 30d</span>
           </div>
-          <div className="flex items-center">
-            <CalendarDays className="mr-1.5 h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" />
-            <span className="text-xs">
+          <div className="flex items-center space-x-1.5">
+            <CalendarDays className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground flex-shrink-0" />
+            <span className="text-xs truncate">
               Last session: {formatLastSession(patient.last_session_date)}
             </span>
           </div>
-          <div className="flex items-center">
-            <Clock className="mr-1.5 h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground" />
+          <div className="flex items-center space-x-1.5">
+            <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-muted-foreground flex-shrink-0" />
             <span className="text-xs">
               {patient.total_sessions || 0} sessions
             </span>

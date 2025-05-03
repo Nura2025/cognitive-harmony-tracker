@@ -29,11 +29,13 @@ export const StatusCard: React.FC<StatusCardProps> = ({
     <Card className="glass overflow-hidden">
       <CardContent className="p-3 sm:p-6">
         <div className="flex justify-between items-start">
-          <div className="w-full">
-            <p className="text-xs sm:text-sm font-medium text-muted-foreground flex items-center gap-1">
-              {title}
+          <div className="w-full max-w-[80%]">
+            <div className="flex items-center gap-1 flex-wrap">
+              <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">
+                {title}
+              </p>
               {tooltip && <InfoTooltip text={tooltip} size="sm" />}
-            </p>
+            </div>
             <h4 className={`text-lg sm:text-2xl font-bold mt-1 ${colorClass} truncate`}>
               {formattedValue}
               {isPercentile && <span className="hidden sm:inline"> Percentile</span>}
@@ -41,15 +43,15 @@ export const StatusCard: React.FC<StatusCardProps> = ({
             </h4>
             
             {change && (
-              <div className="flex items-center mt-1 sm:mt-2">
+              <div className="flex items-center mt-1 sm:mt-2 flex-wrap">
                 {change.isImprovement ? (
                   <div className="flex items-center text-emerald-600 text-xs sm:text-sm">
-                    <ArrowUp className="h-3 w-3 mr-1" />
+                    <ArrowUp className="h-3 w-3 mr-1 flex-shrink-0" />
                     <span>{change.value}%</span>
                   </div>
                 ) : (
                   <div className="flex items-center text-red-600 text-xs sm:text-sm">
-                    <ArrowDown className="h-3 w-3 mr-1" />
+                    <ArrowDown className="h-3 w-3 mr-1 flex-shrink-0" />
                     <span>{change.value}%</span>
                   </div>
                 )}

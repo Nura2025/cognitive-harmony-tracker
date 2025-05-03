@@ -65,10 +65,10 @@ export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
           {(Object.keys(domainData) as (keyof typeof domainData)[]).map(domain => (
             <div key={domain} className="flex items-center">
               <div 
-                className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full mr-1 sm:mr-1.5" 
+                className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full mr-1 sm:mr-1.5 flex-shrink-0" 
                 style={{ backgroundColor: domainColors[domain] }}
               />
-              <span className="text-xs flex items-center gap-1">
+              <span className="text-xs flex items-center gap-1 whitespace-nowrap">
                 {getDomainName(domain as keyof CognitiveDomain)}
                 <InfoTooltip 
                   text={domainDescriptions[domain]} 
@@ -83,7 +83,7 @@ export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={chartData}
-              margin={{ top: 20, right: 0, left: -20, bottom: 0 }}
+              margin={{ top: 20, right: 0, left: 0, bottom: 0 }}
             >
               <defs>
                 {(Object.keys(domainData) as (keyof typeof domainData)[]).map(domain => (
@@ -119,12 +119,14 @@ export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
                   borderRadius: 'var(--radius)',
                   color: 'hsl(var(--foreground))',
                   fontSize: '12px',
-                  padding: '8px'
+                  padding: '8px',
+                  zIndex: 1000
                 }}
                 itemStyle={{ padding: '1px 0', fontSize: '11px' }}
                 formatter={(value: number) => [`${value}%`, '']}
                 labelFormatter={(day) => `Day ${day}`}
                 labelStyle={{ fontSize: '11px' }}
+                wrapperStyle={{ zIndex: 1000 }}
               />
               <ReferenceLine y={60} stroke="hsl(var(--muted))" strokeDasharray="3 3" />
               
