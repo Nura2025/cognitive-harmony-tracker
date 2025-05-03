@@ -4,7 +4,7 @@ import { PatientList } from "@/components/patients/PatientList";
 import AddPatientDialog from "@/components/patients/AddPatientDialog";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
-import PatientService, { PatientInvitation } from "@/services/patient"; // Updated import
+import PatientService, { PatientInvitation } from "@/services/patient"; 
 import { PlusCircle, AlertCircle, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 
 // Import Patient type
-import type { Patient } from "@/utils/types/patientTypes";
+import type { Patient } from "@/components/patients/PatientList";
 
 const Patients = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -55,6 +55,8 @@ const Patients = () => {
           name: `${p.first_name} ${p.last_name}`,
           age,
           adhdSubtype: p.adhd_subtype,
+          lastAssessment: p.last_session_date,
+          assessmentCount: p.total_sessions || 0
         };
       });
       
@@ -137,10 +139,6 @@ const Patients = () => {
   const handleResetFilters = () => {
     setActiveFilters({});
     setSearchTerm("");
-  };
-
-  const handlePatientClick = (patientId: string) => {
-    navigate(`/patient/${patientId}`);
   };
 
   const handleRetry = () => {

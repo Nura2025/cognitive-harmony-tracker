@@ -1,3 +1,4 @@
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,8 +45,8 @@ export const PatientList: React.FC<PatientListProps> = ({
   const { t, language } = useLanguage();
 
   const handlePatientClick = (patientId: string) => {
-    console.log("patientId", patientId);
-    navigate(`/patients/${patientId}`);
+    console.log("Navigating to patient:", patientId);
+    navigate(`/patient/${patientId}`);
   };
 
   return (
