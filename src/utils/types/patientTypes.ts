@@ -61,6 +61,26 @@ export interface SessionData {
   domainScores: CognitiveDomain;
 }
 
+export interface ReportSummary {
+  attention?: string;
+  memory?: string;
+  executiveFunction?: string;
+  behavioral?: string;
+  overall?: string;
+}
+
+export interface ReportRecommendation {
+  title: string;
+  description: string;
+}
+
+export interface ReportData {
+  date: string;
+  metrics: PatientMetrics;
+  summary?: ReportSummary;
+  recommendations?: ReportRecommendation[];
+}
+
 export interface ReportType {
   id: string;
   patientId: string;
@@ -75,6 +95,7 @@ export interface ReportType {
     rawData: boolean;
   };
   status: 'draft' | 'generated' | 'shared';
+  data?: ReportData;
 }
 
 export interface PatientData {
@@ -83,4 +104,3 @@ export interface PatientData {
   sessions: SessionData[];
   reports: ReportType[];
 }
-
