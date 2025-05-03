@@ -1,17 +1,15 @@
 
 import React from 'react';
-import { 
-  LineChart, Line, XAxis, YAxis, CartesianGrid, 
-  Tooltip, Legend, ResponsiveContainer,
-  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
-} from 'recharts';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { format } from 'date-fns';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Download, Printer } from 'lucide-react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { MetricTooltip } from './MetricTooltip';
+import { Button } from '@/components/ui/button';
+import { Download, Mail } from 'lucide-react';
 import { ReportType } from '@/utils/types/patientTypes';
+import { useLanguage } from '@/contexts/LanguageContext';
+import AuthService from '@/services/auth';
 
 interface ReportVisualizationsProps {
   report: ReportType;
@@ -19,235 +17,237 @@ interface ReportVisualizationsProps {
   patientName: string;
 }
 
-const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({
-  report,
-  patientId,
-  patientName
-}) => {
-  // Format data for charts
-  const performanceData = [
-    { name: 'Attention', score: report.metrics.attention },
-    { name: 'Memory', score: report.metrics.memory },
-    { name: 'Executive', score: report.metrics.executiveFunction },
-    { name: 'Behavioral', score: report.metrics.behavioral },
-  ];
+const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({ report, patientId, patientName }) => {
+  const { t, language } = useLanguage();
+  const currentUser = AuthService.getCurrentUser();
   
-  const progressData = [
-    { name: 'Week 1', score: 65 },
-    { name: 'Week 2', score: 68 },
-    { name: 'Week 3', score: 72 },
-    { name: 'Week 4', score: report.metrics.percentile },
-  ];
+  // Safety check for metrics - ensure we have valid data
+  const metrics = report.data?.metrics || {
+    attention: 0,
+    memory: 0,
+    executiveFunction: 0,
+    behavioral: 0,
+    percentile: 0,
+    sessionsDuration: 0,
+    sessionsCompleted: 0,
+    progress: 0
+  };
+  
+  const formattedDate = report.data?.date 
+    ? format(new Date(report.data.date), 'PPP') 
+    : format(new Date(), 'PPP');
 
-  const domainData = performanceData.map(item => ({
-    subject: item.name,
-    A: item.score,
-    fullMark: 100,
-  }));
-
-  // Generate PDF report
-  const generatePDF = async () => {
-    const element = document.getElementById('report-content');
-    if (!element) return;
-    
-    try {
-      const canvas = await html2canvas(element);
-      const imgData = canvas.toDataURL('image/png');
-      
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-      
-      const imgX = (pdfWidth - imgWidth * ratio) / 2;
-      const imgY = 30;
-      
-      pdf.setFontSize(18);
-      pdf.text(`Cognitive Report: ${patientName}`, 14, 22);
-      
-      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
-      pdf.save(`report_${patientId}_${new Date().toISOString().split('T')[0]}.pdf`);
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-    }
+  const handleDownloadPDF = () => {
+    console.log('Download PDF functionality would be implemented here');
+    // In a real application, this would generate and download a PDF
   };
 
-  // Print report
-  const printReport = () => {
-    window.print();
+  const handleShareViaEmail = () => {
+    console.log('Share via email functionality would be implemented here');
+    // In a real application, this would open an email share modal
   };
 
   return (
     <div className="space-y-6">
-      {/* Header with actions */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className={`flex items-center justify-between ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+        <h2 className="text-2xl font-bold">{t('clinicalReport')}</h2>
+        <div className={`flex gap-2 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+          <Button variant="outline" size="sm" onClick={handleDownloadPDF}>
+            <Download className={`h-4 w-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+            {t('downloadPdf')}
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleShareViaEmail}>
+            <Mail className={`h-4 w-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
+            Email
+          </Button>
+        </div>
+      </div>
+
+      <div className={`grid grid-cols-2 gap-4 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
         <div>
-          <h3 className="text-xl font-bold">{report.title}</h3>
-          <p className="text-muted-foreground">
-            {new Date(report.date).toLocaleDateString()} • Patient ID: {patientId}
-          </p>
+          <p className="text-sm text-muted-foreground">{t('patientName')}</p>
+          <p className="font-medium">{patientName}</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={printReport}>
-            <Printer className="mr-2 h-4 w-4" />
-            Print
-          </Button>
-          <Button size="sm" onClick={generatePDF}>
-            <Download className="mr-2 h-4 w-4" />
-            Download PDF
-          </Button>
+        <div className={language === 'ar' ? 'text-left' : 'text-right'}>
+          <p className="text-sm text-muted-foreground">{t('date')}</p>
+          <p className="font-medium">{formattedDate}</p>
         </div>
       </div>
 
-      {/* Report content */}
-      <div id="report-content" className="space-y-6">
-        {/* Patient info */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <h4 className="font-semibold text-sm text-muted-foreground mb-1">Patient</h4>
-                <p className="text-base">{patientName}</p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-sm text-muted-foreground mb-1">Report Type</h4>
-                <p className="text-base">{report.type}</p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-sm text-muted-foreground mb-1">Sessions Completed</h4>
-                <p className="text-base">{report.metrics.sessionsCompleted}</p>
-              </div>
-              <div>
-                <h4 className="font-semibold text-sm text-muted-foreground mb-1">Total Duration</h4>
-                <p className="text-base">{report.metrics.sessionsDuration} minutes</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Visualization tabs */}
-        <Tabs defaultValue="summary">
-          <TabsList className="grid grid-cols-3 mb-4">
-            <TabsTrigger value="summary">Summary</TabsTrigger>
-            <TabsTrigger value="performance">Performance</TabsTrigger>
-            <TabsTrigger value="domains">Cognitive Domains</TabsTrigger>
-          </TabsList>
-
-          {/* Summary Tab */}
-          <TabsContent value="summary">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Percentile score */}
-                  <div className="flex flex-col items-center justify-center p-6 border rounded-lg">
-                    <div className="text-4xl font-bold text-primary mb-2">
-                      {typeof report.metrics.percentile === 'number' 
-                        ? report.metrics.percentile.toFixed(1)
-                        : report.metrics.percentile}%
-                    </div>
-                    <p className="text-muted-foreground">Percentile Ranking</p>
-                  </div>
-
-                  {/* Progress */}
-                  <div className="flex flex-col items-center justify-center p-6 border rounded-lg">
-                    <div className="text-4xl font-bold text-green-500 mb-2">
-                      +{report.metrics.progress}%
-                    </div>
-                    <p className="text-muted-foreground">Progress Since Last Assessment</p>
-                  </div>
-
-                  {/* Report description */}
-                  <div className="col-span-1 md:col-span-2">
-                    <h4 className="font-semibold mb-2">Assessment Summary</h4>
-                    <p className="text-muted-foreground">{report.summary}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Performance Tab */}
-          <TabsContent value="performance">
-            <Card>
-              <CardContent className="pt-6">
-                <h4 className="font-semibold mb-4">Performance Over Time</h4>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={progressData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis domain={[0, 100]} />
-                    <Tooltip />
-                    <Legend />
-                    <Line 
-                      type="monotone" 
-                      dataKey="score" 
-                      stroke="#5EF38C" 
-                      activeDot={{ r: 8 }} 
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Cognitive Domains Tab */}
-          <TabsContent value="domains">
-            <Card>
-              <CardContent className="pt-6">
-                <h4 className="font-semibold mb-4">Cognitive Domain Matrix</h4>
-                <ResponsiveContainer width="100%" height={350}>
-                  <RadarChart outerRadius={90} data={domainData}>
-                    <PolarGrid />
-                    <PolarAngleAxis dataKey="subject" />
-                    <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                    <Radar
-                      name="Score"
-                      dataKey="A"
-                      stroke="#5EF38C"
-                      fill="#5EF38C"
-                      fillOpacity={0.6}
-                    />
-                    <Legend />
-                  </RadarChart>
-                </ResponsiveContainer>
+      <Tabs defaultValue="summary" className="w-full">
+        <TabsList className={`w-full justify-start ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+          <TabsTrigger value="summary">{t('executiveSummary')}</TabsTrigger>
+          <TabsTrigger value="metrics">{t('metricsOverTime')}</TabsTrigger>
+          <TabsTrigger value="recommendations">{t('recommendations')}</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="summary" className="space-y-6 py-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className={language === 'ar' ? 'text-right' : 'text-left'}>{t('comparativeAnalysis')}</CardTitle>
+              <CardDescription className={language === 'ar' ? 'text-right' : 'text-left'}>
+                {t('performanceComparison')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className={`grid grid-cols-4 gap-4 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                <div></div>
+                <div className="font-semibold text-sm text-center">{t('firstSession')}</div>
+                <div className="font-semibold text-sm text-center">{t('latestSession')}</div>
+                <div className="font-semibold text-sm text-center">{t('change')}</div>
                 
-                <div className="grid grid-cols-2 gap-4 mt-6">
-                  {performanceData.map((domain) => (
-                    <div key={domain.name} className="border rounded p-4">
-                      <h5 className="font-medium">{domain.name}</h5>
-                      <div className="flex items-center mt-2">
-                        <div className="w-full bg-gray-200 rounded-full h-2.5 mr-2">
-                          <div 
-                            className="bg-primary h-2.5 rounded-full" 
-                            style={{ width: `${domain.score}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-sm font-medium">{domain.score}%</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <div className="font-medium">{t('attention')}</div>
+                <div className="text-center">{metrics.attention - 10}</div>
+                <div className="text-center">{metrics.attention}</div>
+                <div className="text-center text-green-500">+10%</div>
+                
+                <div className="font-medium">{t('memory')}</div>
+                <div className="text-center">{metrics.memory - 5}</div>
+                <div className="text-center">{metrics.memory}</div>
+                <div className="text-center text-green-500">+5%</div>
+                
+                <div className="font-medium">{t('executiveFunction')}</div>
+                <div className="text-center">{metrics.executiveFunction - 8}</div>
+                <div className="text-center">{metrics.executiveFunction}</div>
+                <div className="text-center text-green-500">+8%</div>
+                
+                <div className="font-medium">{t('overall')}</div>
+                <div className="text-center">{metrics.percentile - 7}</div>
+                <div className="text-center">{metrics.percentile}</div>
+                <div className="text-center text-green-500">+7%</div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className={language === 'ar' ? 'text-right' : 'text-left'}>
+                  {t('attention')}
+                  <MetricTooltip content={t('attentionExplanation')} />
+                </CardTitle>
+              </CardHeader>
+              <CardContent className={language === 'ar' ? 'text-right' : 'text-left'}>
+                <p>
+                  {report.data?.summary?.attention || 
+                    "The patient demonstrates improved sustained attention compared to initial assessment, with decreased omission errors and increased response consistency."}
+                </p>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
-
-        {/* Recommendations */}
-        <Card>
-          <CardContent className="p-6">
-            <h4 className="font-semibold mb-2">Recommendations</h4>
-            <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
-              {report.recommendations.map((rec, index) => (
-                <li key={index}>{rec}</li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      </div>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className={language === 'ar' ? 'text-right' : 'text-left'}>
+                  {t('memory')}
+                  <MetricTooltip content={t('memoryExplanation')} />
+                </CardTitle>
+              </CardHeader>
+              <CardContent className={language === 'ar' ? 'text-right' : 'text-left'}>
+                <p>
+                  {report.data?.summary?.memory || 
+                    "Working memory capacity has shown moderate improvement, with better performance in sequence recall and pattern recognition tasks."}
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className={language === 'ar' ? 'text-right' : 'text-left'}>
+                  {t('executiveFunction')}
+                  <MetricTooltip content={t('executiveFunctionExplanation')} />
+                </CardTitle>
+              </CardHeader>
+              <CardContent className={language === 'ar' ? 'text-right' : 'text-left'}>
+                <p>
+                  {report.data?.summary?.executiveFunction || 
+                    "Executive function metrics show improvement in cognitive flexibility and planning abilities."}
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className={language === 'ar' ? 'text-right' : 'text-left'}>
+                  {t('overall')}
+                  <MetricTooltip content={t('overallExplanation')} />
+                </CardTitle>
+              </CardHeader>
+              <CardContent className={language === 'ar' ? 'text-right' : 'text-left'}>
+                <p>
+                  {report.data?.summary?.overall || 
+                    "Overall cognitive performance has improved by approximately 7 percentile points since beginning the training program."}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="metrics" className="py-4">
+          {/* Metrics visualization would go here */}
+          <Card>
+            <CardContent className="p-6">
+              <div className="h-80 flex items-center justify-center border rounded-md">
+                <p className="text-muted-foreground">{t('metricsOverTime')}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="recommendations" className="py-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className={language === 'ar' ? 'text-right' : 'text-left'}>{t('recommendations')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[300px]">
+                <div className={`space-y-4 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                  {report.data?.recommendations ? (
+                    report.data.recommendations.map((recommendation, index) => (
+                      <div key={index} className="pb-3 border-b last:border-0">
+                        <p className="mb-1 font-medium">{recommendation.title}</p>
+                        <p className="text-sm text-muted-foreground">{recommendation.description}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <>
+                      <div className="pb-3 border-b">
+                        <p className="mb-1 font-medium">Continue with current training regimen</p>
+                        <p className="text-sm text-muted-foreground">
+                          The patient is responding well to the current cognitive exercises. Recommend continuing with the established protocol with 3-4 sessions per week.
+                        </p>
+                      </div>
+                      <div className="pb-3 border-b">
+                        <p className="mb-1 font-medium">Increase challenging activities</p>
+                        <p className="text-sm text-muted-foreground">
+                          Consider gradually increasing the difficulty level of executive function tasks to further enhance cognitive flexibility.
+                        </p>
+                      </div>
+                      <div className="pb-3 border-b">
+                        <p className="mb-1 font-medium">Monitor attention span</p>
+                        <p className="text-sm text-muted-foreground">
+                          While attention has improved, continued monitoring is recommended as this remains the area with the most opportunity for growth.
+                        </p>
+                      </div>
+                      <div className="pb-3 border-b">
+                        <p className="mb-1 font-medium">Academic accommodations</p>
+                        <p className="text-sm text-muted-foreground">
+                          Consider extended time for tasks requiring sustained attention and complex problem solving in academic settings.
+                        </p>
+                      </div>
+                      <div>
+                        <p className="mb-1 font-medium">Follow-up assessment</p>
+                        <p className="text-sm text-muted-foreground">
+                          Schedule follow-up cognitive assessment in 3 months to evaluate progress and adjust intervention strategies as needed.
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

@@ -35,9 +35,9 @@ export const PatientFilters: React.FC<PatientFiltersProps> = ({
   const hasActiveFilters = Object.values(activeFilters).some(value => value);
   
   return (
-    <div className={`flex items-center mb-6 ${language === 'ar' ? 'flex-row-reverse space-x-reverse' : 'space-x-4'}`}>
+    <div className={`flex items-center mb-6 gap-4 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
       <div className="relative flex-1">
-        <Search className={`absolute ${language === 'ar' ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground`} />
+        <Search className={`absolute ${language === 'ar' ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground`} />
         <Input
           placeholder={t('searchPatientsByName')}
           value={searchTerm}
@@ -58,24 +58,26 @@ export const PatientFilters: React.FC<PatientFiltersProps> = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align={language === 'ar' ? 'start' : 'end'} className="w-56">
-          <DropdownMenuLabel>{t('adhdSubtypes')}</DropdownMenuLabel>
+          <DropdownMenuLabel className={language === 'ar' ? 'text-right' : ''}>{t('adhdSubtypes')}</DropdownMenuLabel>
           {adhdSubtypes.map(subtype => (
             <DropdownMenuCheckboxItem
               key={subtype}
               checked={activeFilters[`subtype-${subtype}`] || false}
               onCheckedChange={(checked) => onFilterChange(`subtype-${subtype}`, !!checked)}
+              className={language === 'ar' ? 'flex-row-reverse justify-between' : ''}
             >
               {t(subtype.toLowerCase())}
             </DropdownMenuCheckboxItem>
           ))}
           
           <DropdownMenuSeparator />
-          <DropdownMenuLabel>{t('ageRange')}</DropdownMenuLabel>
+          <DropdownMenuLabel className={language === 'ar' ? 'text-right' : ''}>{t('ageRange')}</DropdownMenuLabel>
           {ageRanges.map(range => (
             <DropdownMenuCheckboxItem
               key={range}
               checked={activeFilters[`age-${range}`] || false}
               onCheckedChange={(checked) => onFilterChange(`age-${range}`, !!checked)}
+              className={language === 'ar' ? 'flex-row-reverse justify-between' : ''}
             >
               {range} {t('years')}
             </DropdownMenuCheckboxItem>
@@ -90,7 +92,7 @@ export const PatientFilters: React.FC<PatientFiltersProps> = ({
               onClick={onResetFilters}
               disabled={!hasActiveFilters}
             >
-              <FilterX className={language === 'ar' ? 'ml-2 h-4 w-4' : 'mr-2 h-4 w-4'} />
+              <FilterX className={`h-4 w-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
               {t('resetFilters')}
             </Button>
           </div>
@@ -99,4 +101,3 @@ export const PatientFilters: React.FC<PatientFiltersProps> = ({
     </div>
   );
 };
-

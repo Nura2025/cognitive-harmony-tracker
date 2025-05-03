@@ -33,7 +33,7 @@ export const Navbar: React.FC = () => {
   
   return (
     <div className="h-16 border-b border-border flex items-center justify-between px-4 bg-background z-10">
-      <div className={`flex items-center space-x-4 ${language === 'ar' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+      <div className={`flex items-center ${language === 'ar' ? 'flex-row-reverse space-x-reverse' : 'space-x-4'}`}>
         <SidebarTrigger className="lg:hidden" />
         <div className="relative w-[300px]">
           <Search className={`absolute ${language === 'ar' ? 'right-2' : 'left-2'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground`} />
@@ -45,7 +45,7 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
       
-      <div className={`flex items-center space-x-2 ${language === 'ar' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+      <div className={`flex items-center gap-2 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
         <LanguageToggle />
         <ThemeToggle />
         
@@ -74,15 +74,18 @@ export const Navbar: React.FC = () => {
             <DropdownMenuLabel>{t('account')}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link to="/my-account">{t('profile')}</Link>
+              <Link to="/my-account" className={language === 'ar' ? 'flex flex-row-reverse w-full' : ''}>{t('profile')}</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to="/settings">{t('accountSettings')}</Link>
+              <Link to="/settings" className={language === 'ar' ? 'flex flex-row-reverse w-full' : ''}>{t('accountSettings')}</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>{t('support')}</DropdownMenuItem>
+            <DropdownMenuItem className={language === 'ar' ? 'flex flex-row-reverse w-full' : ''}>{t('support')}</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive flex items-center">
-              <LogOut className="h-4 w-4 mr-2" />
+            <DropdownMenuItem 
+              onClick={handleLogout} 
+              className={`text-destructive focus:text-destructive flex items-center ${language === 'ar' ? 'flex-row-reverse w-full' : ''}`}
+            >
+              <LogOut className={`h-4 w-4 ${language === 'ar' ? 'ml-2' : 'mr-2'}`} />
               {t('logout')}
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -91,4 +94,3 @@ export const Navbar: React.FC = () => {
     </div>
   );
 };
-

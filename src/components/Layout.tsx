@@ -31,7 +31,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className={`min-h-screen flex w-full bg-background ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
         <Sidebar>
           <div className="flex flex-col h-full">
-            <div className="flex items-center h-16 px-6 border-b border-sidebar-border">
+            <div className={`flex items-center h-16 px-6 border-b border-sidebar-border ${language === 'ar' ? 'justify-end' : ''}`}>
               <h1 className="text-xl font-bold text-sidebar-foreground">NURA</h1>
             </div>
             
@@ -40,7 +40,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip={t('dashboard')}>
                     <Link to="/dashboard" className={language === 'ar' ? 'flex flex-row-reverse items-center w-full' : ''}>
-                      <LayoutDashboard />
+                      <LayoutDashboard className={language === 'ar' ? 'ml-2' : 'mr-2'} />
                       <span>{t('dashboard')}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -48,7 +48,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip={t('patients')}>
                     <Link to="/patients" className={language === 'ar' ? 'flex flex-row-reverse items-center w-full' : ''}>
-                      <Users />
+                      <Users className={language === 'ar' ? 'ml-2' : 'mr-2'} />
                       <span>{t('patients')}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -56,7 +56,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip={t('analysis')}>
                     <Link to="/analysis" className={language === 'ar' ? 'flex flex-row-reverse items-center w-full' : ''}>
-                      <BarChart />
+                      <BarChart className={language === 'ar' ? 'ml-2' : 'mr-2'} />
                       <span>{t('analysis')}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -64,7 +64,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip={t('sessions')}>
                     <Link to="/sessions" className={language === 'ar' ? 'flex flex-row-reverse items-center w-full' : ''}>
-                      <Calendar />
+                      <Calendar className={language === 'ar' ? 'ml-2' : 'mr-2'} />
                       <span>{t('sessions')}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -74,7 +74,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
             
             <div className="mt-auto p-4 border-t border-sidebar-border">
               <div className={`flex items-center ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                <div className="w-2 h-2 rounded-full bg-emerald-500 mr-2"></div>
+                <div className={`w-2 h-2 rounded-full bg-emerald-500 ${language === 'ar' ? 'ml-2' : 'mr-2'}`}></div>
                 <span className="text-sm text-sidebar-foreground opacity-80">{t('connected')}</span>
               </div>
             </div>

@@ -28,7 +28,9 @@ const translations: Record<Language, Record<string, string>> = {
     accountSettings: 'Account Settings',
     support: 'Support',
     logout: 'Log out',
+    logoutSuccess: 'You have been logged out successfully',
     
+    // Report translations
     clinicalReport: 'Clinical Assessment Report',
     downloadPdf: 'Download PDF Report',
     executiveSummary: 'Executive Summary',
@@ -44,6 +46,7 @@ const translations: Record<Language, Record<string, string>> = {
     processingSpeed: 'Processing Speed',
     executiveFunction: 'Executive Function',
     overall: 'Overall',
+    date: 'Date',
     
     attentionExplanation: 'Measures the ability to focus on specific stimuli while filtering out distractions',
     memoryExplanation: 'Evaluates the capacity to store, retain, and recall information',
@@ -55,6 +58,7 @@ const translations: Record<Language, Record<string, string>> = {
     inattentionExplanation: 'Number of omission errors due to failure to respond to target stimuli',
     crossGameExplanation: 'Performance comparison across different cognitive exercises',
     
+    // Patient management translations
     managePatientProfiles: 'Manage patient profiles and assessment data',
     addPatient: 'Add Patient',
     searchPatientsByName: 'Search patients by name...',
@@ -74,6 +78,52 @@ const translations: Record<Language, Record<string, string>> = {
     inattentive: 'Inattentive',
     hyperactive: 'Hyperactive-Impulsive',
     combined: 'Combined',
+    retry: 'Retry',
+    retrying: 'Retrying',
+
+    // Dashboard and Navigation
+    dashboard: 'Dashboard',
+    overview: 'Overview',
+    recentActivity: 'Recent Activity',
+    upcomingSessions: 'Upcoming Sessions',
+    patientProgress: 'Patient Progress',
+    viewAll: 'View All',
+    todaysSessions: 'Today\'s Sessions',
+    noSessions: 'No sessions scheduled for today',
+
+    // Session related
+    sessionDetails: 'Session Details',
+    duration: 'Duration',
+    completionRate: 'Completion Rate',
+    startSession: 'Start Session',
+    endSession: 'End Session',
+    reschedule: 'Reschedule',
+    cancel: 'Cancel',
+    minutes: 'minutes',
+    
+    // Status and metrics
+    completed: 'Completed',
+    inProgress: 'In Progress',
+    notStarted: 'Not Started',
+    cancelled: 'Cancelled',
+    high: 'High',
+    medium: 'Medium',
+    low: 'Low',
+    excellent: 'Excellent',
+    good: 'Good',
+    average: 'Average',
+    needsImprovement: 'Needs Improvement',
+    
+    // Common actions
+    save: 'Save',
+    edit: 'Edit',
+    delete: 'Delete',
+    view: 'View',
+    confirm: 'Confirm',
+    cancel: 'Cancel',
+    back: 'Back',
+    next: 'Next',
+    submit: 'Submit',
   },
   ar: {
     dashboard: 'لوحة المعلومات',
@@ -92,7 +142,9 @@ const translations: Record<Language, Record<string, string>> = {
     accountSettings: 'إعدادات الحساب',
     support: 'الدعم الفني',
     logout: 'تسجيل الخروج',
+    logoutSuccess: 'تم تسجيل الخروج بنجاح',
     
+    // Report translations
     clinicalReport: 'تقرير التقييم السريري',
     downloadPdf: 'تحميل التقرير بصيغة PDF',
     executiveSummary: 'الملخص التنفيذي',
@@ -108,6 +160,7 @@ const translations: Record<Language, Record<string, string>> = {
     processingSpeed: 'سرعة المعالجة',
     executiveFunction: 'الوظائف التنفيذية',
     overall: 'التقييم العام',
+    date: 'التاريخ',
     
     attentionExplanation: 'يقيس القدرة على التركيز على المثيرات المحددة مع تصفية المشتتات',
     memoryExplanation: 'تقييم القدرة على تخزين واسترجاع المعلومات والاحتفاظ بها',
@@ -119,6 +172,7 @@ const translations: Record<Language, Record<string, string>> = {
     inattentionExplanation: 'عدد أخطاء الإغفال بسبب الفشل في الاستجابة للمثيرات المستهدفة',
     crossGameExplanation: 'مقارنة الأداء عبر التمارين المعرفية المختلفة',
     
+    // Patient management translations
     managePatientProfiles: 'إدارة ملفات المرضى وبيانات التقييم',
     addPatient: 'إضافة مريض',
     searchPatientsByName: 'البحث عن المرضى بالاسم...',
@@ -138,6 +192,51 @@ const translations: Record<Language, Record<string, string>> = {
     inattentive: 'نقص الانتباه',
     hyperactive: 'فرط الحركة والاندفاع',
     combined: 'مشترك',
+    retry: 'إعادة المحاولة',
+    retrying: 'جاري إعادة المحاولة',
+
+    // Dashboard and Navigation
+    overview: 'نظرة عامة',
+    recentActivity: 'النشاط الأخير',
+    upcomingSessions: 'الجلسات القادمة',
+    patientProgress: 'تقدم المريض',
+    viewAll: 'عرض الكل',
+    todaysSessions: 'جلسات اليوم',
+    noSessions: 'لا توجد جلسات مجدولة لليوم',
+
+    // Session related
+    sessionDetails: 'تفاصيل الجلسة',
+    duration: 'المدة',
+    completionRate: 'معدل الإكمال',
+    startSession: 'بدء الجلسة',
+    endSession: 'إنهاء الجلسة',
+    reschedule: 'إعادة جدولة',
+    cancel: 'إلغاء',
+    minutes: 'دقائق',
+    
+    // Status and metrics
+    completed: 'مكتمل',
+    inProgress: 'قيد التنفيذ',
+    notStarted: 'لم يبدأ',
+    cancelled: 'ملغى',
+    high: 'مرتفع',
+    medium: 'متوسط',
+    low: 'منخفض',
+    excellent: 'ممتاز',
+    good: 'جيد',
+    average: 'متوسط',
+    needsImprovement: 'يحتاج إلى تحسين',
+    
+    // Common actions
+    save: 'حفظ',
+    edit: 'تعديل',
+    delete: 'حذف',
+    view: 'عرض',
+    confirm: 'تأكيد',
+    cancel: 'إلغاء',
+    back: 'رجوع',
+    next: 'التالي',
+    submit: 'إرسال',
   }
 };
 
@@ -186,4 +285,3 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     </LanguageContext.Provider>
   );
 };
-

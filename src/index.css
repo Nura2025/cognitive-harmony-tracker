@@ -126,26 +126,67 @@
   }
 
   /* RTL specific adjustments */
-  [dir="rtl"] .flex-row {
-    flex-direction: row-reverse;
+  [dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-x-reverse: 1;
   }
-
-  [dir="rtl"] .ml-auto {
-    margin-left: 0;
-    margin-right: auto;
+  
+  [dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-x-reverse: 1;
   }
-
-  [dir="rtl"] .mr-auto {
+  
+  [dir="rtl"] .mr-2 {
     margin-right: 0;
-    margin-left: auto;
+    margin-left: 0.5rem;
   }
-
+  
+  [dir="rtl"] .ml-2 {
+    margin-left: 0;
+    margin-right: 0.5rem;
+  }
+  
+  [dir="rtl"] .mr-4 {
+    margin-right: 0;
+    margin-left: 1rem;
+  }
+  
+  [dir="rtl"] .ml-4 {
+    margin-left: 0;
+    margin-right: 1rem;
+  }
+  
+  [dir="rtl"] .pl-8 {
+    padding-left: 0;
+    padding-right: 2rem;
+  }
+  
+  [dir="rtl"] .pr-8 {
+    padding-right: 0;
+    padding-left: 2rem;
+  }
+  
   [dir="rtl"] .text-left {
     text-align: right;
   }
-
+  
   [dir="rtl"] .text-right {
     text-align: left;
+  }
+  
+  /* Navigation menu RTL adjustments */
+  [dir="rtl"] .radix-navigation-menu-content {
+    --radix-navigation-menu-viewport-left: auto;
+    --radix-navigation-menu-viewport-right: 0;
+    transform-origin: 100% 0;
+  }
+  
+  [dir="rtl"] .react-datepicker__header {
+    direction: rtl;
+  }
+  
+  [dir="rtl"] .react-datepicker__day-names,
+  [dir="rtl"] .react-datepicker__week {
+    display: flex;
+    flex-direction: row-reverse;
   }
 }
 
@@ -198,6 +239,11 @@
   }
 }
 
+/* RTL specific animations */
+[dir="rtl"] .shimmer::after {
+  animation-direction: reverse;
+}
+
 /* Pixel art specific styles */
 .pixel-font {
   font-family: 'Press Start 2P', cursive;
@@ -223,4 +269,25 @@
     94% 10%, 94% 0%, 96% 0%, 96% 10%, 98% 10%, 98% 0%, 
     100% 0%, 100% 100%, 0% 100%
   );
+}
+
+/* RTL-specific overrides for shadcn components */
+[dir="rtl"] .navigation-menu-trigger .chevron {
+  margin-left: 0;
+  margin-right: 8px;
+}
+
+[dir="rtl"] .navigation-menu-content {
+  transform-origin: top right;
+}
+
+/* To ensure icons are aligned properly in RTL */
+[dir="rtl"] svg + span:not(.absolute) {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
+
+[dir="rtl"] .radix-dropdown-menu-content {
+  direction: rtl;
+  text-align: right;
 }

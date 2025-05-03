@@ -18,6 +18,7 @@ export function LanguageToggle() {
       onClick={toggleLanguage}
       className="text-sm font-medium flex items-center gap-1.5"
       title={language === 'en' ? 'العربية' : 'English'}
+      aria-label={language === 'en' ? 'Switch to Arabic' : 'Switch to English'}
     >
       <Globe className="h-4 w-4" />
       <span>{language === 'en' ? 'العربية' : 'English'}</span>

@@ -12,6 +12,7 @@ import ReportVisualizations from '@/components/reports/ReportVisualizations';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Sheet, SheetContent, SheetClose } from '@/components/ui/sheet';
 import { X } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PatientReportTabProps {
   patientId: string;
@@ -22,6 +23,7 @@ export const PatientReportTab: React.FC<PatientReportTabProps> = ({ patientId, p
   const [reports, setReports] = useState<ReportType[]>(() => mockReports(patientId));
   const [selectedReport, setSelectedReport] = useState<ReportType | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { language } = useLanguage();
   
   // Function to handle adding a new report
   const handleAddReport = (newReport: ReportType) => {
@@ -84,7 +86,7 @@ export const PatientReportTab: React.FC<PatientReportTabProps> = ({ patientId, p
   
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
         <div className="lg:col-span-2">
           <PatientReports 
             reports={reports} 
@@ -118,7 +120,7 @@ export const PatientReportTab: React.FC<PatientReportTabProps> = ({ patientId, p
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           {selectedReport && (
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
+              <div className={`flex justify-between items-center ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
                 <h2 className="text-xl font-semibold">{selectedReport.title}</h2>
               </div>
               <ReportVisualizations 
