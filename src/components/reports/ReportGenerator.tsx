@@ -27,7 +27,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
 // Import the jsPDF and html2canvas libraries with proper type handling
-import jspdf from 'jspdf';
+import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 
 interface ReportGeneratorProps {
@@ -179,7 +179,7 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       const canvas = await html2canvas(reportContainer, {scale: 2});
       const imgData = canvas.toDataURL('image/png');
       
-      const pdf = new jspdf('p', 'mm', 'a4');
+      const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       const imgWidth = canvas.width;
