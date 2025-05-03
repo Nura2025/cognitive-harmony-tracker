@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { AlertCircle, ChevronDown, ChevronUp, Info } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -7,7 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { TrendData } from '@/services/patient';
 import SessionService from '@/services/session';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { InfoTooltip } from '@/components/ui/info-tooltip';
 
 interface MemoryTabProps {
   session: TrendData;
@@ -28,15 +29,15 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
   formatPercentile,
   getClassificationStyle
 }) => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [memoryDetails, setMemoryDetails] = useState<any>(null);
   
   const sessionId = session.session_id;
 
-  // Only fetch when memory domain is expanded and we don't already have the data
+  // Fetch memory details whenever the tab is active
   useEffect(() => {
-    if (expandedDomain === 'memory' && sessionId && !memoryDetails) {
+    if (sessionId) {
       setLoading(true);
       setError(null);
       
@@ -59,7 +60,7 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
           setLoading(false);
         });
     }
-  }, [expandedDomain, sessionId, memoryDetails]);
+  }, [sessionId]);
 
   // Combine fetched data with session data if available
   const details = memoryDetails || (session.memory_details || null);
@@ -71,13 +72,13 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
           <CardContent className="p-6">
             <div className="space-y-4">
               <Skeleton className="h-8 w-48" />
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <Skeleton className="h-24 w-full" />
                 <Skeleton className="h-24 w-full" />
                 <Skeleton className="h-24 w-full" />
               </div>
               <Skeleton className="h-8 w-36" />
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Skeleton className="h-40 w-full" />
                 <Skeleton className="h-40 w-full" />
               </div>
@@ -132,23 +133,14 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
         <CardContent className="p-6">
           <h3 className="text-lg font-medium mb-4 border-b pb-2">Memory Assessment Summary</h3>
           
-          <div className="grid grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
             <div className="bg-background p-4 rounded-lg shadow-sm border">
               <div className="text-sm font-medium mb-1">Overall Score</div>
               <div className="flex items-center justify-between">
                 <div className={`text-2xl font-bold ${getScoreColor(details.overall_score)}`}>
                   {formatScore(details.overall_score)}
                 </div>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Combined score from all memory assessments</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <InfoTooltip text="Combined score from all memory assessments" size="sm" />
               </div>
               <Progress 
                 value={details.overall_score} 
@@ -163,16 +155,7 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
                 <div className="text-2xl font-bold">
                   {formatPercentile(details.percentile)}
                 </div>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Performance compared to peers in the same age group</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <InfoTooltip text="Performance compared to peers in the same age group" size="sm" />
               </div>
               <Progress 
                 value={details.percentile} 
@@ -187,16 +170,7 @@ export const MemoryTab: React.FC<MemoryTabProps> = ({
                 <div className={`text-lg font-semibold px-3 py-1 rounded-full ${getClassificationStyle(details.classification)}`}>
                   {details.classification}
                 </div>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Clinical interpretation of memory performance</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <InfoTooltip text="Clinical interpretation of memory performance" size="sm" />
               </div>
             </div>
           </div>
