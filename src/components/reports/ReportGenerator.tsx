@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,8 +16,7 @@ import {
   FileText, 
   LayoutTemplate, 
   Mail, 
-  Printer, 
-  Share2
+  Printer
 } from 'lucide-react';
 import { Patient, PatientMetrics, ReportType } from '@/utils/types/patientTypes';
 import { format } from 'date-fns';
@@ -25,8 +25,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-// Properly import the jsPDF and html2canvas libraries
-import jsPDF from 'jspdf';
+
+// Import the jsPDF and html2canvas libraries with proper type handling
+import jspdf from 'jspdf';
 import html2canvas from 'html2canvas';
 
 interface ReportGeneratorProps {
@@ -178,7 +179,7 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       const canvas = await html2canvas(reportContainer, {scale: 2});
       const imgData = canvas.toDataURL('image/png');
       
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdf = new jspdf('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       const imgWidth = canvas.width;
