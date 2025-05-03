@@ -77,50 +77,167 @@ export const PatientReports: React.FC<PatientReportsProps> = ({
       reportContainer.style.padding = '20px';
       reportContainer.style.fontFamily = 'Arial, sans-serif';
       
-      // Build report HTML content
+      // Build enhanced report HTML content with more detailed sections
       reportContainer.innerHTML = `
-        <h1 style="color:#333;">${report.title}</h1>
-        <p style="color:#666;font-style:italic;">Generated on ${format(parseISO(report.createdDate), 'MMMM d, yyyy')}</p>
+        <h1 style="color:#333;font-size:24px;margin-bottom:10px;">${report.title}</h1>
+        <p style="color:#666;font-style:italic;margin-bottom:20px;">Generated on ${format(parseISO(report.createdDate), 'MMMM d, yyyy')}</p>
         
         ${report.sections.overview ? `
-          <div style="margin-bottom:20px;">
-            <h2 style="color:#333;">Patient Overview</h2>
-            <p>This report contains an overview of the patient's performance and progress.</p>
+          <div style="margin-bottom:25px;border-bottom:1px solid #eee;padding-bottom:15px;">
+            <h2 style="color:#333;font-size:18px;margin-bottom:10px;">Patient Overview</h2>
+            <p>This comprehensive report provides detailed insights into the patient's cognitive performance across multiple domains and sessions.</p>
+            <p style="margin-top:10px;"><strong>Assessment Purpose:</strong> To evaluate cognitive function and monitor progress over time</p>
+            <p><strong>Report Type:</strong> ${getReportTypeLabel(report.type)}</p>
+            <p><strong>Status:</strong> ${report.status.charAt(0).toUpperCase() + report.status.slice(1)}</p>
           </div>
         ` : ''}
         
         ${report.sections.domainAnalysis ? `
-          <div style="margin-bottom:20px;">
-            <h2 style="color:#333;">Cognitive Domain Analysis</h2>
-            <p>Analysis of cognitive domains including attention, memory, executive function, and behavioral aspects.</p>
+          <div style="margin-bottom:25px;border-bottom:1px solid #eee;padding-bottom:15px;">
+            <h2 style="color:#333;font-size:18px;margin-bottom:10px;">Cognitive Domain Analysis</h2>
+            <p>Detailed analysis of cognitive domains showing strengths and areas for improvement:</p>
+            
+            <div style="margin-top:15px;">
+              <h3 style="color:#555;font-size:16px;margin-bottom:5px;">Attention</h3>
+              <p>Score: 75%</p>
+              <p style="margin-top:5px;">The patient demonstrates good sustained attention with some difficulties in divided attention tasks. Selective attention is within normal limits but shows room for improvement.</p>
+              <p style="margin-top:5px;"><strong>Interpretation:</strong> Moderate performance with positive trajectory.</p>
+            </div>
+            
+            <div style="margin-top:15px;">
+              <h3 style="color:#555;font-size:16px;margin-bottom:5px;">Memory</h3>
+              <p>Score: 65%</p>
+              <p style="margin-top:5px;">Working memory shows some limitations, particularly with sequential tasks. Visual memory is stronger than verbal memory. Long-term recall is inconsistent.</p>
+              <p style="margin-top:5px;"><strong>Interpretation:</strong> Moderate performance with opportunities for targeted intervention.</p>
+            </div>
+            
+            <div style="margin-top:15px;">
+              <h3 style="color:#555;font-size:16px;margin-bottom:5px;">Executive Function</h3>
+              <p>Score: 80%</p>
+              <p style="margin-top:5px;">Good problem-solving abilities and cognitive flexibility. Planning and organization skills are well-developed. Task initiation sometimes requires prompting.</p>
+              <p style="margin-top:5px;"><strong>Interpretation:</strong> Strong performance; relative strength compared to other domains.</p>
+            </div>
+            
+            <div style="margin-top:15px;">
+              <h3 style="color:#555;font-size:16px;margin-bottom:5px;">Behavioral</h3>
+              <p>Score: 70%</p>
+              <p style="margin-top:5px;">Generally appropriate self-regulation with occasional impulsivity. Response inhibition is developing well. Emotional regulation is appropriate for developmental stage.</p>
+              <p style="margin-top:5px;"><strong>Interpretation:</strong> Good behavioral control with specific situations triggering challenges.</p>
+            </div>
           </div>
         ` : ''}
         
         ${report.sections.trends ? `
-          <div style="margin-bottom:20px;">
-            <h2 style="color:#333;">Performance Trends</h2>
-            <p>Analysis of patient's performance trends over time across multiple sessions.</p>
+          <div style="margin-bottom:25px;border-bottom:1px solid #eee;padding-bottom:15px;">
+            <h2 style="color:#333;font-size:18px;margin-bottom:10px;">Performance Trends</h2>
+            <p>Longitudinal analysis of patient's performance across ${report.type === 'detailed' ? '12' : '8'} assessment sessions:</p>
+            
+            <div style="margin-top:15px;">
+              <h3 style="color:#555;font-size:16px;margin-bottom:5px;">Progress Summary</h3>
+              <p><strong>Sessions Completed:</strong> 12</p>
+              <p><strong>Overall Progress:</strong> 8% improvement</p>
+              <p><strong>Most Improved Domain:</strong> Executive Function (+15%)</p>
+              <p><strong>Least Improved Domain:</strong> Memory (+3%)</p>
+            </div>
+            
+            <div style="margin-top:15px;">
+              <h3 style="color:#555;font-size:16px;margin-bottom:5px;">Consistency Analysis</h3>
+              <p>Performance shows greater consistency in morning sessions compared to afternoon sessions. Environmental factors appear to influence attention scores significantly.</p>
+            </div>
+            
+            <div style="margin-top:15px;">
+              <h3 style="color:#555;font-size:16px;margin-bottom:5px;">Response to Interventions</h3>
+              <p>Positive response to working memory exercises implemented in session 5. Attention training modules show mixed results with greater efficacy when combined with behavioral strategies.</p>
+            </div>
           </div>
         ` : ''}
         
         ${report.sections.recommendations ? `
-          <div style="margin-bottom:20px;">
-            <h2 style="color:#333;">Clinical Recommendations</h2>
-            <p>Based on the assessment results, the following recommendations are provided:</p>
-            <ul>
-              <li>Continue regular cognitive assessments</li>
-              <li>Focus on exercises that target executive function</li>
-              <li>Consider strategies for enhancing attention span</li>
+          <div style="margin-bottom:25px;border-bottom:1px solid #eee;padding-bottom:15px;">
+            <h2 style="color:#333;font-size:18px;margin-bottom:10px;">Clinical Recommendations</h2>
+            <p>Based on comprehensive assessment results, the following evidence-based recommendations are provided:</p>
+            
+            <h3 style="color:#555;font-size:16px;margin:15px 0 5px;">Cognitive Interventions:</h3>
+            <ul style="margin-left:20px;line-height:1.5;">
+              <li>Continue regular cognitive assessments on a bi-weekly schedule</li>
+              <li>Focus on exercises that target executive function, particularly in planning and organization</li>
+              <li>Implement structured working memory training 3x weekly for 15-20 minutes per session</li>
+              <li>Consider dual-task training to enhance divided attention capacity</li>
+            </ul>
+            
+            <h3 style="color:#555;font-size:16px;margin:15px 0 5px;">Environmental Modifications:</h3>
+            <ul style="margin-left:20px;line-height:1.5;">
+              <li>Minimize distractions during focused work periods</li>
+              <li>Implement visual schedules and reminders</li>
+              <li>Break complex tasks into smaller, manageable steps</li>
+              <li>Utilize strengths in visual processing when presenting new information</li>
+            </ul>
+            
+            <h3 style="color:#555;font-size:16px;margin:15px 0 5px;">Follow-up Plan:</h3>
+            <ul style="margin-left:20px;line-height:1.5;">
+              <li>Comprehensive reassessment in 3 months</li>
+              <li>Monthly check-ins to adjust intervention strategies as needed</li>
+              <li>Consider school consultation if academic challenges persist</li>
             </ul>
           </div>
         ` : ''}
         
         ${report.sections.rawData ? `
-          <div style="margin-bottom:20px;">
-            <h2 style="color:#333;">Raw Assessment Data</h2>
-            <p>Detailed raw data from assessments is available upon request.</p>
+          <div style="margin-bottom:25px;">
+            <h2 style="color:#333;font-size:18px;margin-bottom:10px;">Raw Assessment Data</h2>
+            <p>Detailed raw data from assessments showing test-by-test performance metrics:</p>
+            
+            <table style="width:100%;border-collapse:collapse;margin-top:15px;font-size:14px;">
+              <thead>
+                <tr style="background-color:#f3f4f6;">
+                  <th style="padding:8px;text-align:left;border:1px solid #ddd;">Assessment</th>
+                  <th style="padding:8px;text-align:left;border:1px solid #ddd;">Raw Score</th>
+                  <th style="padding:8px;text-align:left;border:1px solid #ddd;">Percentile</th>
+                  <th style="padding:8px;text-align:left;border:1px solid #ddd;">Classification</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding:8px;border:1px solid #ddd;">Continuous Performance Test</td>
+                  <td style="padding:8px;border:1px solid #ddd;">42/50</td>
+                  <td style="padding:8px;border:1px solid #ddd;">75th</td>
+                  <td style="padding:8px;border:1px solid #ddd;">Above Average</td>
+                </tr>
+                <tr style="background-color:#f9fafb;">
+                  <td style="padding:8px;border:1px solid #ddd;">Digit Span Forward</td>
+                  <td style="padding:8px;border:1px solid #ddd;">6</td>
+                  <td style="padding:8px;border:1px solid #ddd;">65th</td>
+                  <td style="padding:8px;border:1px solid #ddd;">Average</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px;border:1px solid #ddd;">Digit Span Backward</td>
+                  <td style="padding:8px;border:1px solid #ddd;">4</td>
+                  <td style="padding:8px;border:1px solid #ddd;">55th</td>
+                  <td style="padding:8px;border:1px solid #ddd;">Average</td>
+                </tr>
+                <tr style="background-color:#f9fafb;">
+                  <td style="padding:8px;border:1px solid #ddd;">Trail Making Test A</td>
+                  <td style="padding:8px;border:1px solid #ddd;">28 sec</td>
+                  <td style="padding:8px;border:1px solid #ddd;">80th</td>
+                  <td style="padding:8px;border:1px solid #ddd;">Above Average</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px;border:1px solid #ddd;">Trail Making Test B</td>
+                  <td style="padding:8px;border:1px solid #ddd;">65 sec</td>
+                  <td style="padding:8px;border:1px solid #ddd;">70th</td>
+                  <td style="padding:8px;border:1px solid #ddd;">Average</td>
+                </tr>
+              </tbody>
+            </table>
+            
+            <p style="margin-top:15px;font-style:italic;">Complete raw data files are available upon request for professional review.</p>
           </div>
         ` : ''}
+        
+        <div style="margin-top:30px;font-size:12px;color:#666;border-top:1px solid #eee;padding-top:15px;">
+          <p>This report is confidential and contains protected health information. It should only be shared with authorized individuals involved in the patient's care.</p>
+          <p style="margin-top:5px;">Generated by Cognitive Assessment Platform on ${format(parseISO(report.createdDate), 'MMMM d, yyyy')}.</p>
+        </div>
       `;
       
       // Append to document body temporarily (hidden)
@@ -228,10 +345,10 @@ export const PatientReports: React.FC<PatientReportsProps> = ({
         </CardContent>
       </Card>
 
-      {/* Report Viewing Dialog */}
+      {/* Report Viewing Dialog with Enhanced Content */}
       <Dialog open={!!viewingReport} onOpenChange={closeReportView}>
         {viewingReport && (
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-xl">{viewingReport.title}</DialogTitle>
             </DialogHeader>
@@ -250,19 +367,23 @@ export const PatientReports: React.FC<PatientReportsProps> = ({
                   {viewingReport.sections.overview && (
                     <div className="mb-6">
                       <h3 className="text-lg font-semibold mb-2">Patient Overview</h3>
-                      <p className="text-muted-foreground">
-                        This report contains an overview of the patient's performance and progress.
+                      <p className="text-muted-foreground mb-3">
+                        This comprehensive report provides detailed insights into the patient's cognitive performance across multiple domains and sessions.
                       </p>
+                      <div className="bg-muted/20 p-3 rounded-md">
+                        <p className="mb-1"><strong>Assessment Purpose:</strong> To evaluate cognitive function and monitor progress over time</p>
+                        <p><strong>Report Type:</strong> {getReportTypeLabel(viewingReport.type)}</p>
+                      </div>
                     </div>
                   )}
                   
                   {viewingReport.sections.domainAnalysis && (
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold mb-2">Cognitive Domain Analysis</h3>
-                      <p className="text-muted-foreground">
-                        Analysis of cognitive domains including attention, memory, executive function, and behavioral aspects.
+                    <div className="mb-8">
+                      <h3 className="text-lg font-semibold mb-3">Cognitive Domain Analysis</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Detailed analysis of cognitive domains showing strengths and areas for improvement:
                       </p>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                         <div className="bg-background border rounded-md p-3">
                           <span className="text-sm text-muted-foreground block mb-1">Attention</span>
                           <span className="text-xl font-semibold">75%</span>
@@ -280,45 +401,171 @@ export const PatientReports: React.FC<PatientReportsProps> = ({
                           <span className="text-xl font-semibold">70%</span>
                         </div>
                       </div>
+                      
+                      <div className="space-y-4">
+                        <div className="bg-muted/20 p-4 rounded-md">
+                          <h4 className="font-medium mb-2">Attention - 75%</h4>
+                          <p className="text-sm">The patient demonstrates good sustained attention with some difficulties in divided attention tasks. Selective attention is within normal limits but shows room for improvement.</p>
+                          <p className="text-sm mt-2 font-medium">Interpretation: Moderate performance with positive trajectory.</p>
+                        </div>
+                        
+                        <div className="bg-muted/20 p-4 rounded-md">
+                          <h4 className="font-medium mb-2">Memory - 65%</h4>
+                          <p className="text-sm">Working memory shows some limitations, particularly with sequential tasks. Visual memory is stronger than verbal memory. Long-term recall is inconsistent.</p>
+                          <p className="text-sm mt-2 font-medium">Interpretation: Moderate performance with opportunities for targeted intervention.</p>
+                        </div>
+                        
+                        <div className="bg-muted/20 p-4 rounded-md">
+                          <h4 className="font-medium mb-2">Executive Function - 80%</h4>
+                          <p className="text-sm">Good problem-solving abilities and cognitive flexibility. Planning and organization skills are well-developed. Task initiation sometimes requires prompting.</p>
+                          <p className="text-sm mt-2 font-medium">Interpretation: Strong performance; relative strength compared to other domains.</p>
+                        </div>
+                        
+                        <div className="bg-muted/20 p-4 rounded-md">
+                          <h4 className="font-medium mb-2">Behavioral - 70%</h4>
+                          <p className="text-sm">Generally appropriate self-regulation with occasional impulsivity. Response inhibition is developing well. Emotional regulation is appropriate for developmental stage.</p>
+                          <p className="text-sm mt-2 font-medium">Interpretation: Good behavioral control with specific situations triggering challenges.</p>
+                        </div>
+                      </div>
                     </div>
                   )}
                   
                   {viewingReport.sections.trends && (
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold mb-2">Performance Trends</h3>
-                      <p className="text-muted-foreground">
-                        Analysis of patient's performance trends over time across multiple sessions.
+                    <div className="mb-8">
+                      <h3 className="text-lg font-semibold mb-3">Performance Trends</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Longitudinal analysis of performance across multiple assessment sessions:
                       </p>
-                      <div className="grid grid-cols-2 gap-4 mt-4">
+                      
+                      <div className="grid grid-cols-2 gap-4 mb-5">
                         <div className="bg-background border rounded-md p-3">
                           <span className="text-sm text-muted-foreground block mb-1">Sessions Completed</span>
                           <span className="text-xl font-semibold">12</span>
                         </div>
                         <div className="bg-background border rounded-md p-3">
-                          <span className="text-sm text-muted-foreground block mb-1">Progress</span>
-                          <span className="text-xl font-semibold">8%</span>
+                          <span className="text-sm text-muted-foreground block mb-1">Overall Progress</span>
+                          <span className="text-xl font-semibold">+8%</span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <div className="bg-muted/20 p-4 rounded-md">
+                          <h4 className="font-medium mb-2">Progress Analysis</h4>
+                          <ul className="list-disc pl-5 space-y-1 text-sm">
+                            <li>Most improved domain: Executive Function (+15%)</li>
+                            <li>Least improved domain: Memory (+3%)</li>
+                            <li>Performance consistency has improved by 20% since first assessment</li>
+                            <li>Response time has decreased by 12% across all tasks</li>
+                          </ul>
+                        </div>
+                        
+                        <div className="bg-muted/20 p-4 rounded-md">
+                          <h4 className="font-medium mb-2">Consistency Analysis</h4>
+                          <p className="text-sm">Performance shows greater consistency in morning sessions compared to afternoon sessions. Environmental factors appear to influence attention scores significantly.</p>
+                        </div>
+                        
+                        <div className="bg-muted/20 p-4 rounded-md">
+                          <h4 className="font-medium mb-2">Response to Interventions</h4>
+                          <p className="text-sm">Positive response to working memory exercises implemented in session 5. Attention training modules show mixed results with greater efficacy when combined with behavioral strategies.</p>
                         </div>
                       </div>
                     </div>
                   )}
                   
                   {viewingReport.sections.recommendations && (
-                    <div className="mb-6">
-                      <h3 className="text-lg font-semibold mb-2">Clinical Recommendations</h3>
-                      <ul className="list-disc pl-5 space-y-1">
-                        <li>Continue regular cognitive assessments</li>
-                        <li>Focus on exercises that target executive function</li>
-                        <li>Consider strategies for enhancing attention span</li>
-                        <li>Schedule follow-up evaluation in 3 months</li>
-                      </ul>
+                    <div className="mb-8">
+                      <h3 className="text-lg font-semibold mb-3">Clinical Recommendations</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Based on comprehensive assessment results, the following evidence-based recommendations are provided:
+                      </p>
+                      
+                      <div className="space-y-5">
+                        <div>
+                          <h4 className="font-medium mb-2">Cognitive Interventions</h4>
+                          <ul className="list-disc pl-5 space-y-1">
+                            <li>Continue regular cognitive assessments on a bi-weekly schedule</li>
+                            <li>Focus on exercises that target executive function, particularly in planning and organization</li>
+                            <li>Implement structured working memory training 3x weekly for 15-20 minutes per session</li>
+                            <li>Consider dual-task training to enhance divided attention capacity</li>
+                          </ul>
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-medium mb-2">Environmental Modifications</h4>
+                          <ul className="list-disc pl-5 space-y-1">
+                            <li>Minimize distractions during focused work periods</li>
+                            <li>Implement visual schedules and reminders</li>
+                            <li>Break complex tasks into smaller, manageable steps</li>
+                            <li>Utilize strengths in visual processing when presenting new information</li>
+                          </ul>
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-medium mb-2">Follow-up Plan</h4>
+                          <ul className="list-disc pl-5 space-y-1">
+                            <li>Comprehensive reassessment in 3 months</li>
+                            <li>Monthly check-ins to adjust intervention strategies as needed</li>
+                            <li>Consider school consultation if academic challenges persist</li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   )}
                   
                   {viewingReport.sections.rawData && (
                     <div className="mb-6">
-                      <h3 className="text-lg font-semibold mb-2">Raw Assessment Data</h3>
-                      <p className="text-muted-foreground">
-                        Detailed raw data from assessments is available upon request.
+                      <h3 className="text-lg font-semibold mb-3">Raw Assessment Data</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Detailed raw data from assessments showing test-by-test performance metrics:
+                      </p>
+                      
+                      <div className="overflow-x-auto">
+                        <table className="w-full border-collapse">
+                          <thead>
+                            <tr className="bg-muted/30">
+                              <th className="border p-2 text-left">Assessment</th>
+                              <th className="border p-2 text-left">Raw Score</th>
+                              <th className="border p-2 text-left">Percentile</th>
+                              <th className="border p-2 text-left">Classification</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td className="border p-2">Continuous Performance Test</td>
+                              <td className="border p-2">42/50</td>
+                              <td className="border p-2">75th</td>
+                              <td className="border p-2">Above Average</td>
+                            </tr>
+                            <tr className="bg-muted/10">
+                              <td className="border p-2">Digit Span Forward</td>
+                              <td className="border p-2">6</td>
+                              <td className="border p-2">65th</td>
+                              <td className="border p-2">Average</td>
+                            </tr>
+                            <tr>
+                              <td className="border p-2">Digit Span Backward</td>
+                              <td className="border p-2">4</td>
+                              <td className="border p-2">55th</td>
+                              <td className="border p-2">Average</td>
+                            </tr>
+                            <tr className="bg-muted/10">
+                              <td className="border p-2">Trail Making Test A</td>
+                              <td className="border p-2">28 sec</td>
+                              <td className="border p-2">80th</td>
+                              <td className="border p-2">Above Average</td>
+                            </tr>
+                            <tr>
+                              <td className="border p-2">Trail Making Test B</td>
+                              <td className="border p-2">65 sec</td>
+                              <td className="border p-2">70th</td>
+                              <td className="border p-2">Average</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      
+                      <p className="text-xs text-muted-foreground mt-4">
+                        Complete raw data files are available upon request for professional review.
                       </p>
                     </div>
                   )}
