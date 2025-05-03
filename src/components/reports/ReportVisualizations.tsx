@@ -1,368 +1,255 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { motion } from 'framer-motion';
-import AuthService from '../services/auth';
 
-const Landing: React.FC = () => {
-  const navigate = useNavigate();
-  const isAuthenticated = AuthService.isAuthenticated();
+import React from 'react';
+import { 
+  LineChart, Line, XAxis, YAxis, CartesianGrid, 
+  Tooltip, Legend, ResponsiveContainer,
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar
+} from 'recharts';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Download, Printer } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import { ReportType } from '@/utils/types/patientTypes';
+
+interface ReportVisualizationsProps {
+  report: ReportType;
+  patientId: string;
+  patientName: string;
+}
+
+const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({
+  report,
+  patientId,
+  patientName
+}) => {
+  // Format data for charts
+  const performanceData = [
+    { name: 'Attention', score: report.metrics.attention },
+    { name: 'Memory', score: report.metrics.memory },
+    { name: 'Executive', score: report.metrics.executiveFunction },
+    { name: 'Behavioral', score: report.metrics.behavioral },
+  ];
   
-  const handleSignInClick = () => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    } else {
-      navigate('/login');
+  const progressData = [
+    { name: 'Week 1', score: 65 },
+    { name: 'Week 2', score: 68 },
+    { name: 'Week 3', score: 72 },
+    { name: 'Week 4', score: report.metrics.percentile },
+  ];
+
+  const domainData = performanceData.map(item => ({
+    subject: item.name,
+    A: item.score,
+    fullMark: 100,
+  }));
+
+  // Generate PDF report
+  const generatePDF = async () => {
+    const element = document.getElementById('report-content');
+    if (!element) return;
+    
+    try {
+      const canvas = await html2canvas(element);
+      const imgData = canvas.toDataURL('image/png');
+      
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      const imgY = 30;
+      
+      pdf.setFontSize(18);
+      pdf.text(`Cognitive Report: ${patientName}`, 14, 22);
+      
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      pdf.save(`report_${patientId}_${new Date().toISOString().split('T')[0]}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
     }
   };
 
+  // Print report
+  const printReport = () => {
+    window.print();
+  };
+
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#0A2342] to-[#121212]">
-      {/* Navigation */}
-      <nav className="container mx-auto px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center">
-          <img 
-            src="/lovable-uploads/41067270-5c65-44fb-8d3b-89fc90445214.png" 
-            alt="NURA Logo" 
-            className="h-12 w-auto"
-          />
-        </div>
-        <div className="flex items-center space-x-4">
-          {isAuthenticated ? (
-            <Button 
-              className="bg-[#5EF38C] text-[#0A2342] hover:bg-[#4DD77C]"
-              onClick={() => navigate('/dashboard')}
-            >
-              Dashboard
-            </Button>
-          ) : (
-            <>
-              <Button 
-                variant="outline" 
-                className="border-[#5EF38C] text-[#5EF38C] hover:bg-[#5EF38C]/20"
-                onClick={handleSignInClick}
-              >
-                Sign In
-              </Button>
-              <Link to="/register">
-                <Button className="bg-[#5EF38C] text-[#0A2342] hover:bg-[#4DD77C]">
-                  Sign Up
-                </Button>
-              </Link>
-            </>
-          )}
-        </div>
-      </nav>
-      
-      {/* Hero */}
-      <section className="container mx-auto px-6 py-20 flex flex-col md:flex-row items-center">
-        <div className="md:w-1/2">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white leading-tight">
-            <span className="inline-block text-[#5EF38C] pixel-font">NURA</span>
-            <br />
-            <span className="inline-block">Cognitive Training</span>
-          </h1>
-          <p className="text-xl mb-8 text-gray-300">
-            Train your brain with engaging cognitive exercises designed by clinical psychologists.
+    <div className="space-y-6">
+      {/* Header with actions */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h3 className="text-xl font-bold">{report.title}</h3>
+          <p className="text-muted-foreground">
+            {new Date(report.date).toLocaleDateString()} • Patient ID: {patientId}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4">
-            {isAuthenticated ? (
-              <Button 
-                size="lg" 
-                className="bg-[#5EF38C] text-[#0A2342] hover:bg-[#4DD77C] px-8 py-6"
-                onClick={() => navigate('/dashboard')}
-              >
-                Go to Dashboard
-              </Button>
-            ) : (
-              <Link to="/register">
-                <Button size="lg" className="bg-[#5EF38C] text-[#0A2342] hover:bg-[#4DD77C] px-8 py-6">
-                  Get Started
-                </Button>
-              </Link>
-            )}
-            <a href="#features">
-              <Button size="lg" variant="outline" className="border-[#5EF38C] text-[#5EF38C] hover:bg-[#5EF38C]/20 px-8 py-6">
-                Explore Features
-              </Button>
-            </a>
-          </div>
         </div>
-        <div className="md:w-1/2 mt-10 md:mt-0 flex justify-center">
-          <motion.img 
-            src="/lovable-uploads/41067270-5c65-44fb-8d3b-89fc90445214.png"
-            alt="NURA Hero" 
-            className="w-full max-w-md"
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ 
-              duration: 0.8,
-              repeat: Infinity,
-              repeatType: "reverse",
-              repeatDelay: 2
-            }}
-          />
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={printReport}>
+            <Printer className="mr-2 h-4 w-4" />
+            Print
+          </Button>
+          <Button size="sm" onClick={generatePDF}>
+            <Download className="mr-2 h-4 w-4" />
+            Download PDF
+          </Button>
         </div>
-      </section>
-      
-      {/* About Us */}
-      <section className="py-20 bg-black/30 backdrop-blur-sm">
-        <div className="container mx-auto px-6">
-          <h2 className="text-4xl font-bold mb-12 text-center text-[#5EF38C] pixel-font" id="about">About Us</h2>
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <p className="text-lg text-gray-300 mb-6">
-                NURA is a cognitive training platform developed by leading neuropsychologists and game designers. We combine clinical expertise with engaging gameplay to create an effective brain training experience.
-              </p>
-              <p className="text-lg text-gray-300 mb-6">
-                Our mission is to make cognitive assessment and training accessible and enjoyable for everyone, while providing powerful tools for clinicians to monitor and analyze patient progress.
-              </p>
-              <p className="text-lg text-gray-300">
-                Founded in 2023, we've already helped thousands of users improve their cognitive abilities through our science-backed exercises.
-              </p>
+      </div>
+
+      {/* Report content */}
+      <div id="report-content" className="space-y-6">
+        {/* Patient info */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h4 className="font-semibold text-sm text-muted-foreground mb-1">Patient</h4>
+                <p className="text-base">{patientName}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-muted-foreground mb-1">Report Type</h4>
+                <p className="text-base">{report.type}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-muted-foreground mb-1">Sessions Completed</h4>
+                <p className="text-base">{report.metrics.sessionsCompleted}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-muted-foreground mb-1">Total Duration</h4>
+                <p className="text-base">{report.metrics.sessionsDuration} minutes</p>
+              </div>
             </div>
-            <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
-              <div className="bg-black p-6 rounded-lg h-full">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-4">
-                    <h3 className="text-3xl font-bold text-[#5EF38C]">5000+</h3>
-                    <p className="text-gray-400">Active Users</p>
+          </CardContent>
+        </Card>
+
+        {/* Visualization tabs */}
+        <Tabs defaultValue="summary">
+          <TabsList className="grid grid-cols-3 mb-4">
+            <TabsTrigger value="summary">Summary</TabsTrigger>
+            <TabsTrigger value="performance">Performance</TabsTrigger>
+            <TabsTrigger value="domains">Cognitive Domains</TabsTrigger>
+          </TabsList>
+
+          {/* Summary Tab */}
+          <TabsContent value="summary">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Percentile score */}
+                  <div className="flex flex-col items-center justify-center p-6 border rounded-lg">
+                    <div className="text-4xl font-bold text-primary mb-2">
+                      {typeof report.metrics.percentile === 'number' 
+                        ? report.metrics.percentile.toFixed(1)
+                        : report.metrics.percentile}%
+                    </div>
+                    <p className="text-muted-foreground">Percentile Ranking</p>
                   </div>
-                  <div className="text-center p-4">
-                    <h3 className="text-3xl font-bold text-[#5EF38C]">12</h3>
-                    <p className="text-gray-400">Cognitive Games</p>
+
+                  {/* Progress */}
+                  <div className="flex flex-col items-center justify-center p-6 border rounded-lg">
+                    <div className="text-4xl font-bold text-green-500 mb-2">
+                      +{report.metrics.progress}%
+                    </div>
+                    <p className="text-muted-foreground">Progress Since Last Assessment</p>
                   </div>
-                  <div className="text-center p-4">
-                    <h3 className="text-3xl font-bold text-[#5EF38C]">98%</h3>
-                    <p className="text-gray-400">User Satisfaction</p>
-                  </div>
-                  <div className="text-center p-4">
-                    <h3 className="text-3xl font-bold text-[#5EF38C]">4</h3>
-                    <p className="text-gray-400">Cognitive Domains</p>
+
+                  {/* Report description */}
+                  <div className="col-span-1 md:col-span-2">
+                    <h4 className="font-semibold mb-2">Assessment Summary</h4>
+                    <p className="text-muted-foreground">{report.summary}</p>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* Features */}
-      <section className="py-20" id="features">
-        <div className="container mx-auto px-6">
-          <h2 className="text-4xl font-bold mb-12 text-center text-[#5EF38C] pixel-font">Game Features</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
-              <div className="bg-black p-6 rounded-lg h-full flex flex-col">
-                <div className="h-12 w-12 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-[#5EF38C] text-2xl">🧠</span>
-                </div>
-                <h3 className="text-xl font-bold mb-4 text-white">Attention Training</h3>
-                <p className="text-gray-400 flex-grow">
-                  Enhance focus and concentration with games that challenge your sustained and selective attention abilities.
-                </p>
-                <div className="mt-4 h-2 bg-[#222] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#5EF38C] w-3/4 pixel-progress"></div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Feature 2 */}
-            <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
-              <div className="bg-black p-6 rounded-lg h-full flex flex-col">
-                <div className="h-12 w-12 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-[#5EF38C] text-2xl">🎮</span>
-                </div>
-                <h3 className="text-xl font-bold mb-4 text-white">Memory Games</h3>
-                <p className="text-gray-400 flex-grow">
-                  Improve short and long-term memory with engaging pattern recognition and recall challenges.
-                </p>
-                <div className="mt-4 h-2 bg-[#222] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#5EF38C] w-2/3 pixel-progress"></div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Feature 3 */}
-            <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
-              <div className="bg-black p-6 rounded-lg h-full flex flex-col">
-                <div className="h-12 w-12 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-[#5EF38C] text-2xl">⚡</span>
-                </div>
-                <h3 className="text-xl font-bold mb-4 text-white">Executive Function</h3>
-                <p className="text-gray-400 flex-grow">
-                  Develop problem-solving, planning, and reasoning skills through adaptive puzzle challenges.
-                </p>
-                <div className="mt-4 h-2 bg-[#222] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#5EF38C] w-4/5 pixel-progress"></div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Feature 4 */}
-            <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
-              <div className="bg-black p-6 rounded-lg h-full flex flex-col">
-                <div className="h-12 w-12 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-[#5EF38C] text-2xl">📊</span>
-                </div>
-                <h3 className="text-xl font-bold mb-4 text-white">Progress Tracking</h3>
-                <p className="text-gray-400 flex-grow">
-                  Monitor your cognitive improvement with detailed analytics and performance metrics.
-                </p>
-                <div className="mt-4 h-2 bg-[#222] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#5EF38C] w-4/5 pixel-progress"></div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Feature 5 */}
-            <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
-              <div className="bg-black p-6 rounded-lg h-full flex flex-col">
-                <div className="h-12 w-12 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-[#5EF38C] text-2xl">👥</span>
-                </div>
-                <h3 className="text-xl font-bold mb-4 text-white">Clinician Dashboard</h3>
-                <p className="text-gray-400 flex-grow">
-                  Powerful tools for professionals to assess and monitor patient cognitive performance.
-                </p>
-                <div className="mt-4 h-2 bg-[#222] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#5EF38C] w-3/4 pixel-progress"></div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Feature 6 */}
-            <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
-              <div className="bg-black p-6 rounded-lg h-full flex flex-col">
-                <div className="h-12 w-12 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-[#5EF38C] text-2xl">📱</span>
-                </div>
-                <h3 className="text-xl font-bold mb-4 text-white">Multi-platform</h3>
-                <p className="text-gray-400 flex-grow">
-                  Train your brain on any device - desktop, tablet, or mobile - with seamless progress syncing.
-                </p>
-                <div className="mt-4 h-2 bg-[#222] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#5EF38C] w-1/2 pixel-progress"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* Contact Us */}
-      <section className="py-20 bg-black/30 backdrop-blur-sm" id="contact">
-        <div className="container mx-auto px-6">
-          <h2 className="text-4xl font-bold mb-12 text-center text-[#5EF38C] pixel-font">Contact Us</h2>
-          <div className="max-w-3xl mx-auto bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
-            <div className="bg-black p-8 rounded-lg">
-              <div className="grid md:grid-cols-2 gap-8">
-                <div>
-                  <h3 className="text-2xl font-bold mb-4 text-white">Get in Touch</h3>
-                  <p className="text-gray-400 mb-6">
-                    Have questions or feedback? We'd love to hear from you. Fill out the form and our team will get back to you as soon as possible.
-                  </p>
-                  <div className="space-y-4">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mr-4">
-                        <span className="text-[#5EF38C]">📧</span>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Performance Tab */}
+          <TabsContent value="performance">
+            <Card>
+              <CardContent className="pt-6">
+                <h4 className="font-semibold mb-4">Performance Over Time</h4>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={progressData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis domain={[0, 100]} />
+                    <Tooltip />
+                    <Legend />
+                    <Line 
+                      type="monotone" 
+                      dataKey="score" 
+                      stroke="#5EF38C" 
+                      activeDot={{ r: 8 }} 
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Cognitive Domains Tab */}
+          <TabsContent value="domains">
+            <Card>
+              <CardContent className="pt-6">
+                <h4 className="font-semibold mb-4">Cognitive Domain Matrix</h4>
+                <ResponsiveContainer width="100%" height={350}>
+                  <RadarChart outerRadius={90} data={domainData}>
+                    <PolarGrid />
+                    <PolarAngleAxis dataKey="subject" />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                    <Radar
+                      name="Score"
+                      dataKey="A"
+                      stroke="#5EF38C"
+                      fill="#5EF38C"
+                      fillOpacity={0.6}
+                    />
+                    <Legend />
+                  </RadarChart>
+                </ResponsiveContainer>
+                
+                <div className="grid grid-cols-2 gap-4 mt-6">
+                  {performanceData.map((domain) => (
+                    <div key={domain.name} className="border rounded p-4">
+                      <h5 className="font-medium">{domain.name}</h5>
+                      <div className="flex items-center mt-2">
+                        <div className="w-full bg-gray-200 rounded-full h-2.5 mr-2">
+                          <div 
+                            className="bg-primary h-2.5 rounded-full" 
+                            style={{ width: `${domain.score}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-sm font-medium">{domain.score}%</span>
                       </div>
-                      <span className="text-gray-300">support@nuragames.com</span>
                     </div>
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mr-4">
-                        <span className="text-[#5EF38C]">📱</span>
-                      </div>
-                      <span className="text-gray-300">+1 (888) 123-4567</span>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mr-4">
-                        <span className="text-[#5EF38C]">🏢</span>
-                      </div>
-                      <span className="text-gray-300">123 Cognitive Street, San Francisco, CA</span>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-                <div>
-                  <form className="space-y-4">
-                    <div>
-                      <label htmlFor="name" className="block text-gray-400 mb-2">Name</label>
-                      <input 
-                        type="text" 
-                        id="name" 
-                        className="w-full bg-[#222] border border-[#444] text-white px-4 py-2 rounded focus:outline-none focus:border-[#5EF38C]"
-                        placeholder="Your name"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="email" className="block text-gray-400 mb-2">Email</label>
-                      <input 
-                        type="email" 
-                        id="email" 
-                        className="w-full bg-[#222] border border-[#444] text-white px-4 py-2 rounded focus:outline-none focus:border-[#5EF38C]"
-                        placeholder="your@email.com"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="message" className="block text-gray-400 mb-2">Message</label>
-                      <textarea 
-                        id="message" 
-                        className="w-full bg-[#222] border border-[#444] text-white px-4 py-2 rounded focus:outline-none focus:border-[#5EF38C] h-32"
-                        placeholder="Your message here..."
-                      ></textarea>
-                    </div>
-                    <Button className="w-full bg-[#5EF38C] text-[#0A2342] hover:bg-[#4DD77C] py-6">
-                      Send Message
-                    </Button>
-                  </form>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* Footer */}
-      <footer className="bg-black py-12">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-6 md:mb-0">
-              <img 
-                src="/lovable-uploads/41067270-5c65-44fb-8d3b-89fc90445214.png" 
-                alt="NURA Logo" 
-                className="h-10 w-auto"
-              />
-              <p className="text-gray-500 mt-2">© 2025 NURA Games. All rights reserved.</p>
-            </div>
-            <div className="flex flex-wrap justify-center gap-6">
-              <a href="#about" className="text-gray-400 hover:text-[#5EF38C]">About Us</a>
-              <a href="#features" className="text-gray-400 hover:text-[#5EF38C]">Features</a>
-              <a href="#contact" className="text-gray-400 hover:text-[#5EF38C]">Contact</a>
-              {isAuthenticated ? (
-                <button 
-                  onClick={() => navigate('/dashboard')} 
-                  className="text-gray-400 hover:text-[#5EF38C]"
-                >
-                  Dashboard
-                </button>
-              ) : (
-                <>
-                  <button 
-                    onClick={handleSignInClick} 
-                    className="text-gray-400 hover:text-[#5EF38C]"
-                  >
-                    Sign In
-                  </button>
-                  <Link to="/register" className="text-gray-400 hover:text-[#5EF38C]">Sign Up</Link>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </footer>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {/* Recommendations */}
+        <Card>
+          <CardContent className="p-6">
+            <h4 className="font-semibold mb-2">Recommendations</h4>
+            <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+              {report.recommendations.map((rec, index) => (
+                <li key={index}>{rec}</li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
 
-export default Landing;
+export default ReportVisualizations;

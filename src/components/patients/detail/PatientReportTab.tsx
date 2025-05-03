@@ -8,7 +8,7 @@ import { mockReports } from '@/utils/mockData/reportData';
 import axios from 'axios';
 import { API_BASE } from '@/services/config';
 import { toast } from "@/hooks/use-toast";
-import { ReportVisualizations } from '@/components/reports/ReportVisualizations';
+import ReportVisualizations from '@/components/reports/ReportVisualizations';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Sheet, SheetContent, SheetClose } from '@/components/ui/sheet';
 import { X } from 'lucide-react';
