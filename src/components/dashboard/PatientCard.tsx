@@ -81,7 +81,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mt-3 sm:mt-5">
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">ADHD Subtype</span>
-            <span className="font-medium text-xs sm:text-sm truncate">{patient.adhdSubtype || 'Not Specified'}</span>
+            <span className="font-medium text-xs sm:text-sm truncate">{patient.adhd_subtype || 'Not Specified'}</span>
           </div>
           <div className="flex flex-col">
             <span className="text-xs text-muted-foreground">Progress</span>
