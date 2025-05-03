@@ -29,18 +29,29 @@ const Landing: React.FC = () => {
           />
         </div>
         <div className="flex items-center space-x-4">
-          <Button 
-            variant="outline" 
-            className="border-[#5EF38C] text-[#5EF38C] hover:bg-[#5EF38C]/20"
-            onClick={handleSignInClick}
-          >
-            Sign In
-          </Button>
-          <Link to="/register">
-            <Button className="bg-[#5EF38C] text-[#0A2342] hover:bg-[#4DD77C]">
-              Sign Up
+          {isAuthenticated ? (
+            <Button 
+              className="bg-[#5EF38C] text-[#0A2342] hover:bg-[#4DD77C]"
+              onClick={() => navigate('/dashboard')}
+            >
+              Dashboard
             </Button>
-          </Link>
+          ) : (
+            <>
+              <Button 
+                variant="outline" 
+                className="border-[#5EF38C] text-[#5EF38C] hover:bg-[#5EF38C]/20"
+                onClick={handleSignInClick}
+              >
+                Sign In
+              </Button>
+              <Link to="/register">
+                <Button className="bg-[#5EF38C] text-[#0A2342] hover:bg-[#4DD77C]">
+                  Sign Up
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </nav>
       
@@ -56,11 +67,21 @@ const Landing: React.FC = () => {
             Train your brain with engaging cognitive exercises designed by clinical psychologists.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-            <Link to="/register">
-              <Button size="lg" className="bg-[#5EF38C] text-[#0A2342] hover:bg-[#4DD77C] px-8 py-6">
-                Get Started
+            {isAuthenticated ? (
+              <Button 
+                size="lg" 
+                className="bg-[#5EF38C] text-[#0A2342] hover:bg-[#4DD77C] px-8 py-6"
+                onClick={() => navigate('/dashboard')}
+              >
+                Go to Dashboard
               </Button>
-            </Link>
+            ) : (
+              <Link to="/register">
+                <Button size="lg" className="bg-[#5EF38C] text-[#0A2342] hover:bg-[#4DD77C] px-8 py-6">
+                  Get Started
+                </Button>
+              </Link>
+            )}
             <a href="#features">
               <Button size="lg" variant="outline" className="border-[#5EF38C] text-[#5EF38C] hover:bg-[#5EF38C]/20 px-8 py-6">
                 Explore Features
@@ -319,13 +340,24 @@ const Landing: React.FC = () => {
               <a href="#about" className="text-gray-400 hover:text-[#5EF38C]">About Us</a>
               <a href="#features" className="text-gray-400 hover:text-[#5EF38C]">Features</a>
               <a href="#contact" className="text-gray-400 hover:text-[#5EF38C]">Contact</a>
-              <button 
-                onClick={handleSignInClick} 
-                className="text-gray-400 hover:text-[#5EF38C]"
-              >
-                Sign In
-              </button>
-              <Link to="/register" className="text-gray-400 hover:text-[#5EF38C]">Sign Up</Link>
+              {isAuthenticated ? (
+                <button 
+                  onClick={() => navigate('/dashboard')} 
+                  className="text-gray-400 hover:text-[#5EF38C]"
+                >
+                  Dashboard
+                </button>
+              ) : (
+                <>
+                  <button 
+                    onClick={handleSignInClick} 
+                    className="text-gray-400 hover:text-[#5EF38C]"
+                  >
+                    Sign In
+                  </button>
+                  <Link to="/register" className="text-gray-400 hover:text-[#5EF38C]">Sign Up</Link>
+                </>
+              )}
             </div>
           </div>
         </div>
