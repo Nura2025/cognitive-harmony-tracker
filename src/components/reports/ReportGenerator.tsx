@@ -26,6 +26,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface ReportGeneratorProps {
   patient: Patient;
@@ -88,7 +90,7 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
     });
   };
 
-  const handleSaveReport = () => {
+  const handleSaveReport = async () => {
     if (!generatedReport) {
       toast({
         title: "No Report Available",
@@ -98,35 +100,109 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       return;
     }
 
-    // Create a dummy blob for the PDF download
-    // In a real application, this would be generated from actual report content
-    const reportContent = `
-      ${patient.name} - ${reportType} Report
-      Date: ${today}
+    // Create a temporary container for the report content
+    const reportContainer = document.createElement('div');
+    reportContainer.style.padding = '20px';
+    reportContainer.style.fontFamily = 'Arial, sans-serif';
+    
+    // Build report HTML content
+    reportContainer.innerHTML = `
+      <h1 style="color:#333;">${patient.name} - ${reportType} Report</h1>
+      <p style="color:#666;font-style:italic;">Generated on ${today}</p>
       
-      ${includeSections.overview ? 'Patient Overview: Included' : ''}
-      ${includeSections.domainAnalysis ? 'Cognitive Domain Analysis: Included' : ''}
-      ${includeSections.trends ? 'Performance Trends: Included' : ''}
-      ${includeSections.recommendations ? 'Clinical Recommendations: Included' : ''}
-      ${includeSections.rawData ? 'Raw Assessment Data: Included' : ''}
+      ${includeSections.overview ? `
+        <div style="margin-bottom:20px;">
+          <h2 style="color:#333;">Patient Overview</h2>
+          <p>Patient: ${patient.name}</p>
+          <p>Gender: ${patient.gender}</p>
+          <p>Age: ${patient.age}</p>
+        </div>
+      ` : ''}
+      
+      ${includeSections.domainAnalysis ? `
+        <div style="margin-bottom:20px;">
+          <h2 style="color:#333;">Cognitive Domain Analysis</h2>
+          <div>
+            <div style="margin-bottom:10px;">
+              <span style="font-weight:bold;">Attention: </span>${metrics.attention}%
+            </div>
+            <div style="margin-bottom:10px;">
+              <span style="font-weight:bold;">Memory: </span>${metrics.memory}%
+            </div>
+            <div style="margin-bottom:10px;">
+              <span style="font-weight:bold;">Executive Function: </span>${metrics.executiveFunction}%
+            </div>
+            <div style="margin-bottom:10px;">
+              <span style="font-weight:bold;">Behavioral: </span>${metrics.behavioral}%
+            </div>
+          </div>
+        </div>
+      ` : ''}
+      
+      ${includeSections.trends ? `
+        <div style="margin-bottom:20px;">
+          <h2 style="color:#333;">Performance Trends</h2>
+          <p>Sessions Completed: ${metrics.sessionsCompleted}</p>
+          <p>Progress: ${metrics.progress}%</p>
+        </div>
+      ` : ''}
+      
+      ${includeSections.recommendations ? `
+        <div style="margin-bottom:20px;">
+          <h2 style="color:#333;">Clinical Recommendations</h2>
+          <p>Based on the assessment results, the following recommendations are provided:</p>
+          <ul>
+            <li>Continue regular cognitive assessments</li>
+            <li>Focus on exercises that target executive function</li>
+            <li>Consider strategies for enhancing attention span</li>
+          </ul>
+        </div>
+      ` : ''}
+      
+      ${includeSections.rawData ? `
+        <div style="margin-bottom:20px;">
+          <h2 style="color:#333;">Raw Assessment Data</h2>
+          <p>Detailed raw data from assessments is available upon request.</p>
+        </div>
+      ` : ''}
     `;
     
-    const blob = new Blob([reportContent], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
+    // Append to document body temporarily (hidden)
+    reportContainer.style.position = 'absolute';
+    reportContainer.style.left = '-9999px';
+    document.body.appendChild(reportContainer);
     
-    // Create a temporary link and trigger the download
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${patient.name.replace(/\s+/g, '_')}_${reportType}_report.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    
-    toast({
-      title: "Report Downloaded",
-      description: "Your report has been downloaded successfully.",
-    });
+    try {
+      // Generate PDF using html2canvas and jsPDF
+      const canvas = await html2canvas(reportContainer, {scale: 2});
+      const imgData = canvas.toDataURL('image/png');
+      
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      
+      pdf.addImage(imgData, 'PNG', imgX, 0, imgWidth * ratio, imgHeight * ratio);
+      pdf.save(`${patient.name.replace(/\s+/g, '_')}_${reportType}_report.pdf`);
+      
+      toast({
+        title: "Report Downloaded",
+        description: "Your report has been downloaded successfully.",
+      });
+    } catch (error) {
+      console.error("PDF generation error:", error);
+      toast({
+        title: "Download Failed",
+        description: "There was an error generating your PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      // Clean up
+      document.body.removeChild(reportContainer);
+    }
   };
 
   const handlePrintReport = () => {
