@@ -25,20 +25,22 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
-// Import the jsPDF and html2canvas libraries with proper type handling
-import { jsPDF } from 'jspdf';
+// Import the libraries for PDF generation
+import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 interface ReportGeneratorProps {
   patient: Patient;
   metrics: PatientMetrics;
   onReportGenerate?: (report: ReportType) => void;
+  onSendEmail?: (recipient: string, subject: string, message: string, reportData: any) => Promise<boolean>;
 }
 
 export const ReportGenerator: React.FC<ReportGeneratorProps> = ({ 
   patient, 
   metrics,
-  onReportGenerate
+  onReportGenerate,
+  onSendEmail
 }) => {
   
   const [reportType, setReportType] = useState<ReportType['type']>('clinical');
@@ -55,6 +57,7 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
   const [emailSubject, setEmailSubject] = useState('');
   const [emailMessage, setEmailMessage] = useState('');
   const [generatedReport, setGeneratedReport] = useState<ReportType | null>(null);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
   
   const today = format(new Date(), 'MMMM d, yyyy');
   
@@ -328,14 +331,67 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
     setEmailDialogOpen(true);
   };
 
-  const handleSendEmail = () => {
-    // In a real application, this would call an API to send the email
-    // For now, we'll just simulate success
-    toast({
-      title: "Email Sent",
-      description: `Report sent to ${emailRecipient} successfully.`,
-    });
-    setEmailDialogOpen(false);
+  const handleSendEmail = async () => {
+    if (!onSendEmail) {
+      toast({
+        title: "Email Function Not Available",
+        description: "Email functionality is not available in this context.",
+        variant: "destructive",
+      });
+      setEmailDialogOpen(false);
+      return;
+    }
+    
+    if (!emailRecipient) {
+      toast({
+        title: "Email Required",
+        description: "Please enter a recipient email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsSendingEmail(true);
+    
+    // Create report data object to send
+    const reportData = {
+      patient: {
+        name: patient.name,
+        id: patient.user_id,
+        gender: patient.gender,
+        age: patient.age
+      },
+      reportType,
+      sections: includeSections,
+      metrics,
+      generatedDate: today
+    };
+    
+    try {
+      const success = await onSendEmail(
+        emailRecipient, 
+        emailSubject, 
+        emailMessage, 
+        reportData
+      );
+      
+      if (success) {
+        toast({
+          title: "Email Request Processed",
+          description: `Email to ${emailRecipient} has been processed.`,
+        });
+        setEmailDialogOpen(false);
+      }
+    } catch (error) {
+      console.error("Error in email sending:", error);
+      toast({
+        title: "Email Failed",
+        description: "There was an error processing your email request.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSendingEmail(false);
+    }
   };
   
   return (
@@ -456,8 +512,12 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             <Button type="button" variant="secondary" onClick={() => setEmailDialogOpen(false)}>
               Cancel
             </Button>
-            <Button type="button" onClick={handleSendEmail} disabled={!emailRecipient}>
-              Send Email
+            <Button 
+              type="button" 
+              onClick={handleSendEmail} 
+              disabled={!emailRecipient || isSendingEmail}
+            >
+              {isSendingEmail ? "Sending..." : "Send Email"}
             </Button>
           </DialogFooter>
         </DialogContent>
