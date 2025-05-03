@@ -1,10 +1,22 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import AuthService from '../services/auth';
 
 const Landing: React.FC = () => {
+  const navigate = useNavigate();
+  const isAuthenticated = AuthService.isAuthenticated();
+  
+  const handleSignInClick = () => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    } else {
+      navigate('/login');
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#0A2342] to-[#121212]">
       {/* Navigation */}
@@ -17,11 +29,13 @@ const Landing: React.FC = () => {
           />
         </div>
         <div className="flex items-center space-x-4">
-          <Link to="/login">
-            <Button variant="outline" className="border-[#5EF38C] text-[#5EF38C] hover:bg-[#5EF38C]/20">
-              Sign In
-            </Button>
-          </Link>
+          <Button 
+            variant="outline" 
+            className="border-[#5EF38C] text-[#5EF38C] hover:bg-[#5EF38C]/20"
+            onClick={handleSignInClick}
+          >
+            Sign In
+          </Button>
           <Link to="/register">
             <Button className="bg-[#5EF38C] text-[#0A2342] hover:bg-[#4DD77C]">
               Sign Up
@@ -305,7 +319,12 @@ const Landing: React.FC = () => {
               <a href="#about" className="text-gray-400 hover:text-[#5EF38C]">About Us</a>
               <a href="#features" className="text-gray-400 hover:text-[#5EF38C]">Features</a>
               <a href="#contact" className="text-gray-400 hover:text-[#5EF38C]">Contact</a>
-              <Link to="/login" className="text-gray-400 hover:text-[#5EF38C]">Sign In</Link>
+              <button 
+                onClick={handleSignInClick} 
+                className="text-gray-400 hover:text-[#5EF38C]"
+              >
+                Sign In
+              </button>
               <Link to="/register" className="text-gray-400 hover:text-[#5EF38C]">Sign Up</Link>
             </div>
           </div>
