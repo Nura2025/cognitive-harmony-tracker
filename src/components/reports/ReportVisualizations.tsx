@@ -10,6 +10,24 @@ import { Download, Mail } from 'lucide-react';
 import { ReportType } from '@/utils/types/patientTypes';
 import { useLanguage } from '@/contexts/LanguageContext';
 import AuthService from '@/services/auth';
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer, 
+  Legend,
+  BarChart,
+  Bar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar
+} from 'recharts';
+import { ChartContainer, ChartLegendContent, ChartTooltipContent } from '@/components/ui/chart';
 
 interface ReportVisualizationsProps {
   report: ReportType;
@@ -36,6 +54,79 @@ const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({ report, pat
   const formattedDate = report?.data?.date 
     ? format(new Date(report.data.date), 'PPP') 
     : format(new Date(), 'PPP');
+
+  // Generate sample trend data for the charts
+  const generateTrendData = (numPoints = 10, baseValue = 50, improvement = 20) => {
+    const data = [];
+    for (let i = 0; i < numPoints; i++) {
+      // Create an increasing trend with some randomness
+      const randomVariation = Math.random() * 10 - 5; // -5 to +5
+      const trend = baseValue + (i / (numPoints - 1)) * improvement + randomVariation;
+      data.push({
+        session: i + 1,
+        value: Math.min(Math.max(trend, 0), 100) // Clamp between 0 and 100
+      });
+    }
+    return data;
+  };
+
+  // Create domain-specific trend data
+  const attentionData = generateTrendData(10, 45, 30);
+  const memoryData = generateTrendData(10, 50, 15);
+  const executiveFunctionData = generateTrendData(10, 40, 40);
+  const behavioralData = generateTrendData(10, 55, 25);
+
+  // Combined comparison data for radar chart
+  const comparisonData = [
+    {
+      subject: t('attention'),
+      patient: metrics.attention,
+      average: 50,
+      adhdAverage: 40,
+    },
+    {
+      subject: t('memory'),
+      patient: metrics.memory,
+      average: 50,
+      adhdAverage: 42,
+    },
+    {
+      subject: t('executiveFunction'),
+      patient: metrics.executiveFunction,
+      average: 50,
+      adhdAverage: 38,
+    },
+    {
+      subject: t('behavioral'),
+      patient: metrics.behavioral,
+      average: 50,
+      adhdAverage: 35,
+    },
+  ];
+
+  // Progress data for bar chart
+  const progressData = [
+    {
+      name: t('attention'),
+      initial: metrics.attention - 10,
+      current: metrics.attention,
+    },
+    {
+      name: t('memory'),
+      initial: metrics.memory - 5,
+      current: metrics.memory,
+    },
+    {
+      name: t('executiveFunction'),
+      initial: metrics.executiveFunction - 8,
+      current: metrics.executiveFunction,
+    },
+    {
+      name: t('behavioral'),
+      initial: metrics.behavioral - 12,
+      current: metrics.behavioral,
+    },
+  ];
 
   const handleDownloadPDF = () => {
     console.log('Download PDF functionality would be implemented here');
@@ -90,6 +181,27 @@ const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({ report, pat
               </CardDescription>
             </CardHeader>
             <CardContent>
+              <div className="h-[300px] w-full mb-6">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={progressData} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" />
+                    <YAxis stroke="hsl(var(--muted-foreground))" domain={[0, 100]} />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--background))',
+                        borderColor: 'hsl(var(--border))',
+                        borderRadius: 'var(--radius)',
+                        color: 'hsl(var(--foreground))'
+                      }}
+                    />
+                    <Legend />
+                    <Bar name={t('initialScore')} dataKey="initial" fill="hsl(var(--muted))" radius={[4, 4, 0, 0]} />
+                    <Bar name={t('currentScore')} dataKey="current" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              
               <div className={`grid grid-cols-4 gap-4 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                 <div></div>
                 <div className="font-semibold text-sm text-center">{t('firstSession')}</div>
@@ -183,14 +295,140 @@ const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({ report, pat
         </TabsContent>
         
         <TabsContent value="metrics" className="py-4">
-          {/* Metrics visualization would go here */}
-          <Card>
-            <CardContent className="p-6">
-              <div className="h-80 flex items-center justify-center border rounded-md">
-                <p className="text-muted-foreground">{t('metricsOverTime')}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('cognitivePerformanceOverTime')}</CardTitle>
+                <CardDescription>{t('performanceTrend')}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis 
+                        dataKey="session" 
+                        type="number" 
+                        domain={[1, 10]} 
+                        allowDecimals={false}
+                        stroke="hsl(var(--muted-foreground))"
+                        label={{ value: t('session'), position: 'insideBottomRight', offset: -10 }}
+                      />
+                      <YAxis domain={[0, 100]} stroke="hsl(var(--muted-foreground))" />
+                      <Tooltip 
+                        contentStyle={{
+                          backgroundColor: 'hsl(var(--background))',
+                          borderColor: 'hsl(var(--border))',
+                          borderRadius: 'var(--radius)',
+                          color: 'hsl(var(--foreground))'
+                        }}
+                        formatter={(value) => [`${value}%`, '']}
+                      />
+                      <Legend />
+                      <Line 
+                        type="monotone" 
+                        data={attentionData} 
+                        dataKey="value" 
+                        name={t('attention')} 
+                        stroke="hsl(var(--cognitive-attention))" 
+                        strokeWidth={2}
+                        dot={{ r: 4 }}
+                        activeDot={{ r: 6 }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        data={memoryData} 
+                        dataKey="value" 
+                        name={t('memory')} 
+                        stroke="hsl(var(--cognitive-memory))" 
+                        strokeWidth={2}
+                        dot={{ r: 4 }}
+                        activeDot={{ r: 6 }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        data={executiveFunctionData} 
+                        dataKey="value" 
+                        name={t('executiveFunction')} 
+                        stroke="hsl(var(--cognitive-executive))" 
+                        strokeWidth={2}
+                        dot={{ r: 4 }}
+                        activeDot={{ r: 6 }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        data={behavioralData} 
+                        dataKey="value" 
+                        name={t('behavioral')} 
+                        stroke="hsl(var(--cognitive-behavioral))" 
+                        strokeWidth={2}
+                        dot={{ r: 4 }}
+                        activeDot={{ r: 6 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>{t('domainComparison')}</CardTitle>
+                <CardDescription>{t('comparedToAgeGroup')}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart outerRadius="80%" data={comparisonData}>
+                      <PolarGrid stroke="hsl(var(--border))" />
+                      <PolarAngleAxis 
+                        dataKey="subject" 
+                        stroke="hsl(var(--foreground))"
+                        tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      />
+                      <PolarRadiusAxis 
+                        angle={30} 
+                        domain={[0, 100]}
+                        stroke="hsl(var(--border))" 
+                        tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      />
+                      <Radar 
+                        name={t('patientScore')} 
+                        dataKey="patient" 
+                        stroke="hsl(var(--primary))" 
+                        fill="hsl(var(--primary))" 
+                        fillOpacity={0.5} 
+                      />
+                      <Radar 
+                        name={t('ageGroupAverage')} 
+                        dataKey="average" 
+                        stroke="hsl(var(--secondary))" 
+                        fill="hsl(var(--secondary))" 
+                        fillOpacity={0.3} 
+                      />
+                      <Radar 
+                        name={t('adhdAverage')} 
+                        dataKey="adhdAverage" 
+                        stroke="hsl(var(--muted))" 
+                        fill="hsl(var(--muted))" 
+                        fillOpacity={0.3} 
+                      />
+                      <Legend />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'hsl(var(--background))',
+                          borderColor: 'hsl(var(--border))',
+                          borderRadius: 'var(--radius)',
+                          color: 'hsl(var(--foreground))'
+                        }}
+                        formatter={(value) => [`${value}%`, '']}
+                      />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
         
         <TabsContent value="recommendations" className="py-4">

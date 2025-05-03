@@ -7,7 +7,7 @@ import { ReportType } from '@/utils/types/patientTypes';
 import { mockReports } from '@/utils/mockData/reportData';
 import { toast } from "@/hooks/use-toast";
 import ReportVisualizations from '@/components/reports/ReportVisualizations';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -27,6 +27,11 @@ export const PatientReportTab: React.FC<PatientReportTabProps> = ({ patientId, p
     setReports(prevReports => [newReport, ...prevReports]);
     setSelectedReport(newReport); // Auto-select the newly generated report
     setIsDialogOpen(true); // Open dialog to view the newly generated report
+    
+    toast({
+      title: "Report Generated",
+      description: "Your report has been added to the list.",
+    });
   };
   
   // Function to handle viewing a report
@@ -117,17 +122,17 @@ export const PatientReportTab: React.FC<PatientReportTabProps> = ({ patientId, p
       {/* Dialog for report visualization */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedReport?.title || 'Report'}
+            </DialogTitle>
+          </DialogHeader>
           {selectedReport && (
-            <div className="space-y-4">
-              <div className={`flex justify-between items-center ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
-                <h2 className="text-xl font-semibold">{selectedReport.title}</h2>
-              </div>
-              <ReportVisualizations 
-                report={selectedReport} 
-                patientId={patientId} 
-                patientName={patientName} 
-              />
-            </div>
+            <ReportVisualizations 
+              report={selectedReport} 
+              patientId={patientId} 
+              patientName={patientName} 
+            />
           )}
         </DialogContent>
       </Dialog>
