@@ -306,7 +306,7 @@ export const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({
                         ))}
                       </Pie>
                       <Tooltip 
-                        formatter={(value) => [`${value}%`, 'Score']}
+                        formatter={(value) => [`${typeof value === 'number' ? value.toString() : value}%`, 'Score']}
                         contentStyle={{ 
                           backgroundColor: 'hsl(var(--background))', 
                           border: '1px solid hsl(var(--border))'
