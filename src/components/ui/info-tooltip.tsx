@@ -27,7 +27,12 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({
         <TooltipTrigger asChild>
           <Info className={`${iconSize} text-muted-foreground cursor-help ${className}`} />
         </TooltipTrigger>
-        <TooltipContent side="top" className="max-w-[150px] sm:max-w-xs text-xs sm:text-sm">
+        <TooltipContent 
+          side="top" 
+          align="center" 
+          className="max-w-[200px] sm:max-w-[300px] text-xs sm:text-sm z-50"
+          sideOffset={5}
+        >
           <p>{text}</p>
         </TooltipContent>
       </Tooltip>
