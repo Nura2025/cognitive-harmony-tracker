@@ -24,8 +24,17 @@ export const PatientReportTab: React.FC<PatientReportTabProps> = ({ patientId, p
   
   // Function to handle adding a new report
   const handleAddReport = (newReport: ReportType) => {
-    setReports(prevReports => [newReport, ...prevReports]);
-    setSelectedReport(newReport); // Auto-select the newly generated report
+    // Ensure the report has the proper data structure
+    const enhancedReport = {
+      ...newReport,
+      data: {
+        ...newReport.data,
+        date: newReport.data?.date || new Date().toISOString(),
+      }
+    };
+    
+    setReports(prevReports => [enhancedReport, ...prevReports]);
+    setSelectedReport(enhancedReport); // Auto-select the newly generated report
     setIsDialogOpen(true); // Open dialog to view the newly generated report
     
     toast({
@@ -62,14 +71,6 @@ export const PatientReportTab: React.FC<PatientReportTabProps> = ({ patientId, p
       
       // Simulate API call with a delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // In a production environment, you would use an API like:
-      // const response = await axios.post(`${API_BASE}/api/send-report-email`, {
-      //   recipient: emailRecipient,
-      //   subject: emailSubject,
-      //   message: emailMessage,
-      //   reportData: reportData
-      // });
       
       toast({
         title: "Email Sending Simulated",
