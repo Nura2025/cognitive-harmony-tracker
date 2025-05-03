@@ -1,4 +1,3 @@
-
 import { PatientFilters } from "@/components/patients/PatientFilters";
 import { PatientList } from "@/components/patients/PatientList";
 import { Button } from "@/components/ui/button";
@@ -207,7 +206,7 @@ const Patients = () => {
 
         <Button
           className={`gap-1.5 ${language === "ar" ? "flex-row-reverse" : ""}`}
-          onClick={() => navigate("/patient/add")}
+          onClick={() => navigate("/patients/add")}
         >
           <PlusCircle className="h-4 w-4" />
           <span>{t("addPatient")}</span>

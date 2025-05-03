@@ -46,7 +46,7 @@ export const PatientList: React.FC<PatientListProps> = ({
 
   const handlePatientClick = (patientId: string) => {
     console.log("Navigating to patient:", patientId);
-    navigate(`/patient/${patientId}`);
+    navigate(`/patients/${patientId}`);
   };
 
   return (
