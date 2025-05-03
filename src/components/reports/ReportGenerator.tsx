@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -454,18 +455,18 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
               Generate Report
             </Button>
             
-            <div className="grid grid-cols-3 gap-2 mt-2">
-              <Button variant="outline" size="sm" className="gap-1" onClick={handleSaveReport}>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
+              <Button variant="outline" size="sm" className="gap-1 w-full" onClick={handleSaveReport}>
                 <Download className="h-4 w-4" />
-                <span>Save</span>
+                <span className="whitespace-nowrap">Save</span>
               </Button>
-              <Button variant="outline" size="sm" className="gap-1" onClick={handlePrintReport}>
+              <Button variant="outline" size="sm" className="gap-1 w-full" onClick={handlePrintReport}>
                 <Printer className="h-4 w-4" />
-                <span>Print</span>
+                <span className="whitespace-nowrap">Print</span>
               </Button>
-              <Button variant="outline" size="sm" className="gap-1" onClick={openEmailDialog}>
+              <Button variant="outline" size="sm" className="gap-1 w-full" onClick={openEmailDialog}>
                 <Mail className="h-4 w-4" />
-                <span>Email</span>
+                <span className="whitespace-nowrap">Email</span>
               </Button>
             </div>
           </div>

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ReportGenerator } from '@/components/reports/ReportGenerator';
 import { PatientReports } from '@/components/reports/PatientReports';
@@ -26,6 +26,7 @@ export const PatientReportTab: React.FC<PatientReportTabProps> = ({ patientId, p
   const handleAddReport = (newReport: ReportType) => {
     setReports(prevReports => [newReport, ...prevReports]);
     setSelectedReport(newReport); // Auto-select the newly generated report
+    setIsDialogOpen(true); // Open dialog to view the newly generated report
   };
   
   // Function to handle viewing a report
