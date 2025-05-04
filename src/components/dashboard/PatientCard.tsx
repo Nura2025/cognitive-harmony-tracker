@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { CalendarDays, Clock, User } from 'lucide-react';
 import { formatLastSession, getScoreColorClass } from '@/utils/dataProcessing';
+import { addRecentPatient } from '@/utils/recentPatients';
 
 interface PatientCardProps {
   patient: {
@@ -52,13 +53,29 @@ export const PatientCard: React.FC<PatientCardProps> = ({
     return "default";
   };
 
+  const handleClick = () => {
+    // Add to recently viewed patients when clicked
+    addRecentPatient({
+      user_id: patient.user_id,
+      name: patient.name,
+      age: patient.age,
+      gender: patient.gender,
+      adhd_subtype: patient.adhd_subtype,
+      last_session_date: patient.last_session_date,
+      total_sessions: patient.total_sessions,
+    });
+    
+    // Call the original onClick handler
+    onClick(patient.user_id);
+  };
+
   const percentile = metrics?.percentile || 0;
   const progress = metrics?.progress || 0;
 
   return (
     <Card 
       className="glass cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-md hover:translate-y-[-2px]"
-      onClick={() => onClick(patient.user_id)}
+      onClick={handleClick}
     >
       <div className="h-1.5 sm:h-2 bg-gradient-to-r from-primary/80 to-primary"></div>
       <CardContent className="p-3 sm:p-5">
