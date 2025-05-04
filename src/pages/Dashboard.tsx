@@ -11,13 +11,11 @@ import PatientService from '@/services/patient';
 import { sessionData, generateTrendData } from '@/utils/mockData';
 import { useToast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getRecentPatients } from '@/utils/recentPatients';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [patients, setPatients] = useState<any[]>([]);
-  const [recentlyClickedPatients, setRecentlyClickedPatients] = useState<any[]>([]);
   const [patientMetrics, setPatientMetrics] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
   
@@ -34,12 +32,6 @@ const Dashboard = () => {
     executiveFunction: Array(10).fill(0).map((_, i) => 45 + Math.random() * 35),
     behavioral: Array(10).fill(0).map((_, i) => 60 + Math.random() * 20),
   };
-  
-  // Load recently clicked patients from localStorage
-  useEffect(() => {
-    const recentPatients = getRecentPatients();
-    setRecentlyClickedPatients(recentPatients);
-  }, []);
 
   // Fetch patients from the API
   useEffect(() => {
@@ -152,10 +144,6 @@ const Dashboard = () => {
     navigate('/patients');
   };
 
-  // Display logic - decide which patients to show
-  const displayPatients = recentlyClickedPatients.length > 0 ? 
-    recentlyClickedPatients : patients;
-
   // Loading state
   if (loading) {
     return (
@@ -239,17 +227,15 @@ const Dashboard = () => {
       
       <div>
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-          <h2 className="text-lg sm:text-xl font-semibold">
-            {recentlyClickedPatients.length > 0 ? "Recently Viewed Patients" : "Recent Patients"}
-          </h2>
+          <h2 className="text-lg sm:text-xl font-semibold">Recent Patients</h2>
           <Button variant="outline" size="sm" onClick={handleViewAllPatients} className="text-xs sm:text-sm">
             View all patients
           </Button>
         </div>
         
         <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {displayPatients.length > 0 ? (
-            displayPatients.map(patient => (
+          {patients.length > 0 ? (
+            patients.map(patient => (
               <PatientCard 
                 key={patient.user_id} 
                 patient={patient} 
@@ -259,7 +245,7 @@ const Dashboard = () => {
             ))
           ) : (
             <div className="col-span-full text-center py-8">
-              <p className="text-muted-foreground">No patients found. Click on patients to see them here.</p>
+              <p className="text-muted-foreground">No patients found.</p>
             </div>
           )}
         </div>

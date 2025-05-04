@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { CalendarDays, Clock, User } from 'lucide-react';
 import { formatLastSession, getScoreColorClass } from '@/utils/dataProcessing';
-import { addRecentPatient } from '@/utils/recentPatients';
 
 interface PatientCardProps {
   patient: {
@@ -54,17 +53,6 @@ export const PatientCard: React.FC<PatientCardProps> = ({
   };
 
   const handleClick = () => {
-    // Add to recently viewed patients when clicked
-    addRecentPatient({
-      user_id: patient.user_id,
-      name: patient.name,
-      age: patient.age,
-      gender: patient.gender,
-      adhd_subtype: patient.adhd_subtype,
-      last_session_date: patient.last_session_date,
-      total_sessions: patient.total_sessions,
-    });
-    
     // Call the original onClick handler
     onClick(patient.user_id);
   };

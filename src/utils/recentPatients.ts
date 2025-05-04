@@ -1,4 +1,3 @@
-
 /**
  * Utility functions to manage recently clicked patients
  */
