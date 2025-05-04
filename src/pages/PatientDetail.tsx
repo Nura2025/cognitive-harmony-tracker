@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { AlertCircle, RefreshCw } from "lucide-react";
 
 // UI Components
@@ -19,6 +19,11 @@ import { PatientProfile } from "@/services/patient";
 const PatientDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Extract the tab from query parameters
+  const queryParams = new URLSearchParams(location.search);
+  const activeTab = queryParams.get('tab');
 
   const [patient, setPatient] = useState<PatientProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -194,6 +199,7 @@ const PatientDetail = () => {
         lastSessionDate={patient.last_session_date}
         age={patient.age}
         gender={patient.gender}
+        defaultTab={activeTab === 'reports' ? 'reports' : 'profile'}
       />
     </div>
   );

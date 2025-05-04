@@ -141,7 +141,8 @@ export const PatientList: React.FC<PatientListProps> = ({
                     className="h-8 w-8 p-0"
                     onClick={(e) => {
                       e.stopPropagation();
-                      navigate(`/reports?patient=${patient.user_id}`);
+                      // Change to navigate to the patient report tab directly
+                      navigate(`/patients/${patient.user_id}?tab=reports`);
                     }}
                     title={t("viewReports")}
                   >

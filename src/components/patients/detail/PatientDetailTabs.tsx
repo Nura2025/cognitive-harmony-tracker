@@ -24,6 +24,7 @@ interface PatientDetailTabsProps {
   lastSessionDate: string | null;
   age: number;
   gender: string;
+  defaultTab?: string;
 }
 
 export const PatientDetailTabs: React.FC<PatientDetailTabsProps> = ({
@@ -37,12 +38,13 @@ export const PatientDetailTabs: React.FC<PatientDetailTabsProps> = ({
   firstSessionDate,
   lastSessionDate,
   age,
-  gender
+  gender,
+  defaultTab = 'profile'
 }) => {
   const hasTrendData = trendGraph && trendGraph.length > 0;
 
   return (
-    <Tabs defaultValue="profile" className="w-full">
+    <Tabs defaultValue={defaultTab} className="w-full">
       <TabsList className="grid grid-cols-4 mb-8">
         <TabsTrigger value="profile">Profile</TabsTrigger>
         <TabsTrigger value="sessions">Sessions</TabsTrigger>
