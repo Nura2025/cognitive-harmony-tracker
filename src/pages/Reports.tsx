@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -391,7 +392,7 @@ const Reports: React.FC = () => {
           
           <DomainComparison 
             patientData={patientMetrics} 
-            normativeData={mockNormativeData ? mockNormativeData : defaultCognitiveDomain}
+            normativeData={mockNormativeData || defaultCognitiveDomain}
           />
         </TabsContent>
         
@@ -715,8 +716,8 @@ const Reports: React.FC = () => {
                       
                       <DomainComparison 
                         patientData={patientMetrics} 
-                        normativeData={mockNormativeData ? mockNormativeData : defaultCognitiveDomain}
-                        subtypeData={mockSubtypeData ? mockSubtypeData : defaultCognitiveDomain}
+                        normativeData={mockNormativeData || defaultCognitiveDomain}
+                        subtypeData={mockSubtypeData || defaultCognitiveDomain}
                         sessions={patientSessions}
                       />
                     </CardContent>
