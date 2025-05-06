@@ -24,17 +24,25 @@ import PrivateRoute from "./utils/PrivateRoute";
 import AuthService from "./services/auth";
 import SessionTimeoutHandler from "./components/SessionTimeoutHandler";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => {
+  // We'll check for authentication outside of the render process to avoid infinite loops
   const isAuthenticated = AuthService.isAuthenticated();
   
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <LanguageProvider>
-          <UserProvider>
-            <BrowserRouter>
+        <BrowserRouter>
+          <LanguageProvider>
+            <UserProvider>
               <TooltipProvider>
                 <Toaster />
                 <Sonner />
@@ -107,9 +115,9 @@ const App = () => {
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </TooltipProvider>
-            </BrowserRouter>
-          </UserProvider>
-        </LanguageProvider>
+            </UserProvider>
+          </LanguageProvider>
+        </BrowserRouter>
       </ThemeProvider>
     </QueryClientProvider>
   );

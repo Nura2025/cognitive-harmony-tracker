@@ -16,11 +16,19 @@ const SessionTimeoutHandler = () => {
         
         if (!token || isTokenExpired(token)) {
           localStorage.removeItem('neurocog_token');
-          toast({
-            title: "Session expired",
-            description: "Your session has expired. Please log in again.",
-          });
-          navigate('/login');
+          // Only show toast if token exists but expired
+          if (token) {
+            toast({
+              title: "Session expired",
+              description: "Your session has expired. Please log in again.",
+            });
+          }
+          
+          // Only navigate if we're not already on the login or landing page
+          const currentPath = window.location.pathname;
+          if (currentPath !== '/login' && currentPath !== '/') {
+            navigate('/login');
+          }
         } else {
           // Token is valid, refresh user data
           refreshUserData();

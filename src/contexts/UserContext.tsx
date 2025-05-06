@@ -1,8 +1,9 @@
 
 import { useNavigate } from "react-router-dom";
 import parseJwt from "@/utils/helpers/parseJwt";
-import React, { createContext, useCallback, useContext, useState } from "react";
+import React, { createContext, useCallback, useContext, useState, useEffect } from "react";
 import { isTokenExpired } from "@/utils/tokenExpiration";
+import { toast } from "@/hooks/use-toast";
 
 // Define the type for user data
 interface UserData {
@@ -44,6 +45,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // Check if token is expired
       if (isTokenExpired(token)) {
+        console.log("Token expired during refresh");
         localStorage.removeItem("neurocog_token");
         setUserData(null);
         return;
@@ -67,6 +69,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
       // Don't set userData to null on error to prevent potential logout loops
     }
   }, []);
+
+  // Run once when the provider mounts to load initial user data
+  useEffect(() => {
+    refreshUserData();
+  }, [refreshUserData]);
 
   return (
     <UserContext.Provider value={{ userData, refreshUserData }}>
