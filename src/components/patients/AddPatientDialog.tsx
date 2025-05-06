@@ -120,8 +120,10 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
   const handleGenerateInvitation = async (data: EmailFormData) => {
     try {
       setIsGenerating(true);
-      const response = await axios.get(
-        `${API_BASE}/generate-invitation-link?patient_email=${encodeURIComponent(data.email)}`
+      // Updated to use POST request instead of GET
+      const response = await axios.post(
+        `${API_BASE}/generate-invitation-link`,
+        { patient_email: data.email }
       );
       
       setInvitationLink(response.data.invitation_link);
