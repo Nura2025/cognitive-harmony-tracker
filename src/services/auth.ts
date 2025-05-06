@@ -43,6 +43,7 @@ const login = async (data: LoginData): Promise<AuthResponse> => {
     // Store the token in localStorage
     // Handle both response formats: {token, user, user_id} or {access_token, token_type, user_id}
     if (response.data.access_token) {
+      // Store the token that will be used by the axios interceptor
       localStorage.setItem('neurocog_token', response.data.access_token);
       
       // Extract user ID from the response if available, otherwise use email as identifier

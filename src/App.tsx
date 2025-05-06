@@ -22,6 +22,10 @@ import Settings from "./pages/Settings";
 import PrivateRoute from "./utils/PrivateRoute";
 import AuthService from "./services/auth";
 import SessionTimeoutHandler from "./components/SessionTimeoutHandler";
+import { setupAxiosInterceptors } from "./services/config";
+
+// Initialize axios interceptors
+setupAxiosInterceptors();
 
 const queryClient = new QueryClient();
 
