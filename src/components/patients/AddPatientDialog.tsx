@@ -1,21 +1,13 @@
-
-import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { format } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, User, Mail, Phone, Copy, Link } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -23,41 +15,50 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger
+  PopoverTrigger,
 } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from "@/components/ui/select";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { API_BASE } from "@/services/config";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { cn } from "@/lib/utils";
+import PatientService from "@/services/patient";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
+import { CalendarIcon, Copy, Link, Mail, Phone, User } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import * as z from "zod";
 
 // Form schema for initial patient data (just email)
 const emailSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" })
+  email: z.string().email({ message: "Invalid email address" }),
 });
 
 // Form schema for complete patient data
 const fullFormSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
-  username: z.string().min(3, { message: "Username must be at least 3 characters" }),
+  username: z
+    .string()
+    .min(3, { message: "Username must be at least 3 characters" }),
   first_name: z.string().min(1, { message: "First name is required" }),
   last_name: z.string().min(1, { message: "Last name is required" }),
   date_of_birth: z.date({ required_error: "Date of birth is required" }),
   gender: z.enum(["Male", "Female", "Other"], {
-    required_error: "Please select a gender"
+    required_error: "Please select a gender",
   }),
-  phone_number: z.string().optional()
+  phone_number: z.string().optional(),
 });
 
 type EmailFormData = z.infer<typeof emailSchema>;
@@ -72,10 +73,12 @@ interface AddPatientDialogProps {
 export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
   open,
   onOpenChange,
-  onSubmit
+  onSubmit,
 }) => {
   const { t } = useLanguage();
-  const [currentStep, setCurrentStep] = useState<'email' | 'full-form' | 'invitation'>('email');
+  const [currentStep, setCurrentStep] = useState<
+    "email" | "full-form" | "invitation"
+  >("email");
   const [invitationLink, setInvitationLink] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -86,8 +89,8 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
   const emailForm = useForm<EmailFormData>({
     resolver: zodResolver(emailSchema),
     defaultValues: {
-      email: ""
-    }
+      email: "",
+    },
   });
 
   // Form for full patient details
@@ -98,14 +101,14 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
       username: "",
       first_name: "",
       last_name: "",
-      phone_number: ""
-    }
+      phone_number: "",
+    },
   });
 
   // Reset the forms when the dialog closes
   useEffect(() => {
     if (!open) {
-      setCurrentStep('email');
+      setCurrentStep("email");
       setInvitationLink(null);
       setError(null);
       setPatientEmail("");
@@ -120,33 +123,27 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
       setIsGenerating(true);
       setError(null);
       setPatientEmail(email); // Store email for later use
-      
+
       // Get the token from localStorage
-      const token = localStorage.getItem('neurocog_token');
+      const token = localStorage.getItem("neurocog_token");
       if (!token) {
         throw new Error("Authentication token not found");
       }
-      
-      const response = await fetch(`${API_BASE}/generate-invitation-link`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`  // Add the token to the Authorization header
-        },
-        body: JSON.stringify({ patient_email: email })
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.detail || `Error: ${response.status}`);
+      console.log("email", email);
+      const data = await PatientService.invitePatient(email);
+      if (!data) {
+        throw new Error("Failed to generate invitation link");
       }
-      
-      const data = await response.json();
+      console.log("data", data);
       setInvitationLink(data.invitation_link);
-      setCurrentStep('invitation');
+      setCurrentStep("invitation");
     } catch (err) {
       console.error("Failed to generate invitation link:", err);
-      setError(err instanceof Error ? err.message : "Failed to generate invitation link. Please try again.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to generate invitation link. Please try again."
+      );
       toast.error(t("Failed to generate invitation link"));
     } finally {
       setIsGenerating(false);
@@ -162,10 +159,10 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
   const handleFullFormSubmit = async (data: FullFormData) => {
     try {
       setIsSubmitting(true);
-      
+
       // Format date of birth to YYYY-MM-DD string for the API
-      const formattedDob = format(data.date_of_birth, 'yyyy-MM-dd');
-      
+      const formattedDob = format(data.date_of_birth, "yyyy-MM-dd");
+
       // Prepare the data for the API
       const patientData = {
         email: data.email,
@@ -174,42 +171,48 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
         last_name: data.last_name,
         gender: data.gender,
         date_of_birth: formattedDob,
-        phone_number: data.phone_number || ""
+        phone_number: data.phone_number || "",
       };
-      
+
       // Get the token from localStorage
-      const token = localStorage.getItem('neurocog_token');
+      const token = localStorage.getItem("neurocog_token");
       if (!token) {
         throw new Error("Authentication token not found");
       }
-      
+
       // Make the PATCH request to update the user
-      const response = await fetch(`${API_BASE}/update-user-by-email`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(patientData)
-      });
-      
+      const response = await fetch(
+        `http://127.0.0.1:8000/update-user-by-email`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(patientData),
+        }
+      );
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         throw new Error(errorData?.detail || `Error: ${response.status}`);
       }
-      
+
       // Call the parent component's onSubmit function with the updated data
       onSubmit(data);
-      
+
       // Show success message
       toast.success(t("Patient details updated successfully"));
-      
+
       // Close the dialog
       onOpenChange(false);
-      
     } catch (err) {
       console.error("Failed to update patient details:", err);
-      setError(err instanceof Error ? err.message : "Failed to update patient details. Please try again.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to update patient details. Please try again."
+      );
       toast.error(t("Failed to update patient details"));
     } finally {
       setIsSubmitting(false);
@@ -228,7 +231,7 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
   const proceedToFullForm = () => {
     // Set the email field in the full form before transitioning
     fullForm.setValue("email", patientEmail);
-    setCurrentStep('full-form');
+    setCurrentStep("full-form");
   };
 
   return (
@@ -236,20 +239,26 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            {currentStep === 'email' && t("Invite New Patient")}
-            {currentStep === 'invitation' && t("Patient Invitation Link")}
-            {currentStep === 'full-form' && t("Add Patient Details")}
+            {currentStep === "email" && t("Invite New Patient")}
+            {currentStep === "invitation" && t("Patient Invitation Link")}
+            {currentStep === "full-form" && t("Add Patient Details")}
           </DialogTitle>
           <DialogDescription>
-            {currentStep === 'email' && t("Enter patient email to generate an invitation link.")}
-            {currentStep === 'invitation' && t("Send this link to the patient to complete registration.")}
-            {currentStep === 'full-form' && t("Enter complete patient details for your records.")}
+            {currentStep === "email" &&
+              t("Enter patient email to generate an invitation link.")}
+            {currentStep === "invitation" &&
+              t("Send this link to the patient to complete registration.")}
+            {currentStep === "full-form" &&
+              t("Enter complete patient details for your records.")}
           </DialogDescription>
         </DialogHeader>
 
-        {currentStep === 'email' && (
+        {currentStep === "email" && (
           <Form {...emailForm}>
-            <form onSubmit={emailForm.handleSubmit(handleEmailSubmit)} className="space-y-4">
+            <form
+              onSubmit={emailForm.handleSubmit(handleEmailSubmit)}
+              className="space-y-4"
+            >
               <FormField
                 control={emailForm.control}
                 name="email"
@@ -259,7 +268,12 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                     <FormControl>
                       <div className="relative">
                         <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input className="pl-10" type="email" placeholder={t("Enter patient email")} {...field} />
+                        <Input
+                          className="pl-10"
+                          type="email"
+                          placeholder={t("Enter patient email")}
+                          {...field}
+                        />
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -274,18 +288,24 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
               )}
 
               <DialogFooter className="mt-6">
-                <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => onOpenChange(false)}
+                >
                   {t("cancel")}
                 </Button>
                 <Button type="submit" disabled={isGenerating}>
-                  {isGenerating ? t("Generating...") : t("Generate Invitation Link")}
+                  {isGenerating
+                    ? t("Generating...")
+                    : t("Generate Invitation Link")}
                 </Button>
               </DialogFooter>
             </form>
           </Form>
         )}
 
-        {currentStep === 'invitation' && invitationLink && (
+        {currentStep === "invitation" && invitationLink && (
           <div className="space-y-4">
             <div className="p-4 border rounded-md bg-muted/30">
               <div className="flex items-center mb-2">
@@ -296,28 +316,32 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                 {invitationLink}
               </p>
             </div>
-            
+
             <div className="flex justify-between space-x-2">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="flex-1"
                 onClick={copyToClipboard}
               >
                 <Copy className="h-4 w-4 mr-2" />
                 {t("Copy Link")}
               </Button>
-              
-              <Button 
-                variant="default" 
+
+              <Button
+                variant="default"
                 className="flex-1"
                 onClick={proceedToFullForm}
               >
                 {t("Add Patient Details")}
               </Button>
             </div>
-            
+
             <div className="text-sm text-muted-foreground mt-2">
-              <p>{t("You can now send this link to the patient, or continue to add their details to your records.")}</p>
+              <p>
+                {t(
+                  "You can now send this link to the patient, or continue to add their details to your records."
+                )}
+              </p>
             </div>
 
             <DialogFooter className="mt-4">
@@ -328,9 +352,12 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
           </div>
         )}
 
-        {currentStep === 'full-form' && (
+        {currentStep === "full-form" && (
           <Form {...fullForm}>
-            <form onSubmit={fullForm.handleSubmit(handleFullFormSubmit)} className="space-y-4">
+            <form
+              onSubmit={fullForm.handleSubmit(handleFullFormSubmit)}
+              className="space-y-4"
+            >
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={fullForm.control}
@@ -341,7 +368,11 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                       <FormControl>
                         <div className="relative">
                           <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                          <Input className="pl-10" placeholder={t("Enter first name")} {...field} />
+                          <Input
+                            className="pl-10"
+                            placeholder={t("Enter first name")}
+                            {...field}
+                          />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -358,7 +389,11 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                       <FormControl>
                         <div className="relative">
                           <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                          <Input className="pl-10" placeholder={t("Enter last name")} {...field} />
+                          <Input
+                            className="pl-10"
+                            placeholder={t("Enter last name")}
+                            {...field}
+                          />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -376,7 +411,13 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                     <FormControl>
                       <div className="relative">
                         <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input className="pl-10" type="email" placeholder={t("Enter Email")} {...field} />
+                        <Input
+                          disabled
+                          className="pl-10"
+                          type="email"
+                          placeholder={t("Enter Email")}
+                          {...field}
+                        />
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -393,7 +434,11 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                     <FormControl>
                       <div className="relative">
                         <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input className="pl-10" placeholder={t("Enter username")} {...field} />
+                        <Input
+                          className="pl-10"
+                          placeholder={t("Enter username")}
+                          {...field}
+                        />
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -419,7 +464,11 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                               )}
                             >
                               <CalendarIcon className="absolute left-3 top-2.5 h-4 w-4" />
-                              {field.value ? format(field.value, "PPP") : <span>{t("select Date")}</span>}
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>{t("select Date")}</span>
+                              )}
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
@@ -428,7 +477,9 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
-                            disabled={date => date > new Date() || date < new Date("1900-01-01")}
+                            disabled={(date) =>
+                              date > new Date() || date < new Date("1900-01-01")
+                            }
                             initialFocus
                             className="p-3 pointer-events-auto"
                           />
@@ -445,7 +496,10 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>{t("Gender")}</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder={t("Select gender")} />
@@ -472,7 +526,11 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                     <FormControl>
                       <div className="relative">
                         <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input className="pl-10" placeholder={t("Enter phone number")} {...field} />
+                        <Input
+                          className="pl-10"
+                          placeholder={t("Enter phone number")}
+                          {...field}
+                        />
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -487,7 +545,11 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
               )}
 
               <DialogFooter className="mt-6">
-                <Button variant="outline" type="button" onClick={() => setCurrentStep('invitation')}>
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => setCurrentStep("invitation")}
+                >
                   {t("Back")}
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>

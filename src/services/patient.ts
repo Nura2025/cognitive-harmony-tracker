@@ -1,4 +1,3 @@
-
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { API_BASE } from "./config"; // Make sure this points to your backend URL
 
@@ -117,18 +116,26 @@ const handleApiError = (error: unknown, context: string = "API Request") => {
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError;
     if (axiosError.response) {
-      console.error(`${context} - API Error Response:`, axiosError.response.data);
+      console.error(
+        `${context} - API Error Response:`,
+        axiosError.response.data
+      );
       console.error(`${context} - Status:`, axiosError.response.status);
-      const errorMessage = 
-        typeof axiosError.response.data === 'object' && axiosError.response.data !== null
-          ? (axiosError.response.data as any).detail || JSON.stringify(axiosError.response.data)
+      const errorMessage =
+        typeof axiosError.response.data === "object" &&
+        axiosError.response.data !== null
+          ? (axiosError.response.data as any).detail ||
+            JSON.stringify(axiosError.response.data)
           : `Error ${axiosError.response.status}: ${axiosError.message}`;
       throw new Error(errorMessage);
     } else if (axiosError.request) {
       console.error(`${context} - No response received:`, axiosError.request);
       throw new Error("No response from server. Please check your connection.");
     } else {
-      console.error(`${context} - Error setting up request:`, axiosError.message);
+      console.error(
+        `${context} - Error setting up request:`,
+        axiosError.message
+      );
       throw new Error(`Request setup error: ${axiosError.message}`);
     }
   } else {
@@ -138,11 +145,15 @@ const handleApiError = (error: unknown, context: string = "API Request") => {
 };
 
 // Fetch all patients for a clinician
-const getPatientsByClinician = async (clinicianId: string): Promise<PatientListItem[]> => {
+const getPatientsByClinician = async (
+  clinicianId: string
+): Promise<PatientListItem[]> => {
   try {
     // Ensure API_BASE is correctly defined in ./config
-    // Example: export const API_BASE = "http://localhost:8000"; 
-    const response: AxiosResponse<PatientListItem[]> = await axios.get(`${API_BASE}/${clinicianId}/patients`);
+    // Example: export const API_BASE = "http://localhost:8000";
+    const response: AxiosResponse<PatientListItem[]> = await axios.get(
+      `${API_BASE}/${clinicianId}/patients`
+    );
     return response.data;
   } catch (error) {
     return handleApiError(error, "getPatientsByClinician");
@@ -152,7 +163,9 @@ const getPatientsByClinician = async (clinicianId: string): Promise<PatientListI
 // Fetch a specific patient's details
 const getPatientById = async (clinicianId: string, patientId: string) => {
   try {
-    const response = await axios.get(`${API_BASE}/${clinicianId}/patients/${patientId}`);
+    const response = await axios.get(
+      `${API_BASE}/${clinicianId}/patients/${patientId}`
+    );
     return response.data;
   } catch (error) {
     return handleApiError(error, "getPatientById");
@@ -160,9 +173,32 @@ const getPatientById = async (clinicianId: string, patientId: string) => {
 };
 
 // Add a new patient
+const invitePatient = async (email: string) => {
+  try {
+    const token = localStorage.getItem("neurocog_token");
+    const response = await axios.post(
+      `${API_BASE}/generate-invitation-link?patient_email=${email}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    return handleApiError(error, "invitePatient");
+  }
+};
+
+// Add a new patient
 const addPatient = async (clinicianId: string, patientData: any) => {
   try {
-    const response = await axios.post(`${API_BASE}/${clinicianId}/patients`, patientData);
+    const response = await axios.post(
+      `${API_BASE}/${clinicianId}/patients`,
+      patientData
+    );
     return response.data;
   } catch (error) {
     return handleApiError(error, "addPatient");
@@ -173,7 +209,9 @@ const addPatient = async (clinicianId: string, patientData: any) => {
 const getPatientProfile = async (userId: string): Promise<PatientProfile> => {
   try {
     // Assuming the profile endpoint is relative to the base URL or handled by proxy
-    const response: AxiosResponse<PatientProfile> = await axios.get(`${API_BASE}/api/cognitive/profile/${userId}`);
+    const response: AxiosResponse<PatientProfile> = await axios.get(
+      `${API_BASE}/api/cognitive/profile/${userId}`
+    );
     return response.data;
   } catch (error) {
     return handleApiError(error, "getPatientProfile");
@@ -185,7 +223,8 @@ const PatientService = {
   getPatientsByClinician,
   getPatientById,
   getPatientProfile,
-  addPatient
+  addPatient,
+  invitePatient,
 };
 
 export default PatientService;
