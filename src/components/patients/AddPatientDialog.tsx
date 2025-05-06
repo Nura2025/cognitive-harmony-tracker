@@ -80,6 +80,7 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [patientEmail, setPatientEmail] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form for email-only step
   const emailForm = useForm<EmailFormData>({
@@ -158,8 +159,61 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
   };
 
   // Handle full form submission
-  const handleFullFormSubmit = (data: FullFormData) => {
-    onSubmit(data);
+  const handleFullFormSubmit = async (data: FullFormData) => {
+    try {
+      setIsSubmitting(true);
+      
+      // Format date of birth to YYYY-MM-DD string for the API
+      const formattedDob = format(data.date_of_birth, 'yyyy-MM-dd');
+      
+      // Prepare the data for the API
+      const patientData = {
+        email: data.email,
+        username: data.username,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        gender: data.gender,
+        date_of_birth: formattedDob,
+        phone_number: data.phone_number || ""
+      };
+      
+      // Get the token from localStorage
+      const token = localStorage.getItem('neurocog_token');
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
+      
+      // Make the PATCH request to update the user
+      const response = await fetch(`${API_BASE}/update-user-by-email`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(patientData)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.detail || `Error: ${response.status}`);
+      }
+      
+      // Call the parent component's onSubmit function with the updated data
+      onSubmit(data);
+      
+      // Show success message
+      toast.success(t("Patient details updated successfully"));
+      
+      // Close the dialog
+      onOpenChange(false);
+      
+    } catch (err) {
+      console.error("Failed to update patient details:", err);
+      setError(err instanceof Error ? err.message : "Failed to update patient details. Please try again.");
+      toast.error(t("Failed to update patient details"));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Copy invitation link to clipboard
@@ -426,11 +480,19 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                 )}
               />
 
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
               <DialogFooter className="mt-6">
                 <Button variant="outline" type="button" onClick={() => setCurrentStep('invitation')}>
                   {t("Back")}
                 </Button>
-                <Button type="submit">{t("Add Patient")}</Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? t("Updating...") : t("Add Patient")}
+                </Button>
               </DialogFooter>
             </form>
           </Form>
