@@ -1,9 +1,13 @@
-
-import { useNavigate } from "react-router-dom";
 import parseJwt from "@/utils/helpers/parseJwt";
-import React, { createContext, useCallback, useContext, useState, useEffect } from "react";
 import { isTokenExpired } from "@/utils/tokenExpiration";
-import { toast } from "@/hooks/use-toast";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { useNavigate } from "react-router-dom";
 
 // Define the type for user data
 interface UserData {
@@ -57,7 +61,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
         setUserData({
           id: userId,
-          email: parsedToken.email || '',
+          email: parsedToken.email || "",
           name: parsedToken.name,
           user_role: parsedToken.user_role,
           exp: parsedToken.exp,

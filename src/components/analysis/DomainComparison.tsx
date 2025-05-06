@@ -1,20 +1,17 @@
-import React, { useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChartContainer, ChartLegend } from '@/components/ui/chart';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getDomainName } from "@/utils/dataProcessing";
+import { SessionData } from "@/utils/mockData";
+import { CognitiveDomain } from "@/utils/types/patientTypes";
+import React, { useMemo } from "react";
 import {
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
   Radar,
   RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
   ResponsiveContainer,
-  Legend
-} from 'recharts';
-import { CognitiveDomain } from '@/utils/types/patientTypes';
-import { SessionData } from '@/utils/mockData';
-import { getDomainName } from '@/utils/dataProcessing';
-import { BarChart } from 'lucide-react';
+} from "recharts";
 
 interface DomainComparisonProps {
   patientData: CognitiveDomain;
@@ -27,74 +24,86 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
   patientData,
   normativeData,
   subtypeData,
-  sessions = []
+  sessions = [],
 }) => {
   const domains = Object.keys(patientData) as (keyof CognitiveDomain)[];
-  
-  const isValidData = domains.every(domain => 
-    typeof patientData[domain] === 'number' && !isNaN(patientData[domain])
+
+  const isValidData = domains.every(
+    (domain) =>
+      typeof patientData[domain] === "number" && !isNaN(patientData[domain])
   );
-  
-  const normativeChartData = domains.map(domain => {
-    const patientValue = typeof patientData[domain] === 'number' && !isNaN(patientData[domain]) 
-      ? patientData[domain] 
-      : 0;
-    
-    const normativeValue = normativeData && typeof normativeData[domain] === 'number' && !isNaN(normativeData[domain])
-      ? normativeData[domain]
-      : 50;
-      
-    const subtypeValue = subtypeData && typeof subtypeData[domain] === 'number' && !isNaN(subtypeData[domain])
-      ? subtypeData[domain]
-      : 40;
-      
+
+  const normativeChartData = domains.map((domain) => {
+    const patientValue =
+      typeof patientData[domain] === "number" && !isNaN(patientData[domain])
+        ? patientData[domain]
+        : 0;
+
+    const normativeValue =
+      normativeData &&
+      typeof normativeData[domain] === "number" &&
+      !isNaN(normativeData[domain])
+        ? normativeData[domain]
+        : 50;
+
+    const subtypeValue =
+      subtypeData &&
+      typeof subtypeData[domain] === "number" &&
+      !isNaN(subtypeData[domain])
+        ? subtypeData[domain]
+        : 40;
+
     return {
       domain: getDomainName(domain),
       patient: patientValue,
       normative: normativeValue,
-      subtype: subtypeValue
+      subtype: subtypeValue,
     };
   });
-  
+
   const firstAndLastSession = useMemo(() => {
     if (!sessions || sessions.length < 2) {
       return null;
     }
-    
-    const sortedSessions = [...sessions].sort((a, b) => 
-      new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+
+    const sortedSessions = [...sessions].sort(
+      (a, b) =>
+        new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
     );
-    
+
     const firstSession = sortedSessions[0];
     const lastSession = sortedSessions[sortedSessions.length - 1];
-    
+
     return { firstSession, lastSession };
   }, [sessions]);
-  
+
   const sessionComparisonData = useMemo(() => {
     if (!firstAndLastSession) return [];
-    
+
     const { firstSession, lastSession } = firstAndLastSession;
-    
-    return domains.map(domain => {
-      const firstValue = typeof firstSession.domainScores[domain] === 'number' 
-        ? firstSession.domainScores[domain] 
-        : 0;
-        
-      const lastValue = typeof lastSession.domainScores[domain] === 'number'
-        ? lastSession.domainScores[domain]
-        : 0;
-        
+
+    return domains.map((domain) => {
+      const firstValue =
+        typeof firstSession.domainScores[domain] === "number"
+          ? firstSession.domainScores[domain]
+          : 0;
+
+      const lastValue =
+        typeof lastSession.domainScores[domain] === "number"
+          ? lastSession.domainScores[domain]
+          : 0;
+
       return {
         domain: getDomainName(domain),
         firstSession: firstValue,
-        lastSession: lastValue
+        lastSession: lastValue,
       };
     });
   }, [firstAndLastSession, domains]);
-  
-  const hasSessionData = firstAndLastSession !== null && sessionComparisonData.length > 0;
-  
+
+  const hasSessionData =
+    firstAndLastSession !== null && sessionComparisonData.length > 0;
+
   return (
     <Tabs defaultValue="normative" className="w-full">
       <TabsList className="grid w-full grid-cols-2 mb-6">
@@ -103,11 +112,13 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
           Progress Comparison
         </TabsTrigger>
       </TabsList>
-      
+
       <TabsContent value="normative">
         <Card className="glass">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Cognitive Domain Comparison</CardTitle>
+            <CardTitle className="text-lg">
+              Cognitive Domain Comparison
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-4 mb-4">
@@ -128,23 +139,26 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
                 </div>
               )}
             </div>
-            
+
             <div className="h-[350px] w-full">
               {normativeChartData.length > 0 && isValidData && (
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart outerRadius="75%" data={normativeChartData}>
                     <PolarGrid stroke="hsl(var(--border))" />
-                    <PolarAngleAxis 
-                      dataKey="domain" 
-                      tick={{ fill: 'hsl(var(--foreground))', fontSize: 12 }}
+                    <PolarAngleAxis
+                      dataKey="domain"
+                      tick={{ fill: "hsl(var(--foreground))", fontSize: 12 }}
                     />
-                    <PolarRadiusAxis 
-                      angle={30} 
-                      domain={[0, 100]} 
-                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                    <PolarRadiusAxis
+                      angle={30}
+                      domain={[0, 100]}
+                      tick={{
+                        fill: "hsl(var(--muted-foreground))",
+                        fontSize: 10,
+                      }}
                       stroke="hsl(var(--border))"
                     />
-                    
+
                     {subtypeData && (
                       <Radar
                         name="ADHD Subtype Average"
@@ -154,7 +168,7 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
                         fillOpacity={0.5}
                       />
                     )}
-                    
+
                     {normativeData && (
                       <Radar
                         name="Age-Based Normative"
@@ -164,7 +178,7 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
                         fillOpacity={0.5}
                       />
                     )}
-                    
+
                     <Radar
                       name="Patient"
                       dataKey="patient"
@@ -184,11 +198,13 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
           </CardContent>
         </Card>
       </TabsContent>
-      
+
       <TabsContent value="progress">
         <Card className="glass">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">First vs. Last Session Progress</CardTitle>
+            <CardTitle className="text-lg">
+              First vs. Last Session Progress
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {hasSessionData ? (
@@ -203,19 +219,22 @@ export const DomainComparison: React.FC<DomainComparisonProps> = ({
                     <span className="text-xs">Latest Session</span>
                   </div>
                 </div>
-                
+
                 <div className="h-[350px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <RadarChart outerRadius="75%" data={sessionComparisonData}>
                       <PolarGrid stroke="hsl(var(--border))" />
-                      <PolarAngleAxis 
-                        dataKey="domain" 
-                        tick={{ fill: 'hsl(var(--foreground))', fontSize: 12 }}
+                      <PolarAngleAxis
+                        dataKey="domain"
+                        tick={{ fill: "hsl(var(--foreground))", fontSize: 12 }}
                       />
-                      <PolarRadiusAxis 
-                        angle={30} 
-                        domain={[0, 100]} 
-                        tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                      <PolarRadiusAxis
+                        angle={30}
+                        domain={[0, 100]}
+                        tick={{
+                          fill: "hsl(var(--muted-foreground))",
+                          fontSize: 10,
+                        }}
                         stroke="hsl(var(--border))"
                       />
                       <Radar
