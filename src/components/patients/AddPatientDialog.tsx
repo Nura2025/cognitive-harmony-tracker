@@ -79,6 +79,7 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
   const [invitationLink, setInvitationLink] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [patientEmail, setPatientEmail] = useState<string>("");
 
   // Form for email-only step
   const emailForm = useForm<EmailFormData>({
@@ -106,23 +107,18 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
       setCurrentStep('email');
       setInvitationLink(null);
       setError(null);
+      setPatientEmail("");
       emailForm.reset();
       fullForm.reset();
     }
   }, [open, emailForm, fullForm]);
-
-  // Update full form email when email form is submitted
-  useEffect(() => {
-    if (emailForm.watch("email")) {
-      fullForm.setValue("email", emailForm.watch("email"));
-    }
-  }, [emailForm, fullForm]);
 
   // Function to generate invitation link
   const generateInvitationLink = async (email: string) => {
     try {
       setIsGenerating(true);
       setError(null);
+      setPatientEmail(email); // Store email for later use
       
       // Get the token from localStorage
       const token = localStorage.getItem('neurocog_token');
@@ -176,6 +172,8 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
 
   // Move to step for collecting full patient details
   const proceedToFullForm = () => {
+    // Set the email field in the full form before transitioning
+    fullForm.setValue("email", patientEmail);
     setCurrentStep('full-form');
   };
 
@@ -324,7 +322,7 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                     <FormControl>
                       <div className="relative">
                         <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input className="pl-10" type="email" placeholder={t("Enter Email")} {...field} readOnly />
+                        <Input className="pl-10" type="email" placeholder={t("Enter Email")} {...field} />
                       </div>
                     </FormControl>
                     <FormMessage />
