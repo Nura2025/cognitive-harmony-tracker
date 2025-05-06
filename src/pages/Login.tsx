@@ -31,7 +31,19 @@ const Login = () => {
     setLoading(true);
     
     try {
-      await AuthService.login({ email, password });
+      const authResponse = await AuthService.login({ email, password });
+      
+      // Extract user/clinician ID
+      const clinicianId = authResponse.user_id || 
+                        (authResponse.user && authResponse.user.id) || 
+                        null;
+      
+      if (clinicianId) {
+        console.log("Logged in as clinician with ID:", clinicianId);
+      } else {
+        console.warn("No clinician ID found in the response");
+      }
+      
       toast.success("Login successful!");
       // Redirect to dashboard on successful login
       navigate('/dashboard');
