@@ -1,7 +1,7 @@
-
+import parseJwt from "@/utils/helpers/parseJwt";
 import axios from "axios";
-import { API_BASE } from "./config";
 import { toast } from "sonner";
+import { API_BASE } from "./config";
 import SessionManager from "./session-manager";
 
 interface AuthResponse {
@@ -38,83 +38,83 @@ interface RegisterClinicianData {
 const login = async (data: LoginData): Promise<AuthResponse> => {
   try {
     const response = await axios.post(`${API_BASE}/login`, data);
-    
-    // Store the token in localStorage
-    // Handle both response formats: {token, user} or {access_token, token_type}
-    if (response.data.access_token) {
-      localStorage.setItem('neurocog_token', response.data.access_token);
-      
-      // Since user data is not returned by the API, we'll store minimal user info
-      const userEmail = data.email;
+
+    const token = response.data.access_token;
+    if (token) {
+      const decoded = parseJwt(token);
+      // ✅ Check if role exists and is 'doctor'
+      if (!decoded?.user_role || decoded.user_role !== "doctor") {
+        throw new Error("Access denied. Only doctors can log in.");
+      }
+
+      localStorage.setItem("neurocog_token", token);
+
+      const userEmail = decoded.email || data.email;
       const userInfo = { email: userEmail };
-      localStorage.setItem('neurocog_user', JSON.stringify(userInfo));
-      
-      // Initialize session management
+      localStorage.setItem("neurocog_user", JSON.stringify(userInfo));
+
       SessionManager.resetTimer();
-      
+
       return {
-        token: response.data.access_token,
-        user: userInfo
+        token,
+        user: userInfo,
       };
-    } else if (response.data.token) {
-      // Handle the original format if it's ever returned
-      localStorage.setItem('neurocog_token', response.data.token);
-      localStorage.setItem('neurocog_user', JSON.stringify(response.data.user));
-      
-      // Initialize session management
-      SessionManager.resetTimer();
-      
-      return response.data;
     }
-    
+
     return response.data;
-  } catch (error: any) {
+  } catch (error) {
     console.error("Login error:", error);
     throw error;
   }
 };
 
 // Register as patient function
-const registerAsPatient = async (data: RegisterPatientData): Promise<AuthResponse> => {
+const registerAsPatient = async (
+  data: RegisterPatientData
+): Promise<AuthResponse> => {
   try {
     const response = await axios.post(`${API_BASE}/register/patient`, data);
-    
+
     // Store the token in localStorage
     if (response.data.token) {
-      localStorage.setItem('neurocog_token', response.data.token);
-      localStorage.setItem('neurocog_user', JSON.stringify(response.data.user));
-      
+      localStorage.setItem("neurocog_token", response.data.token);
+      localStorage.setItem("neurocog_user", JSON.stringify(response.data.user));
+
       // Initialize session management
       SessionManager.resetTimer();
     }
-    
+
     return response.data;
   } catch (error: any) {
     console.error("Patient registration error:", error);
-    const errorMessage = error.response?.data?.message || "Registration failed. Please try again.";
+    const errorMessage =
+      error.response?.data?.message || "Registration failed. Please try again.";
     toast.error(errorMessage);
     throw error;
   }
 };
 
 // Register as clinician function
-const registerAsClinician = async (data: RegisterClinicianData): Promise<AuthResponse> => {
+const registerAsClinician = async (
+  data: RegisterClinicianData
+): Promise<AuthResponse> => {
   try {
     const response = await axios.post(`${API_BASE}/register/clinician`, data);
-    
+
     // Store the token in localStorage
     if (response.data.token) {
-      localStorage.setItem('neurocog_token', response.data.token);
-      localStorage.setItem('neurocog_user', JSON.stringify(response.data.user));
-      
+      localStorage.setItem("neurocog_token", response.data.token);
+      localStorage.setItem("neurocog_user", JSON.stringify(response.data.user));
+
       // Initialize session management
       SessionManager.resetTimer();
     }
-    
+
     return response.data;
   } catch (error: any) {
     console.error("Clinician registration error:", error);
-    const errorMessage = error.response?.data?.message || "Registration failed. Please try again.";
+    const errorMessage =
+      error.response?.data?.message || "Registration failed. Please try again.";
     toast.error(errorMessage);
     throw error;
   }
@@ -123,22 +123,22 @@ const registerAsClinician = async (data: RegisterClinicianData): Promise<AuthRes
 // Logout function
 const logout = () => {
   // Remove auth related items from localStorage
-  localStorage.removeItem('neurocog_token');
-  localStorage.removeItem('neurocog_user');
-  
+  localStorage.removeItem("neurocog_token");
+  localStorage.removeItem("neurocog_user");
+
   // Clear any session data or cookies if needed
-  document.cookie.split(';').forEach(cookie => {
+  document.cookie.split(";").forEach((cookie) => {
     document.cookie = cookie
-      .replace(/^ +/, '')
-      .replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
+      .replace(/^ +/, "")
+      .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
   });
 };
 
 // Get current user function
 const getCurrentUser = () => {
-  const userJson = localStorage.getItem('neurocog_user');
+  const userJson = localStorage.getItem("neurocog_user");
   if (!userJson) return null;
-  
+
   try {
     return JSON.parse(userJson);
   } catch (e) {
@@ -149,7 +149,7 @@ const getCurrentUser = () => {
 
 // Check if user is authenticated
 const isAuthenticated = (): boolean => {
-  return !!localStorage.getItem('neurocog_token');
+  return !!localStorage.getItem("neurocog_token");
 };
 
 // Auth Service object
