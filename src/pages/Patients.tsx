@@ -71,9 +71,13 @@ const Patients = () => {
     }
   };
 
+  // Use a reference to track if data has been fetched to avoid infinite requests
   useEffect(() => {
-    fetchPatients();
-  }, [userData]); // Refetch when userData changes
+    // Only fetch data when userData is available and hasnt changed since last fetch
+    if (userData?.id) {
+      fetchPatients();
+    }
+  }, [userData?.id]); // Only depend on userData.id, not the entire userData object
 
   // 🔍 Apply filters
   useEffect(() => {

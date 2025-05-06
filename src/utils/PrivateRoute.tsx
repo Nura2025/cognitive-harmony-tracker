@@ -10,14 +10,15 @@ interface PrivateRouteProps {
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   const isAuthenticated = AuthService.isAuthenticated();
-  const { refreshUserData } = useUser();
+  const { userData, refreshUserData } = useUser();
   
   // When mounting a protected route, refresh user data from token
+  // Added check to prevent refreshing if userData is already available
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !userData) {
       refreshUserData();
     }
-  }, [refreshUserData, isAuthenticated]);
+  }, [refreshUserData, isAuthenticated, userData]);
   
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;

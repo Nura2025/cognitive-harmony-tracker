@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import AuthService from '@/services/auth';
 import parseJwt from '@/utils/helpers/parseJwt';
 
@@ -28,7 +28,8 @@ const UserContext = createContext<UserContextType>({
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   
-  const refreshUserData = () => {
+  // Use useCallback to ensure the function reference stays stable
+  const refreshUserData = useCallback(() => {
     const token = localStorage.getItem('neurocog_token');
     if (!token) {
       setUserData(null);
@@ -50,12 +51,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } else {
       setUserData(null);
     }
-  };
+  }, []);
 
-  // Load user data on mount
+  // Load user data on mount, but only once
   useEffect(() => {
     refreshUserData();
-  }, []);
+  }, [refreshUserData]);
 
   return (
     <UserContext.Provider value={{ userData, refreshUserData }}>
