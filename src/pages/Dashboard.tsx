@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Brain, Clock, LineChart, Users } from 'lucide-react';
@@ -8,7 +7,7 @@ import { StatusCard } from '@/components/dashboard/StatusCard';
 import { DomainChart } from '@/components/dashboard/DomainChart';
 import { SessionTimeline } from '@/components/dashboard/SessionTimeline';
 import PatientService from '@/services/patient';
-import { sessionData, generateTrendData } from '@/utils/mockData';
+import { sessionData } from '@/utils/mockData';
 import { useToast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -95,11 +94,12 @@ const Dashboard = () => {
         // Wait for all profile requests to complete
         await Promise.all(profilePromises);
         
+        // Display only the first 8 patients in the UI but store the total count
         setPatients(formattedPatients.slice(0, 8));
         setPatientMetrics(metrics);
         
-        // Calculate dashboard metrics
-        setTotalPatients(formattedPatients.length);
+        // Calculate dashboard metrics - use the full patient list length for total patients
+        setTotalPatients(patientList.length); // Get the total number directly from the API response
         setTotalSessions(formattedPatients.reduce((sum, p) => sum + (p.total_sessions || 0), 0));
         
         const allPercentiles = Object.values(metrics).map((m: any) => m.percentile || 0);

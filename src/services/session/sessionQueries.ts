@@ -1,8 +1,6 @@
 
 import axios from "axios";
 import { API_BASE } from "../config";
-// Import but don't use the mock data
-// import { generateMockSessions } from "./mockData";
 
 /**
  * Get all sessions for a specific user
