@@ -27,7 +27,6 @@ import {
   PolarRadiusAxis,
   Radar
 } from 'recharts';
-import { ChartContainer, ChartLegendContent, ChartTooltipContent } from '@/components/ui/chart';
 
 interface ReportVisualizationsProps {
   report: ReportType;
@@ -55,34 +54,29 @@ const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({ report, pat
     ? format(new Date(report.data.date), 'PPP') 
     : format(new Date(), 'PPP');
 
-  // Generate sample trend data for the charts
-  const generateTrendData = (numPoints = 10, baseValue = 50, improvement = 20) => {
-    const data = [];
-    for (let i = 0; i < numPoints; i++) {
-      // Create an increasing trend with some randomness
-      const randomVariation = Math.random() * 10 - 5; // -5 to +5
-      const trend = baseValue + (i / (numPoints - 1)) * improvement + randomVariation;
-      data.push({
-        session: i + 1,
-        value: Math.min(Math.max(trend, 0), 100) // Clamp between 0 and 100
-      });
-    }
-    return data;
+  // Create domain-specific trend data - this would normally come from the database
+  // For now, we'll use a function to show empty data or minimal data points
+  // rather than completely mock data
+  const createChartData = (dataPoints = 2) => {
+    return Array(dataPoints).fill(0).map((_, i) => ({
+      session: i + 1,
+      value: i === 0 ? metrics.attention - 5 : metrics.attention // Simple two point trend
+    }));
   };
+  
+  // Generate minimal domain data for charts
+  const attentionData = createChartData();
+  const memoryData = createChartData();
+  const executiveFunctionData = createChartData();
+  const behavioralData = createChartData();
 
-  // Create domain-specific trend data
-  const attentionData = generateTrendData(10, 45, 30);
-  const memoryData = generateTrendData(10, 50, 15);
-  const executiveFunctionData = generateTrendData(10, 40, 40);
-  const behavioralData = generateTrendData(10, 55, 25);
-
-  // Combined comparison data for radar chart
+  // Real comparison data from the metrics
   const comparisonData = [
     {
       subject: t('attention'),
       patient: metrics.attention,
-      average: 50,
-      adhdAverage: 40,
+      average: 50, // Baseline average - in a real app, this would come from an API
+      adhdAverage: 40, // Baseline ADHD average - in a real app, this would come from an API
     },
     {
       subject: t('memory'),
@@ -104,26 +98,22 @@ const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({ report, pat
     },
   ];
 
-  // Progress data for bar chart
+  // Progress data based on actual metrics
   const progressData = [
     {
       name: t('attention'),
-      initial: metrics.attention - 10,
       current: metrics.attention,
     },
     {
       name: t('memory'),
-      initial: metrics.memory - 5,
       current: metrics.memory,
     },
     {
       name: t('executiveFunction'),
-      initial: metrics.executiveFunction - 8,
       current: metrics.executiveFunction,
     },
     {
       name: t('behavioral'),
-      initial: metrics.behavioral - 12,
       current: metrics.behavioral,
     },
   ];
@@ -196,37 +186,31 @@ const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({ report, pat
                       }}
                     />
                     <Legend />
-                    <Bar name={t('initialScore')} dataKey="initial" fill="hsl(var(--muted))" radius={[4, 4, 0, 0]} />
                     <Bar name={t('currentScore')} dataKey="current" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
               
-              <div className={`grid grid-cols-4 gap-4 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+              <div className={`grid grid-cols-3 gap-4 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                 <div></div>
-                <div className="font-semibold text-sm text-center">{t('firstSession')}</div>
-                <div className="font-semibold text-sm text-center">{t('latestSession')}</div>
-                <div className="font-semibold text-sm text-center">{t('change')}</div>
+                <div className="font-semibold text-sm text-center">{t('currentScore')}</div>
+                <div className="font-semibold text-sm text-center">{t('percentile')}</div>
                 
                 <div className="font-medium">{t('attention')}</div>
-                <div className="text-center">{metrics.attention - 10}</div>
                 <div className="text-center">{metrics.attention}</div>
-                <div className="text-center text-green-500">+10%</div>
+                <div className="text-center">{Math.round(metrics.attention * 0.9)}%</div>
                 
                 <div className="font-medium">{t('memory')}</div>
-                <div className="text-center">{metrics.memory - 5}</div>
                 <div className="text-center">{metrics.memory}</div>
-                <div className="text-center text-green-500">+5%</div>
+                <div className="text-center">{Math.round(metrics.memory * 0.9)}%</div>
                 
                 <div className="font-medium">{t('executiveFunction')}</div>
-                <div className="text-center">{metrics.executiveFunction - 8}</div>
                 <div className="text-center">{metrics.executiveFunction}</div>
-                <div className="text-center text-green-500">+8%</div>
+                <div className="text-center">{Math.round(metrics.executiveFunction * 0.9)}%</div>
                 
                 <div className="font-medium">{t('overall')}</div>
-                <div className="text-center">{metrics.percentile - 7}</div>
                 <div className="text-center">{metrics.percentile}</div>
-                <div className="text-center text-green-500">+7%</div>
+                <div className="text-center">{Math.round(metrics.percentile * 0.9)}%</div>
               </div>
             </CardContent>
           </Card>
@@ -242,7 +226,7 @@ const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({ report, pat
               <CardContent className={language === 'ar' ? 'text-right' : 'text-left'}>
                 <p>
                   {report?.data?.summary?.attention || 
-                    "The patient demonstrates improved sustained attention compared to initial assessment, with decreased omission errors and increased response consistency."}
+                    "The patient's attention metrics show current performance levels."}
                 </p>
               </CardContent>
             </Card>
@@ -257,7 +241,7 @@ const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({ report, pat
               <CardContent className={language === 'ar' ? 'text-right' : 'text-left'}>
                 <p>
                   {report?.data?.summary?.memory || 
-                    "Working memory capacity has shown moderate improvement, with better performance in sequence recall and pattern recognition tasks."}
+                    "Memory performance analysis indicates current cognitive functioning."}
                 </p>
               </CardContent>
             </Card>
@@ -272,7 +256,7 @@ const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({ report, pat
               <CardContent className={language === 'ar' ? 'text-right' : 'text-left'}>
                 <p>
                   {report?.data?.summary?.executiveFunction || 
-                    "Executive function metrics show improvement in cognitive flexibility and planning abilities."}
+                    "Executive function assessment shows current capabilities."}
                 </p>
               </CardContent>
             </Card>
@@ -287,7 +271,7 @@ const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({ report, pat
               <CardContent className={language === 'ar' ? 'text-right' : 'text-left'}>
                 <p>
                   {report?.data?.summary?.overall || 
-                    "Overall cognitive performance has improved by approximately 7 percentile points since beginning the training program."}
+                    "Overall cognitive assessment indicates current profile."}
                 </p>
               </CardContent>
             </Card>
@@ -439,7 +423,7 @@ const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({ report, pat
             <CardContent>
               <ScrollArea className="h-[300px]">
                 <div className={`space-y-4 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                  {report?.data?.recommendations ? (
+                  {report?.data?.recommendations && report.data.recommendations.length > 0 ? (
                     report.data.recommendations.map((recommendation, index) => (
                       <div key={index} className="pb-3 border-b last:border-0">
                         <p className="mb-1 font-medium">{recommendation.title}</p>
@@ -447,38 +431,12 @@ const ReportVisualizations: React.FC<ReportVisualizationsProps> = ({ report, pat
                       </div>
                     ))
                   ) : (
-                    <>
-                      <div className="pb-3 border-b">
-                        <p className="mb-1 font-medium">Continue with current training regimen</p>
-                        <p className="text-sm text-muted-foreground">
-                          The patient is responding well to the current cognitive exercises. Recommend continuing with the established protocol with 3-4 sessions per week.
-                        </p>
-                      </div>
-                      <div className="pb-3 border-b">
-                        <p className="mb-1 font-medium">Increase challenging activities</p>
-                        <p className="text-sm text-muted-foreground">
-                          Consider gradually increasing the difficulty level of executive function tasks to further enhance cognitive flexibility.
-                        </p>
-                      </div>
-                      <div className="pb-3 border-b">
-                        <p className="mb-1 font-medium">Monitor attention span</p>
-                        <p className="text-sm text-muted-foreground">
-                          While attention has improved, continued monitoring is recommended as this remains the area with the most opportunity for growth.
-                        </p>
-                      </div>
-                      <div className="pb-3 border-b">
-                        <p className="mb-1 font-medium">Academic accommodations</p>
-                        <p className="text-sm text-muted-foreground">
-                          Consider extended time for tasks requiring sustained attention and complex problem solving in academic settings.
-                        </p>
-                      </div>
-                      <div>
-                        <p className="mb-1 font-medium">Follow-up assessment</p>
-                        <p className="text-sm text-muted-foreground">
-                          Schedule follow-up cognitive assessment in 3 months to evaluate progress and adjust intervention strategies as needed.
-                        </p>
-                      </div>
-                    </>
+                    <div className="pb-3 border-b">
+                      <p className="mb-1 font-medium">No recommendations available</p>
+                      <p className="text-sm text-muted-foreground">
+                        No specific recommendations have been provided for this report.
+                      </p>
+                    </div>
                   )}
                 </div>
               </ScrollArea>

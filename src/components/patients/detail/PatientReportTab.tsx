@@ -4,7 +4,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ReportGenerator } from '@/components/reports/ReportGenerator';
 import { PatientReports } from '@/components/reports/PatientReports';
 import { ReportType } from '@/utils/types/patientTypes';
-import { mockReports } from '@/utils/mockData/reportData';
 import { toast } from "@/hooks/use-toast";
 import ReportVisualizations from '@/components/reports/ReportVisualizations';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -17,7 +16,7 @@ interface PatientReportTabProps {
 }
 
 export const PatientReportTab: React.FC<PatientReportTabProps> = ({ patientId, patientName }) => {
-  const [reports, setReports] = useState<ReportType[]>(() => mockReports(patientId));
+  const [reports, setReports] = useState<ReportType[]>([]);
   const [selectedReport, setSelectedReport] = useState<ReportType | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { language } = useLanguage();

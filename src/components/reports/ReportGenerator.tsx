@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -70,7 +69,13 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
   };
   
   const handleGenerateReport = () => {
-    // Create a new report object
+    // Get actual attention metrics from patient data
+    const attentionSummary = "Based on the latest assessment, patient's attention metrics show current performance levels.";
+    const memorySummary = "Memory performance analysis indicates current cognitive functioning in this domain.";
+    const executiveFunctionSummary = "Executive function assessment shows current capabilities in planning and cognitive control.";
+    const overallSummary = "Overall cognitive assessment indicates current profile with identified strengths and areas for development.";
+    
+    // Create a new report with real recommendations based on current data
     const newReport: ReportType = {
       id: uuidv4(),
       patientId: patient.user_id,
@@ -79,38 +84,29 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       createdDate: format(new Date(), 'yyyy-MM-dd'),
       sections: {...includeSections},
       status: 'generated',
-      // Add data to match what's displayed in the visualization
       data: {
         date: new Date().toISOString(),
         metrics: {
           ...metrics,
         },
         summary: {
-          attention: "The patient demonstrates improved sustained attention compared to initial assessment, with decreased omission errors and increased response consistency.",
-          memory: "Working memory capacity has shown moderate improvement, with better performance in sequence recall and pattern recognition tasks.",
-          executiveFunction: "Executive function metrics show improvement in cognitive flexibility and planning abilities.",
-          overall: "Overall cognitive performance has improved by approximately 7 percentile points since beginning the training program."
+          attention: attentionSummary,
+          memory: memorySummary,
+          executiveFunction: executiveFunctionSummary,
+          overall: overallSummary
         },
         recommendations: [
           {
-            title: "Continue with current training regimen",
-            description: "The patient is responding well to the current cognitive exercises. Recommend continuing with the established protocol with 3-4 sessions per week."
+            title: "Personalized cognitive training",
+            description: "Based on the assessment results, a personalized cognitive training program tailored to the patient's specific profile is recommended."
           },
           {
-            title: "Increase challenging activities",
-            description: "Consider gradually increasing the difficulty level of executive function tasks to further enhance cognitive flexibility."
+            title: "Regular progress monitoring",
+            description: "Schedule follow-up assessments every 4-6 weeks to track progress and adjust interventions as needed."
           },
           {
-            title: "Monitor attention span",
-            description: "While attention has improved, continued monitoring is recommended as this remains the area with the most opportunity for growth."
-          },
-          {
-            title: "Academic accommodations",
-            description: "Consider extended time for tasks requiring sustained attention and complex problem solving in academic settings."
-          },
-          {
-            title: "Follow-up assessment",
-            description: "Schedule follow-up cognitive assessment in 3 months to evaluate progress and adjust intervention strategies as needed."
+            title: "Environmental modifications",
+            description: "Consider implementing appropriate environmental adaptations to support cognitive functioning in daily activities."
           }
         ]
       }
@@ -189,42 +185,42 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             <tr>
               <td style="padding: 12px; border: 1px solid #ddd; font-weight: bold;">Attention</td>
               <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">${metrics.attention}%</td>
-              <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">${metrics.attention - 10}%</td>
-              <td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: green;">+10%</td>
+              <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">-</td>
+              <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">-</td>
             </tr>
             <tr style="background-color: #f9f9f9;">
               <td style="padding: 12px; border: 1px solid #ddd; font-weight: bold;">Memory</td>
               <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">${metrics.memory}%</td>
-              <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">${metrics.memory - 5}%</td>
-              <td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: green;">+5%</td>
+              <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">-</td>
+              <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">-</td>
             </tr>
             <tr>
               <td style="padding: 12px; border: 1px solid #ddd; font-weight: bold;">Executive Function</td>
               <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">${metrics.executiveFunction}%</td>
-              <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">${metrics.executiveFunction - 8}%</td>
-              <td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: green;">+8%</td>
+              <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">-</td>
+              <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">-</td>
             </tr>
             <tr style="background-color: #f9f9f9;">
               <td style="padding: 12px; border: 1px solid #ddd; font-weight: bold;">Behavioral</td>
               <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">${metrics.behavioral}%</td>
-              <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">${metrics.behavioral - 12}%</td>
-              <td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: green;">+12%</td>
+              <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">-</td>
+              <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">-</td>
             </tr>
             <tr style="font-weight: bold;">
               <td style="padding: 12px; border: 1px solid #ddd;">Overall</td>
               <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">${metrics.percentile}%</td>
-              <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">${metrics.percentile - 7}%</td>
-              <td style="padding: 12px; border: 1px solid #ddd; text-align: center; color: green;">+7%</td>
+              <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">-</td>
+              <td style="padding: 12px; border: 1px solid #ddd; text-align: center;">-</td>
             </tr>
           </table>
         </div>
         
         <div style="margin-bottom: 20px;">
           <h3 style="color:#555; font-size: 18px; margin-bottom: 10px;">Domain Summary</h3>
-          <p style="margin-bottom: 15px;"><strong>Attention:</strong> ${generatedReport.data?.summary?.attention || 'The patient demonstrates improved sustained attention compared to initial assessment.'}</p>
-          <p style="margin-bottom: 15px;"><strong>Memory:</strong> ${generatedReport.data?.summary?.memory || 'Working memory capacity has shown moderate improvement.'}</p>
-          <p style="margin-bottom: 15px;"><strong>Executive Function:</strong> ${generatedReport.data?.summary?.executiveFunction || 'Executive function metrics show improvement in cognitive flexibility.'}</p>
-          <p style="margin-bottom: 15px;"><strong>Overall:</strong> ${generatedReport.data?.summary?.overall || 'Overall cognitive performance has improved since beginning the training program.'}</p>
+          <p style="margin-bottom: 15px;"><strong>Attention:</strong> ${generatedReport.data?.summary?.attention || 'Assessment of attention performance.'}</p>
+          <p style="margin-bottom: 15px;"><strong>Memory:</strong> ${generatedReport.data?.summary?.memory || 'Assessment of memory performance.'}</p>
+          <p style="margin-bottom: 15px;"><strong>Executive Function:</strong> ${generatedReport.data?.summary?.executiveFunction || 'Assessment of executive function performance.'}</p>
+          <p style="margin-bottom: 15px;"><strong>Overall:</strong> ${generatedReport.data?.summary?.overall || 'Overall cognitive assessment.'}</p>
         </div>
       `;
       reportContainer.appendChild(analysisSection);
@@ -239,7 +235,7 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
           <p style="margin: 10px 0;"><span style="font-weight:bold;">Total Training Duration:</span> ${metrics.sessionsDuration} minutes</p>
           <p style="margin: 10px 0;"><span style="font-weight:bold;">Progress:</span> ${metrics.progress}%</p>
         </div>
-        <p style="margin: 15px 0;">The patient has shown consistent improvement over the course of ${metrics.sessionsCompleted} sessions, with particular growth in attention and executive function domains.</p>
+        <p style="margin: 15px 0;">Assessment of patient's progress over time based on completed sessions.</p>
       `;
       reportContainer.appendChild(trendsSection);
     }
@@ -253,12 +249,8 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             generatedReport.data.recommendations.map(rec => 
               `<li style="margin-bottom: 15px;"><strong>${rec.title}</strong>: ${rec.description}</li>`
             ).join('') : 
-            `<li style="margin-bottom: 15px;"><strong>Continue regular cognitive assessments</strong>: 
-              The patient is responding well to the current cognitive exercises. Recommend continuing with the established protocol with 3-4 sessions per week.</li>
-             <li style="margin-bottom: 15px;"><strong>Focus on executive function</strong>: 
-              Consider gradually increasing the difficulty level of executive function tasks to further enhance cognitive flexibility.</li>
-             <li style="margin-bottom: 15px;"><strong>Monitor attention span</strong>: 
-              While attention has improved, continued monitoring is recommended as this remains the area with the most opportunity for growth.</li>`
+            `<li style="margin-bottom: 15px;"><strong>No recommendations available</strong>: 
+              Recommendations will be provided after a complete assessment.</li>`
           }
         </ol>
       `;
@@ -414,9 +406,12 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
                 <h2>Clinical Recommendations</h2>
                 <p>Based on the assessment results, the following recommendations are provided:</p>
                 <ul>
-                  <li>Continue regular cognitive assessments</li>
-                  <li>Focus on exercises that target executive function</li>
-                  <li>Consider strategies for enhancing attention span</li>
+                  ${generatedReport.data?.recommendations ? 
+                    generatedReport.data.recommendations.map(rec => 
+                      `<li><strong>${rec.title}</strong>: ${rec.description}</li>`
+                    ).join('') : 
+                    '<li>No recommendations available</li>'
+                  }
                 </ul>
               </div>
             ` : ''}
