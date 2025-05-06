@@ -124,16 +124,24 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
       setIsGenerating(true);
       setError(null);
       
+      // Get the token from localStorage
+      const token = localStorage.getItem('neurocog_token');
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
+      
       const response = await fetch(`${API_BASE}/generate-invitation-link`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`  // Add the token to the Authorization header
         },
         body: JSON.stringify({ patient_email: email })
       });
       
       if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.detail || `Error: ${response.status}`);
       }
       
       const data = await response.json();
@@ -141,7 +149,7 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
       setCurrentStep('invitation');
     } catch (err) {
       console.error("Failed to generate invitation link:", err);
-      setError("Failed to generate invitation link. Please try again.");
+      setError(err instanceof Error ? err.message : "Failed to generate invitation link. Please try again.");
       toast.error(t("Failed to generate invitation link"));
     } finally {
       setIsGenerating(false);
