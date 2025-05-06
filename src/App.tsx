@@ -23,6 +23,7 @@ import PrivateRoute from "./utils/PrivateRoute";
 import AuthService from "./services/auth";
 import SessionTimeoutHandler from "./components/SessionTimeoutHandler";
 import { setupAxiosInterceptors } from "./services/config";
+import AccessDenied from "./pages/AccessDenied";
 
 // Initialize axios interceptors
 setupAxiosInterceptors();
@@ -46,50 +47,53 @@ const App = () => {
                 <Route path="/" element={<Landing />} />
                 <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/dashboard" replace />} />
                 <Route path="/register" element={!isAuthenticated ? <Register /> : <Navigate to="/dashboard" replace />} />
+                <Route path="/access-denied" element={<AccessDenied />} />
                 
-                {/* Protected routes */}
+                {/* Clinician routes - require clinician role */}
                 <Route path="/dashboard" element={
-                  <PrivateRoute>
+                  <PrivateRoute requireClinician={true}>
                     <Layout>
                       <Dashboard />
                     </Layout>
                   </PrivateRoute>
                 } />
                 <Route path="/patients" element={
-                  <PrivateRoute>
+                  <PrivateRoute requireClinician={true}>
                     <Layout>
                       <Patients />
                     </Layout>
                   </PrivateRoute>
                 } />
                 <Route path="/patients/:id" element={
-                  <PrivateRoute>
+                  <PrivateRoute requireClinician={true}>
                     <Layout>
                       <PatientDetail />
                     </Layout>
                   </PrivateRoute>
                 } />
                 <Route path="/analysis" element={
-                  <PrivateRoute>
+                  <PrivateRoute requireClinician={true}>
                     <Layout>
                       <Analysis />
                     </Layout>
                   </PrivateRoute>
                 } />
                 <Route path="/sessions" element={
-                  <PrivateRoute>
+                  <PrivateRoute requireClinician={true}>
                     <Layout>
                       <Sessions />
                     </Layout>
                   </PrivateRoute>
                 } />
                 <Route path="/reports" element={
-                  <PrivateRoute>
+                  <PrivateRoute requireClinician={true}>
                     <Layout>
                       <Reports />
                     </Layout>
                   </PrivateRoute>
                 } />
+                
+                {/* Common routes - accessible by both roles */}
                 <Route path="/my-account" element={
                   <PrivateRoute>
                     <Layout>

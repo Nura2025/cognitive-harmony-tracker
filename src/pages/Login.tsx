@@ -34,19 +34,34 @@ const Login = () => {
       const authResponse = await AuthService.login({ email, password });
       
       // Extract user/clinician ID
-      const clinicianId = authResponse.user_id || 
-                        (authResponse.user && authResponse.user.id) || 
-                        null;
+      const userId = authResponse.user_id || 
+                   (authResponse.user && authResponse.user.id) || 
+                   null;
       
-      if (clinicianId) {
-        console.log("Logged in as clinician with ID:", clinicianId);
+      // Extract user type/role
+      const userType = authResponse.user_type || 
+                      (authResponse.user && authResponse.user.type) || 
+                      null;
+      
+      if (userId) {
+        console.log(`Logged in as ${userType} with ID:`, userId);
       } else {
-        console.warn("No clinician ID found in the response");
+        console.warn("No user ID found in the response");
       }
       
       toast.success("Login successful!");
-      // Redirect to dashboard on successful login
-      navigate('/dashboard');
+      
+      // Redirect based on user role
+      if (AuthService.isClinicianUser()) {
+        navigate('/dashboard');
+      } else if (AuthService.isPatientUser()) {
+        // This would need to be updated with the patient dashboard route
+        // For now, we'll redirect to a placeholder route
+        navigate('/dashboard');
+      } else {
+        // If role can't be determined, go to dashboard as a fallback
+        navigate('/dashboard');
+      }
     } catch (error: any) {
       // Extract error message from the error object
       const errorMessage = error.response?.data?.message || 
