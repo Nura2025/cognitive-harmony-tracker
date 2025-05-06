@@ -10,10 +10,12 @@ import PatientService from '@/services/patient';
 import { sessionData } from '@/utils/mockData';
 import { useToast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useUser } from '@/contexts/UserContext';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { userData } = useUser();
   const [patients, setPatients] = useState<any[]>([]);
   const [patientMetrics, setPatientMetrics] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
@@ -37,11 +39,14 @@ const Dashboard = () => {
     const fetchPatients = async () => {
       try {
         setLoading(true);
-        // Use clinicianId from authentication when available
-        const clinicianId = "77a87318-00e6-4124-90ab-c0e72c3b2597";
+        // Use clinicianId from userData when available
+        const clinicianId = userData?.id || "77a87318-00e6-4124-90ab-c0e72c3b2597";
         const patientList = await PatientService.getPatientsByClinician(clinicianId);
         
-        // Format patient data
+        // Get the total patient count directly from the API response length
+        setTotalPatients(patientList.length);
+        
+        // Format patient data for display
         const formattedPatients = patientList.map((p: any) => {
           // Calculate age from date of birth if needed
           const birthDate = p.date_of_birth ? new Date(p.date_of_birth) : null;
@@ -94,12 +99,11 @@ const Dashboard = () => {
         // Wait for all profile requests to complete
         await Promise.all(profilePromises);
         
-        // Display only the first 8 patients in the UI but store the total count
+        // Display only the first 8 patients in the UI
         setPatients(formattedPatients.slice(0, 8));
         setPatientMetrics(metrics);
         
-        // Calculate dashboard metrics - use the full patient list length for total patients
-        setTotalPatients(patientList.length); // Get the total number directly from the API response
+        // Calculate other dashboard metrics
         setTotalSessions(formattedPatients.reduce((sum, p) => sum + (p.total_sessions || 0), 0));
         
         const allPercentiles = Object.values(metrics).map((m: any) => m.percentile || 0);
@@ -134,7 +138,7 @@ const Dashboard = () => {
     };
 
     fetchPatients();
-  }, []);
+  }, [userData?.id, toast, totalSessions]);
   
   const handlePatientClick = (patientId: string) => {
     navigate(`/patients/${patientId}`);
