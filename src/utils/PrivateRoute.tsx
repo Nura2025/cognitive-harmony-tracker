@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import AuthService from '@/services/auth';
+import { useUser } from '@/contexts/UserContext';
 
 interface PrivateRouteProps {
   children: React.ReactNode;
@@ -9,6 +10,14 @@ interface PrivateRouteProps {
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   const isAuthenticated = AuthService.isAuthenticated();
+  const { refreshUserData } = useUser();
+  
+  // When mounting a protected route, refresh user data from token
+  useEffect(() => {
+    if (isAuthenticated) {
+      refreshUserData();
+    }
+  }, [refreshUserData, isAuthenticated]);
   
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;

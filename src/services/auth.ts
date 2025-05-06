@@ -1,3 +1,4 @@
+
 import parseJwt from "@/utils/helpers/parseJwt";
 import axios from "axios";
 import { toast } from "sonner";
@@ -49,15 +50,22 @@ const login = async (data: LoginData): Promise<AuthResponse> => {
 
       localStorage.setItem("neurocog_token", token);
 
-      const userEmail = decoded.email || data.email;
-      const userInfo = { email: userEmail };
-      localStorage.setItem("neurocog_user", JSON.stringify(userInfo));
+      // Store more comprehensive user data from the decoded token
+      const userId = decoded.user_id || decoded.sub || decoded.id;
+      const userData = {
+        id: userId,
+        email: decoded.email || data.email,
+        name: decoded.name,
+        user_role: decoded.user_role,
+      };
+      
+      localStorage.setItem("neurocog_user", JSON.stringify(userData));
 
       SessionManager.resetTimer();
 
       return {
         token,
-        user: userInfo,
+        user: userData,
       };
     }
 
@@ -78,7 +86,13 @@ const registerAsPatient = async (
     // Store the token in localStorage
     if (response.data.token) {
       localStorage.setItem("neurocog_token", response.data.token);
-      localStorage.setItem("neurocog_user", JSON.stringify(response.data.user));
+      
+      // Parse token to get complete user data if available
+      const token = response.data.token;
+      const decoded = parseJwt(token);
+      const userData = decoded || response.data.user;
+      
+      localStorage.setItem("neurocog_user", JSON.stringify(userData));
 
       // Initialize session management
       SessionManager.resetTimer();
@@ -104,7 +118,13 @@ const registerAsClinician = async (
     // Store the token in localStorage
     if (response.data.token) {
       localStorage.setItem("neurocog_token", response.data.token);
-      localStorage.setItem("neurocog_user", JSON.stringify(response.data.user));
+      
+      // Parse token to get complete user data if available
+      const token = response.data.token;
+      const decoded = parseJwt(token);
+      const userData = decoded || response.data.user;
+      
+      localStorage.setItem("neurocog_user", JSON.stringify(userData));
 
       // Initialize session management
       SessionManager.resetTimer();
@@ -147,6 +167,26 @@ const getCurrentUser = () => {
   }
 };
 
+// Get user ID from token or stored user data
+const getCurrentUserId = (): string | null => {
+  // First try to get from stored user data
+  const userData = getCurrentUser();
+  if (userData && userData.id) {
+    return userData.id;
+  }
+  
+  // If not found, try to parse from token
+  const token = localStorage.getItem("neurocog_token");
+  if (token) {
+    const decoded = parseJwt(token);
+    if (decoded) {
+      return decoded.user_id || decoded.sub || decoded.id;
+    }
+  }
+  
+  return null;
+};
+
 // Check if user is authenticated
 const isAuthenticated = (): boolean => {
   return !!localStorage.getItem("neurocog_token");
@@ -159,6 +199,7 @@ const AuthService = {
   registerAsClinician,
   logout,
   getCurrentUser,
+  getCurrentUserId,
   isAuthenticated,
 };
 

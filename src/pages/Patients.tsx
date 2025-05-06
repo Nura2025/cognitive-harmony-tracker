@@ -1,8 +1,8 @@
-
 import { PatientFilters } from "@/components/patients/PatientFilters";
 import { PatientList } from "@/components/patients/PatientList";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useUser } from "@/contexts/UserContext";
 import PatientService from "@/services/patient"; 
 import { PlusCircle, AlertCircle, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -24,6 +24,7 @@ const Patients = () => {
   const [retrying, setRetrying] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const { t, language } = useLanguage();
+  const { userData } = useUser();
 
   // ✅ Fetch patients from API
   const fetchPatients = async () => {
@@ -31,7 +32,10 @@ const Patients = () => {
       setLoading(true);
       setError(null);
       
-      const clinicianId = "48526669-c799-4642-8fb9-93110a8bc2f8"; // Replace with real clinician ID from auth
+      // Use clinicianId from userData if available, otherwise use fallback ID
+      const clinicianId = userData?.id || "48526669-c799-4642-8fb9-93110a8bc2f8"; // Fallback ID
+      console.log("Fetching patients with clinician ID:", clinicianId);
+      
       const patientData = await PatientService.getPatientsByClinician(clinicianId);
       
       // Process the data to add derived fields and ensure user_id is set
@@ -69,7 +73,7 @@ const Patients = () => {
 
   useEffect(() => {
     fetchPatients();
-  }, []);
+  }, [userData]); // Refetch when userData changes
 
   // 🔍 Apply filters
   useEffect(() => {
@@ -131,9 +135,8 @@ const Patients = () => {
 
   const handleAddPatient = async (patientData: any) => {
     try {
-      // In a real app, you would call your API to create the patient
-      // For now, we'll simulate adding the patient to our local state
-      const clinicianId = "48526669-c799-4642-8fb9-93110a8bc2f8";
+      // Use clinicianId from userData if available
+      const clinicianId = userData?.id || "48526669-c799-4642-8fb9-93110a8bc2f8"; // Fallback ID
       
       // Calculate age based on date of birth
       const birthDate = new Date(patientData.date_of_birth);
