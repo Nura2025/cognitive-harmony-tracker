@@ -1,4 +1,5 @@
 
+/*
 import { ReportType } from '../types/patientTypes';
 import { v4 as uuidv4 } from 'uuid';
 import { randomChoice } from '../helpers/randomUtils';
@@ -7,7 +8,7 @@ import { subDays, format } from 'date-fns';
 /**
  * Generate mock report data for patients
  */
-export const generateReports = (patientIds: string[]): ReportType[] => {
+/*export const generateReports = (patientIds: string[]): ReportType[] => {
   const reports: ReportType[] = [];
   
   patientIds.forEach(patientId => {
@@ -88,4 +89,9 @@ export const mockReports = (patientId: string): ReportType[] => {
       status: "shared"
     }
   ];
-};
+};*/
+
+// Empty implementations to avoid import errors
+import { v4 as uuidv4 } from 'uuid';
+export const generateReports = () => [];
+export const mockReports = () => [];

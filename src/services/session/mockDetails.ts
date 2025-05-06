@@ -1,4 +1,5 @@
 
+/*
 import { format, subDays } from 'date-fns';
 
 // Helper function to generate trend data points for a specific domain
@@ -122,4 +123,15 @@ export const getMockDomainDetails = (sessionId: string, domain: string) => {
       console.error(`Unknown domain: ${domain}`);
       return null;
   }
-};
+};*/
+
+// Empty implementation to avoid import errors
+export const getMockDomainDetails = () => ({
+  session_id: '',
+  overall_score: 0,
+  percentile: 0,
+  classification: "No Data",
+  components: {},
+  trendData: [],
+  data_completeness: 0
+});

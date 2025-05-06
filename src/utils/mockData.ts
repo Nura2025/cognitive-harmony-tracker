@@ -1,4 +1,5 @@
 
+/*
 // This file serves as the entry point for mock data
 // It initializes and exports all generated mock data
 
@@ -76,4 +77,48 @@ export {
   generatePercentileData,
   generateRecommendations,
   mockReports
-};
+};*/
+
+// Import only the types we need
+import { 
+  Patient, 
+  PatientMetrics, 
+  SessionData, 
+  CognitiveDomain,
+  ReportType,
+  CognitiveDomainMetrics 
+} from './types/patientTypes';
+
+// Empty mock data for the application to use instead of actual mock values
+export const patients: Patient[] = [];
+export const patientMetrics: PatientMetrics[] = [];
+export const sessionData: SessionData[] = [];
+export const reports: ReportType[] = [];
+
+// Empty cognitive domain data
+export const mockPatientData = {};
+export const mockNormativeData = {};
+export const mockSubtypeData = {};
+export const mockTrendData = [];
+export const mockImprovementData = {};
+export const mockPercentileData = {};
+export const generateSessionPerformance = () => ({});
+
+// Empty maps
+export const metricsMap = {} as Record<string, PatientMetrics>;
+export const sessionsMap = {} as Record<string, SessionData[]>;
+export const reportsMap = {} as Record<string, ReportType[]>;
+
+// Export the types and empty generator functions 
+export type { Patient, PatientMetrics, SessionData, CognitiveDomain, ReportType, CognitiveDomainMetrics };
+export const generatePatients = () => [];
+export const generatePatientMetrics = () => [];
+export const generateSessionData = () => [];
+export const generateTrendData = () => [];
+export const generatePercentileData = () => ({
+  patient: {},
+  ageGroup: {},
+  adhdSubtype: {}
+});
+export const generateRecommendations = () => [''];
+export const mockReports = () => [];

@@ -1,10 +1,11 @@
 
+/*
 import { PatientMetrics } from '../types/patientTypes';
 
 /**
  * Generate recommendations based on patient metrics
  */
-export const generateRecommendations = (metrics: PatientMetrics): string[] => {
+/*export const generateRecommendations = (metrics: PatientMetrics): string[] => {
   const recommendations: string[] = [];
   
   if (metrics.attention < 60) {
@@ -34,4 +35,9 @@ export const generateRecommendations = (metrics: PatientMetrics): string[] => {
   }
   
   return recommendations;
+};*/
+
+// Empty implementation to avoid import errors
+export const generateRecommendations = () => {
+  return ['No recommendations available - using real data only'];
 };

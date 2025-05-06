@@ -1,4 +1,5 @@
 
+/*
 import { format, subDays, addMinutes, subMonths } from 'date-fns';
 import { Patient, PatientMetrics } from '../types/patientTypes';
 import { randomInt, randomFloat, randomChoice } from '../helpers/randomUtils';
@@ -6,7 +7,7 @@ import { randomInt, randomFloat, randomChoice } from '../helpers/randomUtils';
 /**
  * Generate mock patient data
  */
-export const generatePatients = (count: number = 10): Patient[] => {
+/*export const generatePatients = (count: number = 10): Patient[] => {
   const subtypes: Array<'Inattentive' | 'Hyperactive-Impulsive' | 'Combined'> = ['Inattentive', 'Hyperactive-Impulsive', 'Combined'];
   const genders: Array<'Male' | 'Female' | 'Other'> = ['Male', 'Female', 'Other'];
   const firstNames = ['Alex', 'Jamie', 'Taylor', 'Jordan', 'Casey', 'Riley', 'Avery', 'Quinn', 'Skyler', 'Morgan', 'Sam', 'Drew'];
@@ -33,7 +34,7 @@ export const generatePatients = (count: number = 10): Patient[] => {
 /**
  * Generate metrics for each patient
  */
-export const generatePatientMetrics = (patients: Patient[]): PatientMetrics[] => {
+/*export const generatePatientMetrics = (patients: Patient[]): PatientMetrics[] => {
   return patients.map(patient => {
     const concerns: string[] = [];
     const attention = randomFloat(40, 95);
@@ -64,4 +65,8 @@ export const generatePatientMetrics = (patients: Patient[]): PatientMetrics[] =>
       clinicalConcerns: concerns
     };
   });
-};
+};*/
+
+// Empty implementations to avoid import errors
+export const generatePatients = () => [];
+export const generatePatientMetrics = () => [];

@@ -1,4 +1,5 @@
 
+/*
 import { CognitiveDomain, CognitiveDomainMetrics } from '../types/patientTypes';
 import { randomInt } from '../helpers/randomUtils';
 
@@ -58,4 +59,13 @@ export const generateSessionPerformance = (): CognitiveDomainMetrics => ({
   executiveFunction: randomInt(50, 100),
   behavioral: randomInt(50, 100),
 });
+*/
 
+// Empty exports to avoid import errors
+export const mockPatientData = {};
+export const mockNormativeData = {};
+export const mockSubtypeData = {};
+export const mockTrendData = [];
+export const mockImprovementData = {};
+export const mockPercentileData = {};
+export const generateSessionPerformance = () => ({});

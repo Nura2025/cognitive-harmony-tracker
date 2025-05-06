@@ -1,4 +1,5 @@
 
+/*
 import { format, subDays, addMinutes } from 'date-fns';
 import { Patient, SessionData } from '../types/patientTypes';
 import { randomInt, randomFloat, randomChoice } from '../helpers/randomUtils';
@@ -6,7 +7,7 @@ import { randomInt, randomFloat, randomChoice } from '../helpers/randomUtils';
 /**
  * Generate session data for patients
  */
-export const generateSessionData = (patients: Patient[], sessionsPerPatient: number = 5): SessionData[] => {
+/*export const generateSessionData = (patients: Patient[], sessionsPerPatient: number = 5): SessionData[] => {
   const environments: Array<'Home' | 'School' | 'Clinic'> = ['Home', 'School', 'Clinic'];
   const completionStatuses: Array<'Completed' | 'Abandoned' | 'Interrupted'> = ['Completed', 'Abandoned', 'Interrupted'];
   const devices = ['iPad Pro', 'iPhone 13', 'Android Tablet', 'Samsung Galaxy S21', 'Desktop Computer', 'Laptop'];
@@ -57,4 +58,7 @@ export const generateSessionData = (patients: Patient[], sessionsPerPatient: num
   });
   
   return sessions;
-};
+};*/
+
+// Empty implementation to avoid import errors
+export const generateSessionData = () => [];

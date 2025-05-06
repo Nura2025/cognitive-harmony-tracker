@@ -1,11 +1,12 @@
 
+/*
 import { format, subDays } from "date-fns";
 import { TrendData } from "../patient";
 
 /**
  * Generate mock session data for development and testing
  */
-export const generateMockSessions = (userId: string, count: number = 10): { data: TrendData[] } => {
+/*export const generateMockSessions = (userId: string, count: number = 10): { data: TrendData[] } => {
   const sessions: TrendData[] = [];
   
   for (let i = 0; i < count; i++) {
@@ -96,4 +97,7 @@ export const generateMockSessions = (userId: string, count: number = 10): { data
   }
   
   return { data: sessions };
-};
+};*/
+
+// Empty implementation to avoid import errors
+export const generateMockSessions = () => ({ data: [] });

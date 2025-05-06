@@ -1,4 +1,5 @@
 
+/*
 import { format, subDays } from 'date-fns';
 import { CognitiveDomain, PatientMetrics } from '../types/patientTypes';
 import { randomFloat } from '../helpers/randomUtils';
@@ -6,7 +7,7 @@ import { randomFloat } from '../helpers/randomUtils';
 /**
  * Generate historical trends for a specific domain
  */
-export const generateTrendData = (domain: keyof CognitiveDomain, days: number = 90) => {
+/*export const generateTrendData = (domain: keyof CognitiveDomain, days: number = 90) => {
   const data = [];
   for (let i = days; i >= 0; i -= randomInt(3, 7)) {
     const date = format(subDays(new Date(), i), 'yyyy-MM-dd');
@@ -22,7 +23,7 @@ export const generateTrendData = (domain: keyof CognitiveDomain, days: number = 
 /**
  * Generate percentile data for normative comparison
  */
-export const generatePercentileData = () => {
+/*export const generatePercentileData = () => {
   return {
     patient: {
       attention: randomFloat(40, 95),
@@ -43,9 +44,17 @@ export const generatePercentileData = () => {
       behavioral: randomFloat(35, 45)
     }
   };
-};
+};*/
 
 // Helper function from randomUtils to avoid circular dependency
 function randomInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
+
+// Empty implementations to avoid import errors
+export const generateTrendData = () => [];
+export const generatePercentileData = () => ({
+  patient: {},
+  ageGroup: {},
+  adhdSubtype: {}
+});
