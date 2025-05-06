@@ -73,7 +73,7 @@ const Patients = () => {
 
   // Use a reference to track if data has been fetched to avoid infinite requests
   useEffect(() => {
-    // Only fetch data when userData is available and hasnt changed since last fetch
+    // Only fetch data when userData is available and hasn't changed since last fetch
     if (userData?.id) {
       fetchPatients();
     }
@@ -176,7 +176,7 @@ const Patients = () => {
       setAddDialogOpen(false);
       
       // Show a success message
-      toast.success(t("Patient invitation sent successfully"));
+      toast.success(t("Patient added successfully"));
       
     } catch (error) {
       console.error("Failed to add patient:", error);
