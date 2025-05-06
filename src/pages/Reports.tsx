@@ -244,6 +244,14 @@ const Reports: React.FC = () => {
     
     return explanations[metric] || "No explanation available for this metric.";
   };
+
+  // Create default CognitiveDomain objects for the empty objects that were causing errors
+  const defaultCognitiveDomain = {
+    attention: 0,
+    memory: 0,
+    executiveFunction: 0,
+    behavioral: 0
+  };
   
   return (
     <div className="container mx-auto p-4 max-w-6xl">
@@ -383,7 +391,7 @@ const Reports: React.FC = () => {
           
           <DomainComparison 
             patientData={patientMetrics} 
-            normativeData={mockNormativeData}
+            normativeData={mockNormativeData ? mockNormativeData : defaultCognitiveDomain}
           />
         </TabsContent>
         
@@ -707,8 +715,8 @@ const Reports: React.FC = () => {
                       
                       <DomainComparison 
                         patientData={patientMetrics} 
-                        normativeData={mockNormativeData}
-                        subtypeData={mockSubtypeData}
+                        normativeData={mockNormativeData ? mockNormativeData : defaultCognitiveDomain}
+                        subtypeData={mockSubtypeData ? mockSubtypeData : defaultCognitiveDomain}
                         sessions={patientSessions}
                       />
                     </CardContent>
