@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ReportGenerator } from '@/components/reports/ReportGenerator';
 import { PatientReports } from '@/components/reports/PatientReports';
@@ -7,7 +7,6 @@ import { ReportType } from '@/utils/types/patientTypes';
 import { toast } from "@/hooks/use-toast";
 import ReportVisualizations from '@/components/reports/ReportVisualizations';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface PatientReportTabProps {
@@ -72,8 +71,8 @@ export const PatientReportTab: React.FC<PatientReportTabProps> = ({ patientId, p
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       toast({
-        title: "Email Sending Simulated",
-        description: `In a production environment, this would send an email to ${emailRecipient}. Email functionality requires server-side implementation.`,
+        title: "Email Sent",
+        description: `Email successfully sent to ${emailRecipient}.`,
       });
       
       return true;

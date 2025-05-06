@@ -1,13 +1,8 @@
-import { useNavigate } from "react-router-dom";
 
+import { useNavigate } from "react-router-dom";
 import parseJwt from "@/utils/helpers/parseJwt";
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import React, { createContext, useCallback, useContext, useState } from "react";
+import { isTokenExpired } from "@/utils/tokenExpiration";
 
 // Define the type for user data
 interface UserData {
@@ -15,7 +10,7 @@ interface UserData {
   email: string;
   name?: string;
   user_role?: string;
-  exp?: number; // <-- add this
+  exp?: number;
   [key: string]: any;
 }
 
@@ -40,57 +35,38 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Use useCallback to ensure the function reference stays stable
   const refreshUserData = useCallback(() => {
-    const token = localStorage.getItem("neurocog_token");
-    if (!token) {
-      setUserData(null);
-      return;
-    }
+    try {
+      const token = localStorage.getItem("neurocog_token");
+      if (!token) {
+        setUserData(null);
+        return;
+      }
 
-    const parsedToken = parseJwt(token);
-    if (parsedToken) {
-      const userId = parsedToken.user_id || parsedToken.sub || parsedToken.id;
+      // Check if token is expired
+      if (isTokenExpired(token)) {
+        localStorage.removeItem("neurocog_token");
+        setUserData(null);
+        return;
+      }
 
-      setUserData({
-        id: userId,
-        email: parsedToken.email,
-        name: parsedToken.name,
-        user_role: parsedToken.user_role,
-        exp: parsedToken.exp, // <-- store it
-        ...parsedToken,
-      });
+      const parsedToken = parseJwt(token);
+      if (parsedToken) {
+        const userId = parsedToken.user_id || parsedToken.sub || parsedToken.id;
 
-      // Optional: log remaining time in seconds
-      const expiresIn = parsedToken.exp * 1000 - Date.now();
-      console.log(`Token expires in ${Math.floor(expiresIn / 1000)} seconds`);
+        setUserData({
+          id: userId,
+          email: parsedToken.email || '',
+          name: parsedToken.name,
+          user_role: parsedToken.user_role,
+          exp: parsedToken.exp,
+          ...parsedToken,
+        });
+      }
+    } catch (error) {
+      console.error("Error refreshing user data:", error);
+      // Don't set userData to null on error to prevent potential logout loops
     }
   }, []);
-
-  // Load user data on mount, but only once
-  useEffect(() => {
-    refreshUserData();
-  }, [refreshUserData]);
-
-  useEffect(() => {
-    if (!userData?.exp) return;
-
-    const timeUntilExpiry = userData.exp * 1000 - Date.now();
-
-    if (timeUntilExpiry <= 0) {
-      setUserData(null);
-      localStorage.removeItem("neurocog_token");
-      navigate("/login"); // or wherever you want
-      return;
-    }
-
-    const timeout = setTimeout(() => {
-      setUserData(null);
-      localStorage.removeItem("neurocog_token");
-      alert("Your session has expired.");
-      navigate("/login"); // or /dashboard or /
-    }, timeUntilExpiry);
-
-    return () => clearTimeout(timeout);
-  }, [userData?.exp, navigate]);
 
   return (
     <UserContext.Provider value={{ userData, refreshUserData }}>

@@ -1,5 +1,9 @@
+
 function getTokenExpiration(token: string): Date | null {
   try {
+    // Check if token exists and has the expected format
+    if (!token || token.split(".").length !== 3) return null;
+    
     const payload = JSON.parse(atob(token.split(".")[1]));
     if (!payload.exp) return null;
 
@@ -10,10 +14,16 @@ function getTokenExpiration(token: string): Date | null {
     return null;
   }
 }
+
 function isTokenExpired(token: string): boolean {
+  // If token is not provided, consider it expired
+  if (!token) return true;
+  
   const expirationDate = getTokenExpiration(token);
   if (!expirationDate) return true;
 
   const currentDate = new Date();
   return currentDate > expirationDate;
 }
+
+export { getTokenExpiration, isTokenExpired };
