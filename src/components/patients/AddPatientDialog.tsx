@@ -1,11 +1,11 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, User, Mail, Phone } from "lucide-react";
+import { CalendarIcon, User, Mail, Phone, Copy, Link } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
@@ -38,9 +38,26 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import { toast } from "sonner";
+import { API_BASE } from "@/services/config";
+import axios from "axios";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from "@/components/ui/alert-dialog";
 
-// Form schema for patient data
-const formSchema = z.object({
+// Form schema for invitation email
+const emailFormSchema = z.object({
+  email: z.string().email({ message: "Invalid email address" })
+});
+
+// Form schema for full patient data
+const fullFormSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
   username: z.string().min(3, { message: "Username must be at least 3 characters" }),
   first_name: z.string().min(1, { message: "First name is required" }),
@@ -52,12 +69,13 @@ const formSchema = z.object({
   phone_number: z.string().optional()
 });
 
-type FormData = z.infer<typeof formSchema>;
+type EmailFormData = z.infer<typeof emailFormSchema>;
+type FullFormData = z.infer<typeof fullFormSchema>;
 
 interface AddPatientDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: FormData) => void;
+  onSubmit: (data: FullFormData) => void;
 }
 
 export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
@@ -66,9 +84,21 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
   onSubmit
 }) => {
   const { t } = useLanguage();
+  const [invitationLink, setInvitationLink] = useState<string | null>(null);
+  const [showInvitationDialog, setShowInvitationDialog] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+  // Email-only form for generating invitation link
+  const emailForm = useForm<EmailFormData>({
+    resolver: zodResolver(emailFormSchema),
+    defaultValues: {
+      email: ""
+    }
+  });
+
+  // Full form for patient data
+  const fullForm = useForm<FullFormData>({
+    resolver: zodResolver(fullFormSchema),
     defaultValues: {
       email: "",
       username: "",
@@ -78,40 +108,69 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
     }
   });
 
-  // Reset the form when the dialog closes
+  // Reset the forms when the dialog closes
   useEffect(() => {
     if (!open) {
-      form.reset();
+      emailForm.reset();
+      fullForm.reset();
+      setInvitationLink(null);
     }
-  }, [open, form]);
+  }, [open, emailForm, fullForm]);
 
-  const handleSubmit = (data: FormData) => {
+  const handleGenerateInvitation = async (data: EmailFormData) => {
+    try {
+      setIsGenerating(true);
+      const response = await axios.get(
+        `${API_BASE}/generate-invitation-link?patient_email=${encodeURIComponent(data.email)}`
+      );
+      
+      setInvitationLink(response.data.invitation_link);
+      setShowInvitationDialog(true);
+      
+      // Auto-set the email in the full form
+      fullForm.setValue("email", data.email);
+    } catch (error) {
+      console.error("Failed to generate invitation:", error);
+      toast.error(t("Failed to generate invitation link"));
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleCopyLink = () => {
+    if (invitationLink) {
+      navigator.clipboard.writeText(invitationLink);
+      toast.success(t("Invitation link copied to clipboard"));
+    }
+  };
+
+  const handleSubmitFullForm = (data: FullFormData) => {
     onSubmit(data);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>{t("Invite New Patient")}</DialogTitle>
-          <DialogDescription>
-            {t("Enter patient details to send them an invitation email.")}
-          </DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>{t("Invite New Patient")}</DialogTitle>
+            <DialogDescription>
+              {t("Enter patient email to generate an invitation link.")}
+            </DialogDescription>
+          </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+          <Form {...emailForm}>
+            <form onSubmit={emailForm.handleSubmit(handleGenerateInvitation)} className="space-y-4">
               <FormField
-                control={form.control}
-                name="first_name"
+                control={emailForm.control}
+                name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("First Name")}</FormLabel>
+                    <FormLabel>{t("Email")}</FormLabel>
                     <FormControl>
                       <div className="relative">
-                        <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input className="pl-10" placeholder={t("Enter first name")} {...field} />
+                        <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input className="pl-10" type="email" placeholder={t("Enter Email")} {...field} />
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -119,147 +178,53 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="last_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("Last Name")}</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input className="pl-10" placeholder={t("Enter last name")} {...field} />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <DialogFooter className="mt-6">
+                <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
+                  {t("cancel")}
+                </Button>
+                <Button type="submit" disabled={isGenerating}>
+                  {isGenerating ? t("Generating...") : t("Generate Invitation Link")}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={showInvitationDialog} onOpenChange={setShowInvitationDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("Invitation Link Generated")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("Share this invitation link with the patient to complete their registration:")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          {invitationLink && (
+            <div className="my-4">
+              <div className="bg-muted p-4 rounded-md flex items-center justify-between gap-2 break-all">
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <Link className="h-4 w-4 flex-shrink-0" />
+                  <span className="text-sm overflow-hidden text-ellipsis">{invitationLink}</span>
+                </div>
+                <Button variant="outline" size="sm" onClick={handleCopyLink}>
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("Email")}</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input className="pl-10" type="email" placeholder={t("Enter Email")} {...field} />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("Username")}</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input className="pl-10" placeholder={t("Enter username")} {...field} />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="date_of_birth"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("Date of Birth")}</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "pl-10 relative text-left font-normal h-10 w-full",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="absolute left-3 top-2.5 h-4 w-4" />
-                            {field.value ? format(field.value, "PPP") : <span>{t("select Date")}</span>}
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={date => date > new Date() || date < new Date("1900-01-01")}
-                          initialFocus
-                          className="p-3 pointer-events-auto"
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="gender"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("Gender")}</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t("Select gender")} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Male">{t("male")}</SelectItem>
-                        <SelectItem value="Female">{t("female")}</SelectItem>
-                        <SelectItem value="Other">{t("other")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="phone_number"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("Phone Number")}</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input className="pl-10" placeholder={t("Enter phone number")} {...field} />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <DialogFooter className="mt-6">
-              <Button variant="outline" type="button" onClick={() => onOpenChange(false)}>
-                {t("cancel")}
-              </Button>
-              <Button type="submit">{t("Send Invitation")}</Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+          )}
+          
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => {
+              setShowInvitationDialog(false);
+              onOpenChange(false);
+            }}>
+              {t("Done")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
