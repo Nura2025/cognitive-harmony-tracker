@@ -1,11 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Brain, Clock, LineChart, Users } from 'lucide-react';
+import { Brain, Clock, LineChart, Users, Gamepad, Award, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PatientCard } from '@/components/dashboard/PatientCard';
 import { StatusCard } from '@/components/dashboard/StatusCard';
 import { DomainChart } from '@/components/dashboard/DomainChart';
 import { SessionTimeline } from '@/components/dashboard/SessionTimeline';
+import { GameCard } from '@/components/dashboard/GameCard';
 import PatientService from '@/services/patient';
 import { sessionData } from '@/utils/mockData';
 import { useToast } from '@/components/ui/use-toast';
@@ -25,6 +27,31 @@ const Dashboard = () => {
   const [totalSessions, setTotalSessions] = useState(0);
   const [averagePercentile, setAveragePercentile] = useState(0);
   const [totalMinutes, setTotalMinutes] = useState(0);
+  
+  // Game information
+  const miniGames = [
+    {
+      id: 1,
+      name: "Focus Farm",
+      description: "Practice sustained attention by tending to crops and animals",
+      image: "/lovable-uploads/41067270-5c65-44fb-8d3b-89fc90445214.png",
+      domain: "attention"
+    },
+    {
+      id: 2,
+      name: "Memory Market",
+      description: "Test memory skills by remembering item sequences and patterns",
+      image: "/lovable-uploads/f06d0441-78f1-457a-a7f0-bcdfc0333b05.png",
+      domain: "memory"
+    },
+    {
+      id: 3,
+      name: "Planning Puzzle",
+      description: "Improve executive function through farm planning challenges",
+      image: "/placeholder.svg",
+      domain: "executiveFunction"
+    }
+  ];
   
   // Generate domain trends for the dashboard chart (using mock data for now)
   const domainData = {
@@ -147,6 +174,14 @@ const Dashboard = () => {
   const handleViewAllPatients = () => {
     navigate('/patients');
   };
+  
+  const handleGameClick = (gameId: number) => {
+    // Navigate to game details or launch game
+    toast({
+      title: "Game Selected",
+      description: `You selected ${miniGames.find(g => g.id === gameId)?.name}`,
+    });
+  };
 
   // Loading state
   if (loading) {
@@ -188,9 +223,9 @@ const Dashboard = () => {
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in p-2 sm:p-4 md:p-6 overflow-x-hidden">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold mb-1">Dashboard</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-1">Nura Dashboard</h1>
         <p className="text-sm sm:text-base text-muted-foreground">
-          Overview of cognitive assessment data and patient metrics
+          A 2D pixel art farming RPG designed to support children with attention challenges
         </p>
       </div>
       
@@ -199,7 +234,7 @@ const Dashboard = () => {
           title="Total Patients"
           value={totalPatients}
           icon={<Users className="h-4 sm:h-5 w-4 sm:w-5" />}
-          tooltip="Total number of patients under your care"
+          tooltip="Total number of children using Nura"
         />
         <StatusCard 
           title="Average Percentile"
@@ -210,30 +245,49 @@ const Dashboard = () => {
           tooltip="Average cognitive performance across all patients relative to their age group"
         />
         <StatusCard 
-          title="Session Count"
+          title="Game Sessions"
           value={totalSessions}
           change={{ value: 8, isImprovement: true }}
-          icon={<LineChart className="h-4 sm:h-5 w-4 sm:w-5" />}
-          tooltip="Total number of assessment sessions conducted"
+          icon={<Gamepad className="h-4 sm:h-5 w-4 sm:w-5" />}
+          tooltip="Total number of game sessions completed"
         />
         <StatusCard 
-          title="Total Assessment Time"
+          title="Total Playtime"
           value={`${totalMinutes} mins`}
           icon={<Clock className="h-4 sm:h-5 w-4 sm:w-5" />}
-          tooltip="Cumulative time spent across all assessment sessions"
+          tooltip="Cumulative time spent playing Nura"
         />
+      </div>
+      
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg sm:text-xl font-semibold">Mini Games</h2>
+          <Button variant="outline" size="sm" className="text-xs sm:text-sm">
+            View all games
+          </Button>
+        </div>
+        
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
+          {miniGames.map(game => (
+            <GameCard 
+              key={game.id}
+              game={game}
+              onClick={() => handleGameClick(game.id)}
+            />
+          ))}
+        </div>
       </div>
       
       <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
         <DomainChart domainData={domainData} />
-        <SessionTimeline sessions={sessionData.slice(0, 10)} />
+        <SessionTimeline sessions={sessionData.slice(0, 10)} title="Game Progress Timeline" />
       </div>
       
       <div>
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-          <h2 className="text-lg sm:text-xl font-semibold">Recent Patients</h2>
+          <h2 className="text-lg sm:text-xl font-semibold">Recent Players</h2>
           <Button variant="outline" size="sm" onClick={handleViewAllPatients} className="text-xs sm:text-sm">
-            View all patients
+            View all players
           </Button>
         </div>
         
@@ -249,9 +303,26 @@ const Dashboard = () => {
             ))
           ) : (
             <div className="col-span-full text-center py-8">
-              <p className="text-muted-foreground">No patients found.</p>
+              <p className="text-muted-foreground">No players found.</p>
             </div>
           )}
+        </div>
+      </div>
+      
+      <div className="bg-muted/40 rounded-lg p-4 sm:p-6 mt-4">
+        <h2 className="text-lg sm:text-xl font-semibold mb-2">About Nura</h2>
+        <p className="text-sm sm:text-base mb-4">
+          Nura is a 2D pixel art farming RPG designed to support children with attention challenges. 
+          Players explore the game world, engage in different farming activities, interact with NPCs, and 
+          complete tasks to earn rewards. The game includes three adaptive mini-games targeting focus and 
+          memory skills, with progress reports to help parents track improvements in attention span over time.
+        </p>
+        
+        <div className="flex flex-wrap gap-2 items-center">
+          <h3 className="text-sm font-medium">Developers:</h3>
+          <Badge className="bg-primary/20 text-primary hover:bg-primary/30">Ayah Al Tamimi</Badge>
+          <Badge className="bg-primary/20 text-primary hover:bg-primary/30">Bakeza Diazada</Badge>
+          <Badge className="bg-primary/20 text-primary hover:bg-primary/30">Daniella Anastas</Badge>
         </div>
       </div>
     </div>
