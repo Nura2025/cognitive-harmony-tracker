@@ -1,179 +1,128 @@
-
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { PatientAnalysis } from "@/components/patients/detail/PatientAnalysis";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { patients } from '@/utils/mockData';
-import { PatientAnalysis } from '@/components/patients/detail/PatientAnalysis';
-import { TrendData } from '@/services/patient';
+} from "@/components/ui/select";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { usePatientContext } from "@/contexts/PatientContext";
+import { useUser } from "@/contexts/UserContext";
+import CognitiveService from "@/services/cognitive";
+import PatientService, { TrendData } from "@/services/patient";
+import { patients } from "@/utils/mockData";
+import { ChevronLeft } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Analysis = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
+  const { userData } = useUser();
+  const { patientIds, setPatientIds } = usePatientContext();
+
   const [patientId, setPatientId] = useState<string | null>(null);
   const [trendData, setTrendData] = useState<TrendData[]>([]);
-  
-  // Parse patient ID from URL query params
+  const [patientList, setPatientList] = useState<any[]>([]);
+
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const id = params.get('patient');
-    
-    if (id && patients.some(p => p.id === id)) {
-      setPatientId(id);
-      
-      // Get trend data for the selected patient
-      // In a real app, this would come from an API call
-      // For demo purposes, we'll use sample data
-      const sampleTrendData = generateSampleTrendData();
-      setTrendData(sampleTrendData);
-    } else if (patients.length > 0) {
-      setPatientId(patients[0].id);
-      
-      // Get trend data for the first patient
-      const sampleTrendData = generateSampleTrendData();
-      setTrendData(sampleTrendData);
-    }
-  }, [location]);
-  
-  // Generate sample data for demonstration
-  // In a real app, this would be replaced with actual API data
-  const generateSampleTrendData = (): TrendData[] => {
-    // Create trend data for the past 90 days
-    const trendData: TrendData[] = [];
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 90);
-    
-    for (let i = 0; i < 12; i++) {
-      const sessionDate = new Date(startDate);
-      sessionDate.setDate(sessionDate.getDate() + (i * 7)); // weekly data
-      
-      const baseScore = 50 + (i * 2); // Scores improve over time
-      const variability = 10; // Random variation
-      
-      trendData.push({
-        session_id: `session-${i}`,
-        session_date: sessionDate.toISOString().split('T')[0],
-        attention_score: Math.min(100, Math.max(0, baseScore + Math.random() * variability - variability/2)),
-        memory_score: Math.min(100, Math.max(0, baseScore + Math.random() * variability - variability/2)),
-        executive_score: Math.min(100, Math.max(0, baseScore + Math.random() * variability - variability/2)),
-        impulse_score: Math.min(100, Math.max(0, baseScore + Math.random() * variability - variability/2)),
-        attention_details: {
-          overall_score: 0,
-          percentile: 0,
-          classification: '',
-          components: {
-            crop_score: 0,
-            sequence_score: Math.floor(Math.random() * 1000)
-          },
-          data_completeness: 0
-        },
-        memory_details: {
-          overall_score: 0,
-          percentile: 0,
-          classification: '',
-          components: {
-            working_memory: {
-              score: Math.floor(Math.random() * 1000),
-              components: {}
-            },
-            visual_memory: {
-              score: 0,
-              components: {}
-            }
-          },
-          data_completeness: 0,
-          tasks_used: []
-        },
-        executive_details: {
-          overall_score: 0,
-          percentile: 0,
-          classification: '',
-          components: {
-            memory_contribution: Math.floor(Math.random() * 1000),
-            impulse_contribution: 0,
-            attention_contribution: 0
-          },
-          profile_pattern: '',
-          data_completeness: 0
-        },
-        impulse_details: {
-          overall_score: 0,
-          percentile: 0,
-          classification: '',
-          components: {
-            inhibitory_control: Math.floor(Math.random() * 1000),
-            response_control: 0,
-            decision_speed: 0,
-            error_adaptation: 0
-          },
-          data_completeness: 0,
-          games_used: []
+    const fetchPatients = async () => {
+      try {
+        const clinicianId = userData?.id;
+        if (!clinicianId) return;
+
+        const patients = await PatientService.getPatientsByClinician(
+          clinicianId
+        );
+        setPatientList(patients);
+        setPatientIds(patients.map((p) => p.user_id));
+
+        const params = new URLSearchParams(location.search);
+        const id = params.get("patient");
+        const validId = id && patients.find((p) => p.user_id === id)?.user_id;
+        const selectedId = validId || patients[0]?.user_id || null;
+
+        setPatientId(selectedId);
+
+        if (selectedId) {
+          const profile = await CognitiveService.getCognitiveProfile(
+            selectedId
+          );
+          setTrendData(profile.data.trend_graph || []);
         }
-      });
-    }
-    
-    return trendData;
-  };
-  
-  const handlePatientChange = (id: string) => {
+      } catch (error) {
+        console.error("Error fetching patients or trend data:", error);
+      }
+    };
+
+    fetchPatients();
+  }, [location, setPatientIds, userData?.id]);
+
+  const handlePatientChange = async (id: string) => {
+    setPatientId(id);
     navigate(`/analysis?patient=${id}`);
+    const profile = await CognitiveService.getCognitiveProfile(id);
+    setTrendData(profile.data.trend_graph || []);
   };
-  
+
   const handleBackToDashboard = () => {
-    navigate('/');
+    navigate("/");
   };
-  
+
   // Find the current patient
-  const currentPatient = patients.find(p => p.id === patientId);
-  
+  const currentPatient = patients.find((p) => p.id === patientId);
+
   if (!currentPatient) {
-    return <div className="p-8 pixel-text">Loading patient data...</div>;
+    return <div className="p-8 pixel-text">{t("Loading patient data...")}</div>;
   }
-  
+
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div
+      className={`space-y-8 animate-fade-in ${
+        language === "ar" ? "rtl" : "ltr"
+      }`}
+    >
       <div className="flex items-center justify-between">
         <div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             className="mb-2 -ml-2 text-muted-foreground"
             onClick={handleBackToDashboard}
           >
-            <ChevronLeft className="mr-1 h-4 w-4" />
-            Back to Dashboard
+            <ChevronLeft
+              className={`${language === "ar" ? "ml-1" : "mr-1"} h-4 w-4`}
+            />
+            {t("Back to Dashboard")}
           </Button>
-          <h1 className="text-3xl font-bold mb-1 nura-title">NURA Cognitive Analysis</h1>
+          <h1 className="text-3xl font-bold mb-1 nura-title">
+            {t("analysis")}
+          </h1>
           <p className="text-muted-foreground">
-            Detailed cognitive domain assessment and trends
+            {t("Detailed cognitive domain assessment and trends")}
           </p>
         </div>
-        
+
         <div className="min-w-[200px]">
-          <Select value={patientId || ''} onValueChange={handlePatientChange}>
+          <Select value={patientId || ""} onValueChange={handlePatientChange}>
             <SelectTrigger className="pixel-border">
-              <SelectValue placeholder="Select a patient" />
+              <SelectValue placeholder={t("Select a patient")} />
             </SelectTrigger>
             <SelectContent>
-              {patients.map(patient => (
-                <SelectItem key={patient.id} value={patient.id}>
-                  {patient.name}
+              {patientList.map((patient) => (
+                <SelectItem key={patient.user_id} value={patient.user_id}>
+                  {`${patient.first_name} ${patient.last_name}`}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
       </div>
-      
-      {/* Patient Analysis Component */}
-      <PatientAnalysis 
+
+      <PatientAnalysis
         trendGraph={trendData}
         hasTrendData={trendData.length > 0}
       />

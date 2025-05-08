@@ -1,14 +1,17 @@
+
 import { DomainChart } from "@/components/dashboard/DomainChart";
 import { PatientCard } from "@/components/dashboard/PatientCard";
-import { SessionTimeline } from "@/components/dashboard/SessionTimeline";
 import { StatusCard } from "@/components/dashboard/StatusCard";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { usePatientContext } from "@/contexts/PatientContext";
 import { useUser } from "@/contexts/UserContext";
+import CognitiveService from "@/services/cognitive";
 import PatientService from "@/services/patient";
 import { sessionData } from "@/utils/mockData";
-import { Brain, Clock, LineChart, Users } from "lucide-react";
+import { Brain, LineChart, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -16,15 +19,18 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { userData } = useUser();
+  const { t, language } = useLanguage();
   const [patients, setPatients] = useState<any[]>([]);
   const [patientMetrics, setPatientMetrics] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
+  const { patientIds, setPatientIds } = usePatientContext();
 
   // For dashboard metrics
   const [totalPatients, setTotalPatients] = useState(0);
   const [totalSessions, setTotalSessions] = useState(0);
   const [averagePercentile, setAveragePercentile] = useState(0);
   const [totalMinutes, setTotalMinutes] = useState(0);
+  const [numSessions, setNumSessions] = useState(0);
 
   // Generate domain trends for the dashboard chart (using mock data for now)
   const domainData = {
@@ -41,6 +47,30 @@ const Dashboard = () => {
       .fill(0)
       .map((_, i) => 60 + Math.random() * 20),
   };
+  useEffect(() => {
+    const fetchProfiles = async () => {
+      try {
+        if (!patientIds || patientIds.length === 0) return;
+
+        const profiles = await Promise.all(
+          patientIds.map((id) => CognitiveService.getCognitiveProfile(id))
+        );
+
+        let totalSessionCount = 0;
+
+        profiles.forEach((profile) => {
+          console.log("profile", profile);
+          totalSessionCount += profile.data.trend_graph?.length || 0;
+        });
+
+        setNumSessions(totalSessionCount);
+      } catch (error) {
+        console.error("Failed to fetch cognitive profiles:", error);
+      }
+    };
+
+    fetchProfiles();
+  }, [patientIds]); // <- This ensures it reruns when patientIds is updated
 
   // Fetch patients from the API
   useEffect(() => {
@@ -52,6 +82,7 @@ const Dashboard = () => {
         const patientList = await PatientService.getPatientsByClinician(
           clinicianId
         );
+        setPatientIds(patientList.map((p) => p.user_id));
 
         // Get the total patient count directly from the API response length
         setTotalPatients(patientList.length);
@@ -153,9 +184,10 @@ const Dashboard = () => {
       } catch (error) {
         console.error("Failed to fetch patients:", error);
         toast({
-          title: "Error Loading Data",
-          description:
-            "Failed to load patient data. Using sample data instead.",
+          title: t("Error Loading Data"),
+          description: t(
+            "Failed to load patient data. Using sample data instead."
+          ),
           variant: "destructive",
         });
 
@@ -174,7 +206,7 @@ const Dashboard = () => {
     };
 
     fetchPatients();
-  }, [userData?.id, toast, totalSessions]);
+  }, [userData?.id, toast, totalSessions, t, setPatientIds]);
 
   const handlePatientClick = (patientId: string) => {
     navigate(`/patients/${patientId}`);
@@ -189,9 +221,11 @@ const Dashboard = () => {
     return (
       <div className="space-y-6 sm:space-y-8 animate-fade-in p-2 sm:p-4 md:p-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold mb-1">Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-1">
+            {t("dashboard")}
+          </h1>
           <p className="text-sm sm:text-base text-muted-foreground">
-            Overview of cognitive assessment data and patient metrics
+            {t("overview")}
           </p>
         </div>
 
@@ -209,7 +243,7 @@ const Dashboard = () => {
         <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg sm:text-xl font-semibold">
-              Recent Patients
+              {t("recentActivity")}
             </h2>
           </div>
 
@@ -224,59 +258,62 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-6 sm:space-y-8 animate-fade-in p-2 sm:p-4 md:p-6 overflow-x-hidden">
+    <div
+      className={`space-y-6 sm:space-y-8 animate-fade-in p-2 sm:p-4 md:p-6 overflow-x-hidden ${
+        language === "ar" ? "rtl" : "ltr"
+      }`}
+    >
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold mb-1">Dashboard</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-1">
+          {t("dashboard")}
+        </h1>
         <p className="text-sm sm:text-base text-muted-foreground">
-          Overview of cognitive assessment data and patient metrics
+          {t("overview")}
         </p>
       </div>
 
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         <StatusCard
-          title="Total Patients"
+          title={t("patients")}
           value={totalPatients}
           icon={<Users className="h-4 sm:h-5 w-4 sm:w-5" />}
-          tooltip="Total number of patients under your care"
+          tooltip={t("Total number of patients under your care")}
         />
         <StatusCard
-          title="Average Percentile"
+          title={t("percentile")}
           value={averagePercentile}
           isPercentile={true}
           change={{ value: 12, isImprovement: true }}
           icon={<Brain className="h-4 sm:h-5 w-4 sm:w-5" />}
-          tooltip="Average cognitive performance across all patients relative to their age group"
+          tooltip={t(
+            "Average cognitive performance across all patients relative to their age group"
+          )}
         />
         <StatusCard
-          title="Session Count"
-          value={totalSessions}
+          title={t("sessions")}
+          value={numSessions}
           change={{ value: 8, isImprovement: true }}
           icon={<LineChart className="h-4 sm:h-5 w-4 sm:w-5" />}
-          tooltip="Total number of assessment sessions conducted"
-        />
-        <StatusCard
-          title="Total Assessment Time"
-          value={`${totalMinutes} mins`}
-          icon={<Clock className="h-4 sm:h-5 w-4 sm:w-5" />}
-          tooltip="Cumulative time spent across all assessment sessions"
+          tooltip={t("Total number of assessment sessions conducted")}
         />
       </div>
 
-      <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
+      <div className="">
         <DomainChart domainData={domainData} />
-        <SessionTimeline sessions={sessionData.slice(0, 10)} />
       </div>
 
       <div>
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-          <h2 className="text-lg sm:text-xl font-semibold">Recent Patients</h2>
+          <h2 className="text-lg sm:text-xl font-semibold">
+            {t("recentActivity")}
+          </h2>
           <Button
             variant="outline"
             size="sm"
             onClick={handleViewAllPatients}
             className="text-xs sm:text-sm"
           >
-            View all patients
+            {t("viewAll")}
           </Button>
         </div>
 
@@ -292,7 +329,7 @@ const Dashboard = () => {
             ))
           ) : (
             <div className="col-span-full text-center py-8">
-              <p className="text-muted-foreground">No patients found.</p>
+              <p className="text-muted-foreground">{t("No patients found.")}</p>
             </div>
           )}
         </div>

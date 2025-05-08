@@ -1,3 +1,4 @@
+
 import { ActivityBreakdown } from "@/components/sessions/ActivityBreakdown";
 import { SessionAnalysis } from "@/components/sessions/SessionAnalysis";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useUser } from "@/contexts/UserContext";
 import PatientService from "@/services/patient";
 import SessionService from "@/services/session";
 
@@ -22,11 +25,13 @@ const Sessions = () => {
   const [sessionsMap, setSessionsMap] = useState({});
   const [patientId, setPatientId] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const { userData } = useUser();
+  const { t, language } = useLanguage();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const clinicianId = "3f7a219b-32d7-4ca8-abae-d9a77c922aff"; // Replace with your real clinician ID (from auth, etc.)
+        const clinicianId = userData?.id;
         const patientsRes = await PatientService.getPatientsByClinician(
           clinicianId
         );
@@ -64,7 +69,7 @@ const Sessions = () => {
     };
 
     fetchData();
-  }, [location]);
+  }, [location, userData?.id]);
 
   const handlePatientChange = (id: string) => {
     if (sessionsMap[id]?.length > 0) {
@@ -94,9 +99,9 @@ const Sessions = () => {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
-          <h3 className="text-lg font-medium">No session data available</h3>
+          <h3 className="text-lg font-medium">{t("No session data available")}</h3>
           <p className="text-muted-foreground">
-            Select a patient with recorded sessions
+            {t("Select a patient with recorded sessions")}
           </p>
         </div>
       </div>
@@ -104,7 +109,7 @@ const Sessions = () => {
   }
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className={`space-y-8 animate-fade-in ${language === "ar" ? "rtl" : "ltr"}`}>
       <div className="flex items-center justify-between">
         <div>
           <Button
@@ -113,19 +118,19 @@ const Sessions = () => {
             className="mb-2 -ml-2 text-muted-foreground"
             onClick={handleBackToDashboard}
           >
-            <ChevronLeft className="mr-1 h-4 w-4" />
-            Back to Dashboard
+            <ChevronLeft className={`${language === "ar" ? "ml-1" : "mr-1"} h-4 w-4`} />
+            {t("Back to Dashboard")}
           </Button>
-          <h1 className="text-3xl font-bold mb-1">Session Analysis</h1>
+          <h1 className="text-3xl font-bold mb-1">{t("Session Analysis")}</h1>
           <p className="text-muted-foreground">
-            Detailed breakdown of individual assessment sessions
+            {t("Detailed breakdown of individual assessment sessions")}
           </p>
         </div>
 
         <div className="flex items-center space-x-4">
           <Select value={patientId || ""} onValueChange={handlePatientChange}>
             <SelectTrigger className="min-w-[180px]">
-              <SelectValue placeholder="Select a patient" />
+              <SelectValue placeholder={t("Select a patient")} />
             </SelectTrigger>
             <SelectContent>
               {patients.map((patient) => (
@@ -138,12 +143,12 @@ const Sessions = () => {
 
           <Select value={sessionId || ""} onValueChange={handleSessionChange}>
             <SelectTrigger className="min-w-[180px]">
-              <SelectValue placeholder="Select a session" />
+              <SelectValue placeholder={t("Select a session")} />
             </SelectTrigger>
             <SelectContent>
               {patientSessions.map((session) => (
                 <SelectItem key={session.session_id} value={session.session_id}>
-                  Session {session.session_id.split("-")[1]}
+                  {t("Session")} {session.session_id.split("-")[1]}
                 </SelectItem>
               ))}
             </SelectContent>

@@ -13,6 +13,9 @@ import { PatientDetailTabs } from "@/components/patients/detail/PatientDetailTab
 // Services
 import PatientService from "@/services/patient";
 
+// Contexts
+import { useLanguage } from "@/contexts/LanguageContext";
+
 // Types
 import { PatientProfile } from "@/services/patient";
 
@@ -20,6 +23,7 @@ const PatientDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t, language } = useLanguage();
   
   // Extract the tab from query parameters
   const queryParams = new URLSearchParams(location.search);
@@ -39,7 +43,7 @@ const PatientDetail = () => {
       setPatient(data);
     } catch (error) {
       console.error("Failed to fetch patient profile:", error);
-      setError(error instanceof Error ? error.message : "Failed to fetch patient data");
+      setError(error instanceof Error ? error.message : t("Failed to fetch patient data"));
     } finally {
       setLoading(false);
       setRetrying(false);
@@ -68,7 +72,7 @@ const PatientDetail = () => {
   // Loading state with skeletons for better UX
   if (loading) {
     return (
-      <div className="container mx-auto p-4 max-w-7xl">
+      <div className={`container mx-auto p-4 max-w-7xl ${language === 'ar' ? 'rtl' : 'ltr'}`}>
         <Button
           variant="ghost"
           size="sm"
@@ -103,7 +107,7 @@ const PatientDetail = () => {
   // Error state with retry button
   if (error) {
     return (
-      <div className="container mx-auto p-4 max-w-7xl">
+      <div className={`container mx-auto p-4 max-w-7xl ${language === 'ar' ? 'rtl' : 'ltr'}`}>
         <Button
           variant="ghost"
           size="sm"
@@ -111,12 +115,12 @@ const PatientDetail = () => {
           onClick={handleBackClick}
         >
           <AlertCircle className="mr-1 h-4 w-4" />
-          Back to Patients
+          {t("Back to Patients")}
         </Button>
         
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error Loading Patient Data</AlertTitle>
+          <AlertTitle>{t("Error Loading Patient Data")}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
         
@@ -125,7 +129,7 @@ const PatientDetail = () => {
             variant="outline" 
             onClick={handleBackClick}
           >
-            Return to Patients List
+            {t("Return to Patients List")}
           </Button>
           <Button 
             onClick={handleRetry}
@@ -134,12 +138,12 @@ const PatientDetail = () => {
             {retrying ? (
               <>
                 <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                Retrying...
+                {t("retrying")}
               </>
             ) : (
               <>
                 <RefreshCw className="mr-2 h-4 w-4" />
-                Retry
+                {t("retry")}
               </>
             )}
           </Button>
@@ -150,7 +154,7 @@ const PatientDetail = () => {
 
   if (!patient) {
     return (
-      <div className="container mx-auto p-4 max-w-7xl">
+      <div className={`container mx-auto p-4 max-w-7xl ${language === 'ar' ? 'rtl' : 'ltr'}`}>
         <Button
           variant="ghost"
           size="sm"
@@ -158,27 +162,27 @@ const PatientDetail = () => {
           onClick={handleBackClick}
         >
           <AlertCircle className="mr-1 h-4 w-4" />
-          Back to Patients
+          {t("Back to Patients")}
         </Button>
         
         <Alert className="mb-4">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Patient Not Found</AlertTitle>
-          <AlertDescription>The requested patient could not be found or has been removed.</AlertDescription>
+          <AlertTitle>{t("Patient Not Found")}</AlertTitle>
+          <AlertDescription>{t("The requested patient could not be found or has been removed.")}</AlertDescription>
         </Alert>
         
         <Button 
           variant="outline" 
           onClick={handleBackClick}
         >
-          Return to Patients List
+          {t("Return to Patients List")}
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-4 max-w-7xl">
+    <div className={`container mx-auto p-4 max-w-7xl ${language === 'ar' ? 'rtl' : 'ltr'}`}>
       <PatientHeader 
         patientName={patient.user_name}
         patientId={patient.user_id}

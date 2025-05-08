@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
@@ -17,6 +18,9 @@ type CarouselProps = {
   plugins?: CarouselPlugin
   orientation?: "horizontal" | "vertical"
   setApi?: (api: CarouselApi) => void
+  onScrollEnd?: (api: CarouselApi) => void
+  autoScroll?: boolean
+  autoScrollInterval?: number
 }
 
 type CarouselContextProps = {
@@ -52,6 +56,9 @@ const Carousel = React.forwardRef<
       plugins,
       className,
       children,
+      onScrollEnd,
+      autoScroll = false,
+      autoScrollInterval = 4000,
       ...props
     },
     ref
@@ -65,6 +72,26 @@ const Carousel = React.forwardRef<
     )
     const [canScrollPrev, setCanScrollPrev] = React.useState(false)
     const [canScrollNext, setCanScrollNext] = React.useState(false)
+    const autoScrollTimerRef = React.useRef<NodeJS.Timeout | null>(null)
+
+    const startAutoScroll = React.useCallback(() => {
+      if (!autoScroll || !api) return;
+      
+      autoScrollTimerRef.current = setInterval(() => {
+        if (api.canScrollNext()) {
+          api.scrollNext();
+        } else {
+          api.scrollTo(0);
+        }
+      }, autoScrollInterval);
+    }, [api, autoScroll, autoScrollInterval]);
+
+    const stopAutoScroll = React.useCallback(() => {
+      if (autoScrollTimerRef.current) {
+        clearInterval(autoScrollTimerRef.current);
+        autoScrollTimerRef.current = null;
+      }
+    }, []);
 
     const onSelect = React.useCallback((api: CarouselApi) => {
       if (!api) {
@@ -77,11 +104,19 @@ const Carousel = React.forwardRef<
 
     const scrollPrev = React.useCallback(() => {
       api?.scrollPrev()
-    }, [api])
+      if (autoScroll) {
+        stopAutoScroll();
+        startAutoScroll();
+      }
+    }, [api, autoScroll, stopAutoScroll, startAutoScroll])
 
     const scrollNext = React.useCallback(() => {
       api?.scrollNext()
-    }, [api])
+      if (autoScroll) {
+        stopAutoScroll();
+        startAutoScroll();
+      }
+    }, [api, autoScroll, stopAutoScroll, startAutoScroll])
 
     const handleKeyDown = React.useCallback(
       (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -113,10 +148,37 @@ const Carousel = React.forwardRef<
       api.on("reInit", onSelect)
       api.on("select", onSelect)
 
+      if (onScrollEnd) {
+        api.on("settle", () => onScrollEnd(api))
+      }
+
       return () => {
         api?.off("select", onSelect)
+        if (onScrollEnd) {
+          api?.off("settle", () => onScrollEnd(api))
+        }
       }
-    }, [api, onSelect])
+    }, [api, onSelect, onScrollEnd])
+
+    // Auto-scroll effect
+    React.useEffect(() => {
+      if (!api || !autoScroll) return;
+      
+      startAutoScroll();
+      
+      // Pause auto-scroll when interacting with carousel
+      const onPointerDown = () => stopAutoScroll();
+      const onPointerUp = () => startAutoScroll();
+      
+      api.rootNode().addEventListener('pointerdown', onPointerDown);
+      window.addEventListener('pointerup', onPointerUp);
+      
+      return () => {
+        stopAutoScroll();
+        api.rootNode()?.removeEventListener('pointerdown', onPointerDown);
+        window.removeEventListener('pointerup', onPointerUp);
+      };
+    }, [api, autoScroll, startAutoScroll, stopAutoScroll]);
 
     return (
       <CarouselContext.Provider
@@ -130,6 +192,9 @@ const Carousel = React.forwardRef<
           scrollNext,
           canScrollPrev,
           canScrollNext,
+          onScrollEnd,
+          autoScroll,
+          autoScrollInterval,
         }}
       >
         <div
@@ -204,7 +269,7 @@ const CarouselPrevious = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute  h-8 w-8 rounded-full",
+        "absolute h-8 w-8 rounded-full bg-[#5EF38C]/20 hover:bg-[#5EF38C]/40 border border-[#5EF38C] text-[#5EF38C]",
         orientation === "horizontal"
           ? "-left-12 top-1/2 -translate-y-1/2"
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
@@ -233,7 +298,7 @@ const CarouselNext = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute h-8 w-8 rounded-full",
+        "absolute h-8 w-8 rounded-full bg-[#5EF38C]/20 hover:bg-[#5EF38C]/40 border border-[#5EF38C] text-[#5EF38C]",
         orientation === "horizontal"
           ? "-right-12 top-1/2 -translate-y-1/2"
           : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",

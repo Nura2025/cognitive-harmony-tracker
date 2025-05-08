@@ -1,8 +1,7 @@
 
 import React from 'react';
-import { BellIcon, Search, Settings, UserCircle, LogOut } from 'lucide-react';
+import { Settings, UserCircle, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { LanguageToggle } from '@/components/LanguageToggle';
@@ -33,26 +32,13 @@ export const Navbar: React.FC = () => {
   
   return (
     <div className="h-14 sm:h-16 border-b border-border flex items-center justify-between px-3 sm:px-4 bg-background z-10">
-      <div className={`flex items-center ${language === 'ar' ? 'flex-row-reverse' : ''} ${language === 'ar' ? 'space-x-reverse' : 'space-x-2 sm:space-x-4'}`}>
-        <SidebarTrigger className="lg:hidden" />
-        <div className="relative w-full max-w-[180px] sm:max-w-[300px]">
-          <Search className={`absolute ${language === 'ar' ? 'right-2' : 'left-2'} top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground`} />
-          <Input
-            placeholder={t('search')}
-            className={`${language === 'ar' ? 'pr-7 sm:pr-8 text-right' : 'pl-7 sm:pl-8'} h-8 sm:h-9 w-full bg-background border-border text-xs sm:text-sm rounded-full`}
-            dir={language === 'ar' ? 'rtl' : 'ltr'}
-          />
-        </div>
+      <div className={`flex items-center ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
+        <SidebarTrigger className="h-9 w-9" /> {/* Increased size of the trigger button */}
       </div>
       
       <div className={`flex items-center gap-1 sm:gap-2 ${language === 'ar' ? 'flex-row-reverse' : ''}`}>
         <LanguageToggle />
         <ThemeToggle />
-        
-        <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9 relative">
-          <BellIcon className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
-          <span className="absolute -top-1 -right-1 h-2 w-2 sm:h-3 sm:w-3 bg-destructive rounded-full"></span>
-        </Button>
         
         <Link to="/settings">
           <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-9 sm:w-9">

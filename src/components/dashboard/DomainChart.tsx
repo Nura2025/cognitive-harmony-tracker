@@ -14,6 +14,7 @@ import {
 import { CognitiveDomain } from '@/utils/mockData';
 import { getDomainName } from '@/utils/dataProcessing';
 import { InfoTooltip } from '@/components/ui/info-tooltip';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface DomainChartProps {
   domainData: {
@@ -25,6 +26,8 @@ interface DomainChartProps {
 }
 
 export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
+  const { t, language } = useLanguage();
+
   // Convert domain data to a format suitable for the chart
   const chartData = Array(10).fill(0).map((_, index) => {
     const dataPoint: Record<string, number | string> = { day: index + 1 };
@@ -46,18 +49,18 @@ export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
 
   // Domain descriptions for tooltips
   const domainDescriptions = {
-    attention: "Ability to focus on specific stimuli while ignoring distractions",
-    memory: "Capacity to encode, store, and retrieve information",
-    executiveFunction: "Higher-order cognitive processes that control and coordinate other cognitive abilities",
-    behavioral: "Impulse control and self-regulation behaviors"
+    attention: t("attentionExplanation"),
+    memory: t("memoryExplanation"),
+    executiveFunction: t("executiveFunctionExplanation"),
+    behavioral: t("Impulse control and self-regulation behaviors")
   };
 
   return (
     <Card className="glass">
       <CardHeader className="pb-1 sm:pb-2 p-3 sm:p-6">
         <div className="flex items-center gap-1.5 sm:gap-2">
-          <CardTitle className="text-base sm:text-lg">Cognitive Domain Trends</CardTitle>
-          <InfoTooltip text="Performance trends across different cognitive domains over time" />
+          <CardTitle className="text-base sm:text-lg">{t("Cognitive Domain Trends")}</CardTitle>
+          <InfoTooltip text={t("Performance trends across different cognitive domains over time")} />
         </div>
       </CardHeader>
       <CardContent className="p-3 sm:p-6 pt-0 sm:pt-0">
@@ -69,7 +72,7 @@ export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
                 style={{ backgroundColor: domainColors[domain] }}
               />
               <span className="text-xs flex items-center gap-1 whitespace-nowrap">
-                {getDomainName(domain as keyof CognitiveDomain)}
+                {t(getDomainName(domain as keyof CognitiveDomain))}
                 <InfoTooltip 
                   text={domainDescriptions[domain]} 
                   size="sm"
@@ -124,7 +127,7 @@ export const DomainChart: React.FC<DomainChartProps> = ({ domainData }) => {
                 }}
                 itemStyle={{ padding: '1px 0', fontSize: '11px' }}
                 formatter={(value: number) => [`${value}%`, '']}
-                labelFormatter={(day) => `Day ${day}`}
+                labelFormatter={(day) => `${t("Day")} ${day}`}
                 labelStyle={{ fontSize: '11px' }}
                 wrapperStyle={{ zIndex: 1000 }}
               />

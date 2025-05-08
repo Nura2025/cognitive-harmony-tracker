@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -88,7 +87,7 @@ const Login = () => {
               />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold mb-1 text-[#5EF38C] pixel-font">NURA Games</h1>
+          <h1 className="text-3xl font-bold mb-1 text-[#5EF38C] pixel-font">Nura</h1>
           <p className="text-gray-300 text-sm">Cognitive assessment platform</p>
         </div>
         
@@ -190,7 +189,7 @@ const Login = () => {
         </Card>
         
         <div className="text-center mt-6 text-sm text-gray-400">
-          © 2025 NURA Games. All rights reserved.
+          © 2025 Nura. All rights reserved.
         </div>
       </div>
     </div>

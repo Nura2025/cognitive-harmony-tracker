@@ -1,13 +1,23 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Award, Brain, Gamepad, Leaf, Puzzle, Users } from "lucide-react";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthService from "../services/auth";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 const Landing: React.FC = () => {
   const navigate = useNavigate();
   const isAuthenticated = AuthService.isAuthenticated();
+  const isMobile = useIsMobile();
+  const [activeSlide, setActiveSlide] = useState(0);
 
   const handleSignInClick = () => {
     if (isAuthenticated) {
@@ -15,6 +25,90 @@ const Landing: React.FC = () => {
     } else {
       navigate("/login");
     }
+  };
+
+  // Features data for carousel
+  const features = [
+    {
+      icon: <Leaf className="text-[#5EF38C]" size={28} />,
+      title: "Farming",
+      content: [
+        "Plant, water, grow, and harvest crops",
+        "Pick up and manage seeds, tools, and crops",
+        "Chop trees to craft various items",
+      ],
+      progress: "w-3/4",
+    },
+    {
+      icon: <Users className="text-[#5EF38C]" size={28} />,
+      title: "NPCs & Quests",
+      content: [
+        "NPCs act as guides and helpers",
+        "Receive farming, collecting, and problem-solving tasks",
+        "Complete tasks to earn valuable rewards",
+      ],
+      progress: "w-2/3",
+    },
+    {
+      icon: <Gamepad className="text-[#5EF38C]" size={28} />,
+      title: "Mini-Games",
+      content: [
+        "Memory card matching with adaptive difficulty",
+        "Memory sequence game with piano tiles",
+        "Petal patterns game with plant arrangements",
+      ],
+      progress: "w-4/5",
+    },
+    {
+      icon: <Puzzle className="text-[#5EF38C]" size={28} />,
+      title: "Adaptive Difficulty",
+      content: [
+        "All mini-games automatically adjust their difficulty based on player performance, ensuring the perfect balance of challenge and engagement for children with attention difficulties.",
+      ],
+      progress: "w-4/5",
+    },
+    {
+      icon: <Brain className="text-[#5EF38C]" size={28} />,
+      title: "Progress Tracking",
+      content: [
+        "Detailed reports track time spent on tasks, ability to complete levels, and attention-sustaining periods to help parents and professionals monitor cognitive development.",
+      ],
+      progress: "w-3/4",
+    },
+    {
+      icon: <Award className="text-[#5EF38C]" size={28} />,
+      title: "Reward System",
+      content: [
+        "Players earn currencies, items, and farming boosts for completing mini-games and tasks, reinforcing positive behaviors and maintaining engagement.",
+      ],
+      progress: "w-1/2",
+    },
+  ];
+
+  // Function to render feature card
+  const renderFeatureCard = (feature: any, index: number) => {
+    return (
+      <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border h-full">
+        <div className="bg-black p-6 rounded-lg h-full flex flex-col">
+          <div className="h-12 w-12 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mb-4">
+            {feature.icon}
+          </div>
+          <h3 className="text-xl font-bold mb-4 text-white">{feature.title}</h3>
+          {Array.isArray(feature.content) ? (
+            <ul className="text-gray-400 flex-grow list-disc pl-5 space-y-2">
+              {feature.content.map((item: string, i: number) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-400 flex-grow">{feature.content}</p>
+          )}
+          <div className="mt-4 h-2 bg-[#222] rounded-full overflow-hidden">
+            <div className={`h-full bg-[#5EF38C] ${feature.progress} pixel-progress`}></div>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -55,14 +149,14 @@ const Landing: React.FC = () => {
         </div>
       </nav>
 
-      {/* Hero */}
+      {/* Hero Section */}
       <section className="container mx-auto px-6 py-20 flex flex-col md:flex-row items-center">
         <div className="md:w-1/2">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white leading-tight">
             <span className="inline-block text-[#5EF38C] pixel-font">NURA</span>
             <br />
             <span className="inline-block">
-              <span className="bg-gradient-to-r from-[#9b87f5] to-[#D6BCFA] text-transparent bg-clip-text font-medium px-1 py-0.5 rounded animate-pulse">
+              <span className="bg-gradient-to-r from-[#48bb78] to-[#38a169] text-transparent bg-clip-text font-medium py-0.5 rounded animate-pulse">
                 For Children with Attention Difficulties
               </span>
             </span>
@@ -180,137 +274,55 @@ const Landing: React.FC = () => {
       </section>
 
       {/* Features */}
-      <section className="py-20" id="features">
+      <section className="py-24" id="features">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl font-bold mb-12 text-center text-[#5EF38C] pixel-font">
+          <h2 className="text-4xl font-bold mb-16 text-center text-[#5EF38C] pixel-font">
             Core Features
           </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Feature 1 - Farming */}
-            <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
-              <div className="bg-black p-6 rounded-lg h-full flex flex-col">
-                <div className="h-12 w-12 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mb-4">
-                  <Leaf className="text-[#5EF38C]" size={28} />
+          
+          {/* Carousel view for both mobile and desktop */}
+          <div className="relative">
+            <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              autoScroll={true}
+              autoScrollInterval={5000}
+              className="w-full"
+              onScrollEnd={(api) => {
+                const currentSlide = api?.selectedScrollSnap();
+                setActiveSlide(currentSlide || 0);
+              }}
+            >
+              <CarouselContent className="-ml-8">
+                {features.map((feature, index) => (
+                  <CarouselItem key={index} className={`pl-8 py-6 ${isMobile ? 'basis-full' : 'md:basis-1/3'}`}>
+                    {renderFeatureCard(feature, index)}
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <div className="flex items-center justify-center gap-2 mt-10">
+                <CarouselPrevious className="static transform-none mx-2" />
+                <div className="flex gap-2">
+                  {features.map((_, index) => (
+                    <div
+                      key={index}
+                      className={`h-2 w-2 rounded-full ${
+                        activeSlide === index ? "bg-[#5EF38C]" : "bg-gray-600"
+                      }`}
+                    />
+                  ))}
                 </div>
-                <h3 className="text-xl font-bold mb-4 text-white">Farming</h3>
-                <ul className="text-gray-400 flex-grow list-disc pl-5 space-y-2">
-                  <li>Plant, water, grow, and harvest crops</li>
-                  <li>Pick up and manage seeds, tools, and crops</li>
-                  <li>Chop trees to craft various items</li>
-                </ul>
-                <div className="mt-4 h-2 bg-[#222] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#5EF38C] w-3/4 pixel-progress"></div>
-                </div>
+                <CarouselNext className="static transform-none mx-2" />
               </div>
-            </div>
-
-            {/* Feature 2 - NPCs & Quest System */}
-            <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
-              <div className="bg-black p-6 rounded-lg h-full flex flex-col">
-                <div className="h-12 w-12 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mb-4">
-                  <Users className="text-[#5EF38C]" size={28} />
-                </div>
-                <h3 className="text-xl font-bold mb-4 text-white">
-                  NPCs & Quests
-                </h3>
-                <ul className="text-gray-400 flex-grow list-disc pl-5 space-y-2">
-                  <li>NPCs act as guides and helpers</li>
-                  <li>
-                    Receive farming, collecting, and problem-solving tasks
-                  </li>
-                  <li>Complete tasks to earn valuable rewards</li>
-                </ul>
-                <div className="mt-4 h-2 bg-[#222] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#5EF38C] w-2/3 pixel-progress"></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Feature 3 - Mini-Games */}
-            <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
-              <div className="bg-black p-6 rounded-lg h-full flex flex-col">
-                <div className="h-12 w-12 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mb-4">
-                  <Gamepad className="text-[#5EF38C]" size={28} />
-                </div>
-                <h3 className="text-xl font-bold mb-4 text-white">
-                  Mini-Games
-                </h3>
-                <ul className="text-gray-400 flex-grow list-disc pl-5 space-y-2">
-                  <li>Memory card matching with adaptive difficulty</li>
-                  <li>Memory sequence game with piano tiles</li>
-                  <li>Petal patterns game with plant arrangements</li>
-                </ul>
-                <div className="mt-4 h-2 bg-[#222] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#5EF38C] w-4/5 pixel-progress"></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Feature 4 - Memory Games */}
-            <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
-              <div className="bg-black p-6 rounded-lg h-full flex flex-col">
-                <div className="h-12 w-12 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mb-4">
-                  <Puzzle className="text-[#5EF38C]" size={28} />
-                </div>
-                <h3 className="text-xl font-bold mb-4 text-white">
-                  Adaptive Difficulty
-                </h3>
-                <p className="text-gray-400 flex-grow">
-                  All mini-games automatically adjust their difficulty based on
-                  player performance, ensuring the perfect balance of challenge
-                  and engagement for children with attention difficulties.
-                </p>
-                <div className="mt-4 h-2 bg-[#222] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#5EF38C] w-4/5 pixel-progress"></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Feature 5 - Progress Tracking */}
-            <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
-              <div className="bg-black p-6 rounded-lg h-full flex flex-col">
-                <div className="h-12 w-12 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mb-4">
-                  <Brain className="text-[#5EF38C]" size={28} />
-                </div>
-                <h3 className="text-xl font-bold mb-4 text-white">
-                  Progress Tracking
-                </h3>
-                <p className="text-gray-400 flex-grow">
-                  Detailed reports track time spent on tasks, ability to
-                  complete levels, and attention-sustaining periods to help
-                  parents and professionals monitor cognitive development.
-                </p>
-                <div className="mt-4 h-2 bg-[#222] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#5EF38C] w-3/4 pixel-progress"></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Feature 6 - Rewards */}
-            <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
-              <div className="bg-black p-6 rounded-lg h-full flex flex-col">
-                <div className="h-12 w-12 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mb-4">
-                  <Award className="text-[#5EF38C]" size={28} />
-                </div>
-                <h3 className="text-xl font-bold mb-4 text-white">
-                  Reward System
-                </h3>
-                <p className="text-gray-400 flex-grow">
-                  Players earn currencies, items, and farming boosts for
-                  completing mini-games and tasks, reinforcing positive
-                  behaviors and maintaining engagement.
-                </p>
-                <div className="mt-4 h-2 bg-[#222] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#5EF38C] w-1/2 pixel-progress"></div>
-                </div>
-              </div>
-            </div>
+            </Carousel>
           </div>
         </div>
       </section>
 
       {/* Contact Us */}
-      <section className="py-20 bg-black/30 backdrop-blur-sm" id="contact">
+      <section className="py-24 bg-black/30 backdrop-blur-sm" id="contact">
         <div className="container mx-auto px-6">
           <h2 className="text-4xl font-bold mb-12 text-center text-[#5EF38C] pixel-font">
             Contact Us
