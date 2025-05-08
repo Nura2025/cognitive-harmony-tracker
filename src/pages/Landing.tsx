@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import AuthService from '../services/auth';
+import { Gamepad, Brain, Star, Award, Leaf, Puzzle } from 'lucide-react';
 
 const Landing: React.FC = () => {
   const navigate = useNavigate();
@@ -61,10 +62,10 @@ const Landing: React.FC = () => {
           <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white leading-tight">
             <span className="inline-block text-[#5EF38C] pixel-font">NURA</span>
             <br />
-            <span className="inline-block">Cognitive Training</span>
+            <span className="inline-block">For Children with Attention Difficulties</span>
           </h1>
           <p className="text-xl mb-8 text-gray-300">
-            Train your brain with engaging cognitive exercises designed by clinical psychologists.
+            A 2D pixel art farming RPG designed to support children with attention challenges through engaging gameplay and cognitive training.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             {isAuthenticated ? (
@@ -109,37 +110,37 @@ const Landing: React.FC = () => {
       {/* About Us */}
       <section className="py-20 bg-black/30 backdrop-blur-sm">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl font-bold mb-12 text-center text-[#5EF38C] pixel-font" id="about">About Us</h2>
+          <h2 className="text-4xl font-bold mb-12 text-center text-[#5EF38C] pixel-font" id="about">About Nura</h2>
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <p className="text-lg text-gray-300 mb-6">
-                NURA is a cognitive training platform developed by leading neuropsychologists and game designers. We combine clinical expertise with engaging gameplay to create an effective brain training experience.
+                Nura is a farming RPG designed to assist children with attention difficulties, including those with ADHD. Players explore the environment and engage in different farming activities, interact with NPCs, and play focus and memory-specific mini-games.
               </p>
               <p className="text-lg text-gray-300 mb-6">
-                Our mission is to make cognitive assessment and training accessible and enjoyable for everyone, while providing powerful tools for clinicians to monitor and analyze patient progress.
+                The mini-games automatically adjust difficulty based on the player's performance, creating an adaptive experience that grows with the child's cognitive development.
               </p>
               <p className="text-lg text-gray-300">
-                Founded in 2023, we've already helped thousands of users improve their cognitive abilities through our science-backed exercises.
+                The game generates detailed reports to provide insights into the child's attention span, helping parents and professionals track development over time.
               </p>
             </div>
             <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
               <div className="bg-black p-6 rounded-lg h-full">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center p-4">
-                    <h3 className="text-3xl font-bold text-[#5EF38C]">5000+</h3>
-                    <p className="text-gray-400">Active Users</p>
+                    <h3 className="text-3xl font-bold text-[#5EF38C]">3</h3>
+                    <p className="text-gray-400">Mini-Games</p>
                   </div>
                   <div className="text-center p-4">
-                    <h3 className="text-3xl font-bold text-[#5EF38C]">12</h3>
-                    <p className="text-gray-400">Cognitive Games</p>
+                    <h3 className="text-3xl font-bold text-[#5EF38C]">Adaptive</h3>
+                    <p className="text-gray-400">Difficulty</p>
                   </div>
                   <div className="text-center p-4">
-                    <h3 className="text-3xl font-bold text-[#5EF38C]">98%</h3>
-                    <p className="text-gray-400">User Satisfaction</p>
+                    <h3 className="text-3xl font-bold text-[#5EF38C]">Progress</h3>
+                    <p className="text-gray-400">Tracking</p>
                   </div>
                   <div className="text-center p-4">
-                    <h3 className="text-3xl font-bold text-[#5EF38C]">4</h3>
-                    <p className="text-gray-400">Cognitive Domains</p>
+                    <h3 className="text-3xl font-bold text-[#5EF38C]">Detailed</h3>
+                    <p className="text-gray-400">Reports</p>
                   </div>
                 </div>
               </div>
@@ -151,49 +152,71 @@ const Landing: React.FC = () => {
       {/* Features */}
       <section className="py-20" id="features">
         <div className="container mx-auto px-6">
-          <h2 className="text-4xl font-bold mb-12 text-center text-[#5EF38C] pixel-font">Game Features</h2>
+          <h2 className="text-4xl font-bold mb-12 text-center text-[#5EF38C] pixel-font">Core Features</h2>
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
+            {/* Feature 1 - Farming */}
             <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
               <div className="bg-black p-6 rounded-lg h-full flex flex-col">
                 <div className="h-12 w-12 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-[#5EF38C] text-2xl">🧠</span>
+                  <Leaf className="text-[#5EF38C]" size={28} />
                 </div>
-                <h3 className="text-xl font-bold mb-4 text-white">Attention Training</h3>
-                <p className="text-gray-400 flex-grow">
-                  Enhance focus and concentration with games that challenge your sustained and selective attention abilities.
-                </p>
+                <h3 className="text-xl font-bold mb-4 text-white">Farming</h3>
+                <ul className="text-gray-400 flex-grow list-disc pl-5 space-y-2">
+                  <li>Plant, water, grow, and harvest crops</li>
+                  <li>Pick up and manage seeds, tools, and crops</li>
+                  <li>Chop trees to craft various items</li>
+                </ul>
                 <div className="mt-4 h-2 bg-[#222] rounded-full overflow-hidden">
                   <div className="h-full bg-[#5EF38C] w-3/4 pixel-progress"></div>
                 </div>
               </div>
             </div>
             
-            {/* Feature 2 */}
+            {/* Feature 2 - NPCs & Quest System */}
             <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
               <div className="bg-black p-6 rounded-lg h-full flex flex-col">
                 <div className="h-12 w-12 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-[#5EF38C] text-2xl">🎮</span>
+                  <Users className="text-[#5EF38C]" size={28} />
                 </div>
-                <h3 className="text-xl font-bold mb-4 text-white">Memory Games</h3>
-                <p className="text-gray-400 flex-grow">
-                  Improve short and long-term memory with engaging pattern recognition and recall challenges.
-                </p>
+                <h3 className="text-xl font-bold mb-4 text-white">NPCs & Quests</h3>
+                <ul className="text-gray-400 flex-grow list-disc pl-5 space-y-2">
+                  <li>NPCs act as guides and helpers</li>
+                  <li>Receive farming, collecting, and problem-solving tasks</li>
+                  <li>Complete tasks to earn valuable rewards</li>
+                </ul>
                 <div className="mt-4 h-2 bg-[#222] rounded-full overflow-hidden">
                   <div className="h-full bg-[#5EF38C] w-2/3 pixel-progress"></div>
                 </div>
               </div>
             </div>
             
-            {/* Feature 3 */}
+            {/* Feature 3 - Mini-Games */}
             <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
               <div className="bg-black p-6 rounded-lg h-full flex flex-col">
                 <div className="h-12 w-12 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-[#5EF38C] text-2xl">⚡</span>
+                  <Gamepad className="text-[#5EF38C]" size={28} />
                 </div>
-                <h3 className="text-xl font-bold mb-4 text-white">Executive Function</h3>
+                <h3 className="text-xl font-bold mb-4 text-white">Mini-Games</h3>
+                <ul className="text-gray-400 flex-grow list-disc pl-5 space-y-2">
+                  <li>Memory card matching with adaptive difficulty</li>
+                  <li>Memory sequence game with piano tiles</li>
+                  <li>Petal patterns game with plant arrangements</li>
+                </ul>
+                <div className="mt-4 h-2 bg-[#222] rounded-full overflow-hidden">
+                  <div className="h-full bg-[#5EF38C] w-4/5 pixel-progress"></div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Feature 4 - Memory Games */}
+            <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
+              <div className="bg-black p-6 rounded-lg h-full flex flex-col">
+                <div className="h-12 w-12 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mb-4">
+                  <Puzzle className="text-[#5EF38C]" size={28} />
+                </div>
+                <h3 className="text-xl font-bold mb-4 text-white">Adaptive Difficulty</h3>
                 <p className="text-gray-400 flex-grow">
-                  Develop problem-solving, planning, and reasoning skills through adaptive puzzle challenges.
+                  All mini-games automatically adjust their difficulty based on player performance, ensuring the perfect balance of challenge and engagement for children with attention difficulties.
                 </p>
                 <div className="mt-4 h-2 bg-[#222] rounded-full overflow-hidden">
                   <div className="h-full bg-[#5EF38C] w-4/5 pixel-progress"></div>
@@ -201,31 +224,15 @@ const Landing: React.FC = () => {
               </div>
             </div>
             
-            {/* Feature 4 */}
+            {/* Feature 5 - Progress Tracking */}
             <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
               <div className="bg-black p-6 rounded-lg h-full flex flex-col">
                 <div className="h-12 w-12 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-[#5EF38C] text-2xl">📊</span>
+                  <Brain className="text-[#5EF38C]" size={28} />
                 </div>
                 <h3 className="text-xl font-bold mb-4 text-white">Progress Tracking</h3>
                 <p className="text-gray-400 flex-grow">
-                  Monitor your cognitive improvement with detailed analytics and performance metrics.
-                </p>
-                <div className="mt-4 h-2 bg-[#222] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#5EF38C] w-4/5 pixel-progress"></div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Feature 5 */}
-            <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
-              <div className="bg-black p-6 rounded-lg h-full flex flex-col">
-                <div className="h-12 w-12 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-[#5EF38C] text-2xl">👥</span>
-                </div>
-                <h3 className="text-xl font-bold mb-4 text-white">Clinician Dashboard</h3>
-                <p className="text-gray-400 flex-grow">
-                  Powerful tools for professionals to assess and monitor patient cognitive performance.
+                  Detailed reports track time spent on tasks, ability to complete levels, and attention-sustaining periods to help parents and professionals monitor cognitive development.
                 </p>
                 <div className="mt-4 h-2 bg-[#222] rounded-full overflow-hidden">
                   <div className="h-full bg-[#5EF38C] w-3/4 pixel-progress"></div>
@@ -233,15 +240,15 @@ const Landing: React.FC = () => {
               </div>
             </div>
             
-            {/* Feature 6 */}
+            {/* Feature 6 - Rewards */}
             <div className="bg-gradient-to-br from-[#5EF38C]/20 to-[#0A2342] p-1 rounded-lg pixel-border">
               <div className="bg-black p-6 rounded-lg h-full flex flex-col">
                 <div className="h-12 w-12 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mb-4">
-                  <span className="text-[#5EF38C] text-2xl">📱</span>
+                  <Award className="text-[#5EF38C]" size={28} />
                 </div>
-                <h3 className="text-xl font-bold mb-4 text-white">Multi-platform</h3>
+                <h3 className="text-xl font-bold mb-4 text-white">Reward System</h3>
                 <p className="text-gray-400 flex-grow">
-                  Train your brain on any device - desktop, tablet, or mobile - with seamless progress syncing.
+                  Players earn currencies, items, and farming boosts for completing mini-games and tasks, reinforcing positive behaviors and maintaining engagement.
                 </p>
                 <div className="mt-4 h-2 bg-[#222] rounded-full overflow-hidden">
                   <div className="h-full bg-[#5EF38C] w-1/2 pixel-progress"></div>
@@ -262,26 +269,38 @@ const Landing: React.FC = () => {
                 <div>
                   <h3 className="text-2xl font-bold mb-4 text-white">Get in Touch</h3>
                   <p className="text-gray-400 mb-6">
-                    Have questions or feedback? We'd love to hear from you. Fill out the form and our team will get back to you as soon as possible.
+                    Have questions about how Nura can help with attention difficulties? We'd love to hear from you! Fill out the form or contact our team directly.
                   </p>
                   <div className="space-y-4">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mr-4">
-                        <span className="text-[#5EF38C]">📧</span>
+                    <div className="flex items-start">
+                      <div className="h-10 w-10 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mr-4 mt-1">
+                        <span className="text-[#5EF38C]">👤</span>
                       </div>
-                      <span className="text-gray-300">support@nuragames.com</span>
+                      <div>
+                        <p className="text-gray-300">Ayah Al Tamimi</p>
+                        <p className="text-gray-500 text-sm">+972 59-578-5550</p>
+                        <p className="text-gray-500 text-sm">atamimiayah@gmail.com</p>
+                      </div>
                     </div>
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mr-4">
-                        <span className="text-[#5EF38C]">📱</span>
+                    <div className="flex items-start">
+                      <div className="h-10 w-10 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mr-4 mt-1">
+                        <span className="text-[#5EF38C]">👤</span>
                       </div>
-                      <span className="text-gray-300">+1 (888) 123-4567</span>
+                      <div>
+                        <p className="text-gray-300">Bakeza Diazada</p>
+                        <p className="text-gray-500 text-sm">+972 59-263-9672</p>
+                        <p className="text-gray-500 text-sm">dbakeza2002@gmail.com</p>
+                      </div>
                     </div>
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mr-4">
-                        <span className="text-[#5EF38C]">🏢</span>
+                    <div className="flex items-start">
+                      <div className="h-10 w-10 bg-[#5EF38C]/20 rounded-lg flex items-center justify-center mr-4 mt-1">
+                        <span className="text-[#5EF38C]">👤</span>
                       </div>
-                      <span className="text-gray-300">123 Cognitive Street, San Francisco, CA</span>
+                      <div>
+                        <p className="text-gray-300">Daniella Anastas</p>
+                        <p className="text-gray-500 text-sm">+972 59-285-0246</p>
+                        <p className="text-gray-500 text-sm">daniellaanastas91@gmail.com</p>
+                      </div>
                     </div>
                   </div>
                 </div>
