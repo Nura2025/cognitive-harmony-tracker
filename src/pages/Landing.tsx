@@ -62,7 +62,9 @@ const Landing: React.FC = () => {
             <span className="inline-block text-[#5EF38C] pixel-font">NURA</span>
             <br />
             <span className="inline-block">
-              For Children with Attention Difficulties
+              <span className="bg-gradient-to-r from-[#9b87f5] to-[#D6BCFA] text-transparent bg-clip-text font-medium px-1 py-0.5 rounded animate-pulse">
+                For Children with Attention Difficulties
+              </span>
             </span>
           </h1>
           <p className="text-xl mb-8 text-gray-300">
