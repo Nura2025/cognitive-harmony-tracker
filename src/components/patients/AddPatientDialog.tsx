@@ -230,14 +230,22 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
               </p>
             </div>
 
-            <div className="flex justify-center">
+            <div className="flex flex-col gap-3 justify-center">
               <Button
                 variant="outline"
-                className="flex-1"
+                className="w-full"
                 onClick={copyToClipboard}
               >
                 <Copy className="h-4 w-4 mr-2" />
                 {t("Copy Link")}
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => onOpenChange(false)}
+              >
+                {t("Done")}
               </Button>
             </div>
 
@@ -248,12 +256,6 @@ export const AddPatientDialog: React.FC<AddPatientDialogProps> = ({
                 )}
               </p>
             </div>
-
-            <DialogFooter className="mt-4">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                {t("Done")}
-              </Button>
-            </DialogFooter>
           </div>
         )}
       </DialogContent>
