@@ -12,7 +12,6 @@ import { usePatientContext } from "@/contexts/PatientContext";
 import { useUser } from "@/contexts/UserContext";
 import CognitiveService from "@/services/cognitive";
 import PatientService, { TrendData } from "@/services/patient";
-import { patients } from "@/utils/mockData";
 import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -71,13 +70,6 @@ const Analysis = () => {
   const handleBackToDashboard = () => {
     navigate("/");
   };
-
-  // Find the current patient
-  const currentPatient = patients.find((p) => p.id === patientId);
-
-  if (!currentPatient) {
-    return <div className="p-8 pixel-text">{t("Loading patient data...")}</div>;
-  }
 
   return (
     <div
