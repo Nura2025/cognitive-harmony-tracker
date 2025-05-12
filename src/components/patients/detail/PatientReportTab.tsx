@@ -8,7 +8,6 @@ import { toast } from "@/hooks/use-toast";
 import ReportVisualizations from '@/components/reports/ReportVisualizations';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface PatientReportTabProps {
   patientId: string;
@@ -20,7 +19,6 @@ export const PatientReportTab: React.FC<PatientReportTabProps> = ({ patientId, p
   const [selectedReport, setSelectedReport] = useState<ReportType | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { language } = useLanguage();
-  const isMobile = useIsMobile();
   
   // Function to handle adding a new report
   const handleAddReport = (newReport: ReportType) => {
@@ -91,14 +89,14 @@ export const PatientReportTab: React.FC<PatientReportTabProps> = ({ patientId, p
   
   return (
     <div className="space-y-6">
-      <div className={`grid grid-cols-1 ${isMobile ? '' : 'lg:grid-cols-3'} gap-6 ${language === 'ar' ? 'lg:rtl' : ''}`}>
-        <div className={`${isMobile ? 'order-2' : 'lg:col-span-2'}`}>
+      <div className={`grid grid-cols-1 lg:grid-cols-3 gap-6 ${language === 'ar' ? 'lg:rtl' : ''}`}>
+        <div className="lg:col-span-2">
           <PatientReports 
             reports={reports} 
             onViewReport={handleViewReport} 
           />
         </div>
-        <div className={`${isMobile ? 'order-1' : ''}`}>
+        <div>
           <ReportGenerator 
             patient={{ user_id: patientId, name: patientName, age: 0, gender: 'Male' }}
             metrics={{
@@ -122,9 +120,9 @@ export const PatientReportTab: React.FC<PatientReportTabProps> = ({ patientId, p
       
       {/* Dialog for report visualization */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className={`${isMobile ? 'w-[95vw] max-w-none p-4' : 'max-w-4xl'} max-h-[90vh] overflow-y-auto`}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className={`${isMobile ? 'text-base' : ''}`}>
+            <DialogTitle>
               {selectedReport?.title || 'Report'}
             </DialogTitle>
           </DialogHeader>

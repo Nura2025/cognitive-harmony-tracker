@@ -1,7 +1,14 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { 
   Download, 
   FileText, 
@@ -9,7 +16,6 @@ import {
   Mail, 
   Printer
 } from 'lucide-react';
-import { Label } from '@/components/ui/label';
 import { Patient, PatientMetrics, ReportType } from '@/utils/types/patientTypes';
 import { format } from 'date-fns';
 import { toast } from "@/hooks/use-toast";
@@ -17,7 +23,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 // Import the libraries for PDF generation
 import jsPDF from 'jspdf';
@@ -52,7 +57,6 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
   const [emailMessage, setEmailMessage] = useState('');
   const [generatedReport, setGeneratedReport] = useState<ReportType | null>(null);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
-  const isMobile = useIsMobile();
   
   const today = format(new Date(), 'MMMM d, yyyy');
   
@@ -509,7 +513,7 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
   
   return (
     <>
-      <Card className="glass h-full">
+      <Card className="glass">
         <CardHeader>
           <CardTitle className="text-lg">Generate Report</CardTitle>
         </CardHeader>
@@ -519,58 +523,30 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
               <div className="mr-4 p-3 rounded-full bg-primary/10">
                 <FileText className="h-5 w-5 text-primary" />
               </div>
-              <div className="flex-grow">
-                <h3 className="font-medium text-sm md:text-base">Report Preview</h3>
-                <p className="text-xs md:text-sm text-muted-foreground truncate">
+              <div>
+                <h3 className="font-medium">Report Preview</h3>
+                <p className="text-sm text-muted-foreground">
                   Comprehensive Report for {patient.name} - {today}
                 </p>
               </div>
             </div>
           </div>
           
-          <div className="flex flex-col space-y-3 w-full">
-            <Button 
-              onClick={handleGenerateReport} 
-              className="w-full justify-center gap-2 flex items-center p-2"
-              size={isMobile ? "sm" : "default"}
-            >
-              <LayoutTemplate className={`${isMobile ? 'h-3.5 w-3.5' : 'h-4 w-4'}`} />
-              <span className={`${isMobile ? 'text-sm' : ''}`}>Generate Report</span>
+          <div className="flex flex-col space-y-2">
+            <Button onClick={handleGenerateReport} className="w-full gap-2">
+              <LayoutTemplate className="h-4 w-4" />
+              Generate Report
             </Button>
             
-            <div className={`grid ${isMobile ? 'grid-cols-1 gap-2' : 'grid-cols-2 gap-3'} w-full`}>
-              <Button 
-                variant="outline" 
-                onClick={handleSaveReport} 
-                className="w-full justify-center gap-1"
-                size={isMobile ? "sm" : "default"}
-              >
-                <Download className={`${isMobile ? 'h-3.5 w-3.5' : 'h-4 w-4'}`} />
-                <span className={`${isMobile ? 'text-sm' : ''}`}>Save</span>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                onClick={handlePrintReport} 
-                className="w-full justify-center gap-1"
-                size={isMobile ? "sm" : "default"}
-              >
-                <Printer className={`${isMobile ? 'h-3.5 w-3.5' : 'h-4 w-4'}`} />
-                <span className={`${isMobile ? 'text-sm' : ''}`}>Print</span>
-              </Button>
-            </div>
+            <Button variant="outline" onClick={handleSaveReport} className="w-full gap-2 mt-2">
+              <Download className="h-4 w-4" />
+              Save Report
+            </Button>
             
-            {onSendEmail && (
-              <Button 
-                variant="ghost" 
-                onClick={openEmailDialog} 
-                className="w-full justify-center gap-2 mt-1"
-                size={isMobile ? "sm" : "default"}
-              >
-                <Mail className={`${isMobile ? 'h-3.5 w-3.5' : 'h-4 w-4'}`} />
-                <span className={`${isMobile ? 'text-sm' : ''}`}>Email Report</span>
-              </Button>
-            )}
+            <Button variant="outline" onClick={handlePrintReport} className="w-full gap-2">
+              <Printer className="h-4 w-4" />
+              Print Report
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -647,4 +623,3 @@ const formatSectionName = (key: string): string => {
       return key;
   }
 };
-
