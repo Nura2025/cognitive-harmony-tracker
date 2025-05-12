@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -44,7 +43,8 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
 }) => {
   
   const [reportType, setReportType] = useState<ReportType['type']>('clinical');
-  const [includeSections, setIncludeSections] = useState({
+  // Keep track of sections for report generation even though we don't show checkboxes
+  const [includeSections] = useState({
     overview: true,
     domainAnalysis: true,
     trends: true,
@@ -60,13 +60,6 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   
   const today = format(new Date(), 'MMMM d, yyyy');
-  
-  const handleCheckboxChange = (key: keyof typeof includeSections) => {
-    setIncludeSections(prev => ({
-      ...prev,
-      [key]: !prev[key]
-    }));
-  };
   
   const handleGenerateReport = () => {
     // Get actual attention metrics from patient data
@@ -541,24 +534,6 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             </Select>
           </div>
           
-          <div className="mb-6">
-            <Label className="text-muted-foreground mb-2 block">Include Sections</Label>
-            <div className="space-y-2.5">
-              {Object.entries(includeSections).map(([key, checked]) => (
-                <div key={key} className="flex items-center space-x-2">
-                  <Checkbox 
-                    id={key} 
-                    checked={checked}
-                    onCheckedChange={() => handleCheckboxChange(key as keyof typeof includeSections)}
-                  />
-                  <Label htmlFor={key} className="text-sm cursor-pointer">
-                    {formatSectionName(key)}
-                  </Label>
-                </div>
-              ))}
-            </div>
-          </div>
-          
           <div className="p-4 bg-muted/30 rounded-lg border border-border mb-6">
             <div className="flex items-center">
               <div className="mr-4 p-3 rounded-full bg-primary/10">
@@ -579,20 +554,15 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
               Generate Report
             </Button>
             
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
-              <Button variant="outline" size="sm" className="gap-1 w-full" onClick={handleSaveReport}>
-                <Download className="h-4 w-4" />
-                <span className="whitespace-nowrap">Save</span>
-              </Button>
-              <Button variant="outline" size="sm" className="gap-1 w-full" onClick={handlePrintReport}>
-                <Printer className="h-4 w-4" />
-                <span className="whitespace-nowrap">Print</span>
-              </Button>
-              <Button variant="outline" size="sm" className="gap-1 w-full" onClick={openEmailDialog}>
-                <Mail className="h-4 w-4" />
-                <span className="whitespace-nowrap">Email</span>
-              </Button>
-            </div>
+            <Button variant="outline" onClick={handleSaveReport} className="w-full gap-2 mt-2">
+              <Download className="h-4 w-4" />
+              Save Report
+            </Button>
+            
+            <Button variant="outline" onClick={handlePrintReport} className="w-full gap-2">
+              <Printer className="h-4 w-4" />
+              Print Report
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -605,6 +575,7 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
               Send the {reportType} report to the recipient's email address.
             </DialogDescription>
           </DialogHeader>
+          
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="recipient">Recipient Email</Label>
