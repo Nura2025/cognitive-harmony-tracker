@@ -137,51 +137,12 @@ const Patients = () => {
     fetchPatients();
   };
 
+  // Simplified handler that just closes the dialog
   const handleAddPatient = async (patientData: any) => {
-    try {
-      // Use clinicianId from userData if available
-      const clinicianId = userData?.id || "48526669-c799-4642-8fb9-93110a8bc2f8"; // Fallback ID
-      
-      // Calculate age based on date of birth
-      const birthDate = new Date(patientData.date_of_birth);
-      const today = new Date();
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-      
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-      }
-      
-      // Create a new patient with the calculated fields
-      const newPatient = {
-        user_id: `temp-${Date.now()}`, // In a real app, the API would return a real ID
-        first_name: patientData.first_name,
-        last_name: patientData.last_name,
-        name: `${patientData.first_name} ${patientData.last_name}`,
-        date_of_birth: patientData.date_of_birth.toISOString().split('T')[0],
-        age,
-        adhdSubtype: null,
-        gender: patientData.gender,
-        email: patientData.email,
-        username: patientData.username,
-        phone_number: patientData.phone_number,
-        assessmentCount: 0,
-        lastAssessment: null
-      };
-      
-      // Add the new patient to our local state
-      setPatients(prevPatients => [newPatient, ...prevPatients]);
-      
-      // Close the dialog
-      setAddDialogOpen(false);
-      
-      // Show a success message
-      toast.success(t("Patient added successfully"));
-      
-    } catch (error) {
-      console.error("Failed to add patient:", error);
-      toast.error(t("Failed to add patient"));
-    }
+    // We're not actually adding the patient directly anymore
+    // The invitation link is all we need
+    setAddDialogOpen(false);
+    toast.success(t("Patient invitation sent"));
   };
 
   // Loading state
