@@ -42,8 +42,7 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
   onSendEmail
 }) => {
   
-  const [reportType, setReportType] = useState<ReportType['type']>('clinical');
-  // Keep track of sections for report generation even though we don't show checkboxes
+  // Keep track of sections for report generation
   const [includeSections] = useState({
     overview: true,
     domainAnalysis: true,
@@ -72,8 +71,8 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
     const newReport: ReportType = {
       id: uuidv4(),
       patientId: patient.user_id,
-      title: `${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Report`,
-      type: reportType,
+      title: `Comprehensive Report`,
+      type: 'comprehensive',
       createdDate: format(new Date(), 'yyyy-MM-dd'),
       sections: {...includeSections},
       status: 'generated',
@@ -141,7 +140,7 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
     // Add the report header
     const header = document.createElement('div');
     header.innerHTML = `
-      <h1 style="color:#333; font-size: 28px; margin-bottom: 10px;">${patient.name} - ${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Report</h1>
+      <h1 style="color:#333; font-size: 28px; margin-bottom: 10px;">${patient.name} - Comprehensive Report</h1>
       <p style="color:#666; font-style:italic; margin-bottom: 20px;">Generated on ${today}</p>
       <hr style="border: 1px solid #eee; margin: 20px 0;" />
     `;
@@ -305,7 +304,7 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
         }
       }
       
-      pdf.save(`${patient.name.replace(/\s+/g, '_')}_${reportType}_report.pdf`);
+      pdf.save(`${patient.name.replace(/\s+/g, '_')}_comprehensive_report.pdf`);
       
       toast({
         title: "Report Downloaded",
@@ -342,7 +341,7 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
       printWindow.document.write(`
         <html>
           <head>
-            <title>${patient.name} - ${reportType} Report</title>
+            <title>${patient.name} - Comprehensive Report</title>
             <style>
               body { font-family: Arial, sans-serif; padding: 20px; }
               h1 { color: #333; }
@@ -354,7 +353,7 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
             </style>
           </head>
           <body>
-            <h1>${patient.name} - ${reportType} Report</h1>
+            <h1>${patient.name} - Comprehensive Report</h1>
             <p class="date">Generated on ${today}</p>
             
             ${includeSections.overview ? `
@@ -444,8 +443,8 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
     }
     
     setEmailRecipient('');
-    setEmailSubject(`${patient.name}'s ${reportType} Report - ${today}`);
-    setEmailMessage(`Please find attached the ${reportType} report for ${patient.name} generated on ${today}.`);
+    setEmailSubject(`${patient.name}'s Comprehensive Report - ${today}`);
+    setEmailMessage(`Please find attached the comprehensive report for ${patient.name} generated on ${today}.`);
     setEmailDialogOpen(true);
   };
 
@@ -479,7 +478,7 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
         gender: patient.gender,
         age: patient.age
       },
-      reportType,
+      reportType: 'comprehensive',
       sections: includeSections,
       metrics,
       generatedDate: today
@@ -519,21 +518,6 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
           <CardTitle className="text-lg">Generate Report</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="mb-6">
-            <Label className="text-muted-foreground mb-2 block">Report Template</Label>
-            <Select value={reportType} onValueChange={(value: ReportType['type']) => setReportType(value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select report type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="clinical">Clinical Report</SelectItem>
-                <SelectItem value="school">School Accommodation</SelectItem>
-                <SelectItem value="progress">Progress Summary</SelectItem>
-                <SelectItem value="detailed">Detailed Analysis</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
           <div className="p-4 bg-muted/30 rounded-lg border border-border mb-6">
             <div className="flex items-center">
               <div className="mr-4 p-3 rounded-full bg-primary/10">
@@ -542,7 +526,7 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
               <div>
                 <h3 className="font-medium">Report Preview</h3>
                 <p className="text-sm text-muted-foreground">
-                  {reportType.charAt(0).toUpperCase() + reportType.slice(1)} Report for {patient.name} - {today}
+                  Comprehensive Report for {patient.name} - {today}
                 </p>
               </div>
             </div>
@@ -572,7 +556,7 @@ export const ReportGenerator: React.FC<ReportGeneratorProps> = ({
           <DialogHeader>
             <DialogTitle>Email Report</DialogTitle>
             <DialogDescription>
-              Send the {reportType} report to the recipient's email address.
+              Send the comprehensive report to the recipient's email address.
             </DialogDescription>
           </DialogHeader>
           

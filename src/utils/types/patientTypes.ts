@@ -85,7 +85,7 @@ export interface ReportType {
   id: string;
   patientId: string;
   title: string;
-  type: 'clinical' | 'school' | 'progress' | 'detailed';
+  type: 'clinical' | 'school' | 'progress' | 'detailed' | 'comprehensive';
   createdDate: string;
   sections: {
     overview: boolean;
