@@ -29,8 +29,10 @@ const queryClient = new QueryClient({
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
-      // Suppress toast errors from query failures
-      useErrorBoundary: false,
+      // Configure to suppress errors from displaying in the UI
+      meta: {
+        suppressErrors: true,
+      },
     },
   },
 });
