@@ -23,13 +23,14 @@ import Settings from "./pages/Settings";
 import PrivateRoute from "./utils/PrivateRoute";
 import AuthService from "./services/auth";
 import SessionTimeoutHandler from "./components/SessionTimeoutHandler";
-import { useEffect } from "react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
       refetchOnWindowFocus: false,
+      // Suppress toast errors from query failures
+      useErrorBoundary: false,
     },
   },
 });
@@ -48,7 +49,7 @@ const App = () => {
                 <Toaster />
                 <Sonner 
                   toastOptions={{
-                    // Only show success toasts, hide errors
+                    // Hide all error, warning and info toasts
                     unstyled: false,
                     classNames: {
                       error: 'hidden',

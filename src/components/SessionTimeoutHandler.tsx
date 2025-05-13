@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isTokenExpired } from '@/utils/tokenExpiration';
 import { useUser } from '@/contexts/UserContext';
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const SessionTimeoutHandler = () => {
   const navigate = useNavigate();
@@ -16,12 +16,10 @@ const SessionTimeoutHandler = () => {
         
         if (!token || isTokenExpired(token)) {
           localStorage.removeItem('neurocog_token');
-          // Only show toast if token exists but expired
+          // Only show toast if token exists but expired - not on initial load
           if (token) {
-            toast({
-              title: "Session expired",
-              description: "Your session has expired. Please log in again.",
-            });
+            // Use success toast for session expired rather than error toast
+            toast.success("Your session has expired. Please log in again.");
           }
           
           // Only navigate if we're not already on the login or landing page
