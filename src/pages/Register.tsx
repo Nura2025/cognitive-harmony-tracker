@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import AuthService from "@/services/auth";
@@ -14,7 +15,6 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -33,25 +33,21 @@ const Register = () => {
   const validateForm = () => {
     if (!name || !email || !password || !confirmPassword) {
       setError("Please fill in all required fields");
-      toast.error("Please fill in all required fields");
       return false;
     }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match");
-      toast.error("Passwords do not match");
       return false;
     }
 
     if (password.length < 8) {
       setError("Password must be at least 8 characters long");
-      toast.error("Password must be at least 8 characters long");
       return false;
     }
 
     if (!specialty || !licenseNumber) {
       setError("Please provide your specialty and license number");
-      toast.error("Please provide your specialty and license number");
       return false;
     }
 
@@ -78,9 +74,12 @@ const Register = () => {
         licenseNumber,
         clinicName,
       });
-
-      toast.success("Registration successful!");
-      navigate("/dashboard");
+      
+      // Wait slightly for state to update before redirecting
+      setTimeout(() => {
+        navigate("/dashboard", { replace: true });
+      }, 100);
+      
     } catch (error: any) {
       // Extract error message
       const errorMessage =
@@ -88,7 +87,6 @@ const Register = () => {
         error.message ||
         "Registration failed. Please try again.";
       setError(errorMessage);
-      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

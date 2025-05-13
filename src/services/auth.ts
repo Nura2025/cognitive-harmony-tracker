@@ -63,6 +63,7 @@ const login = async (data: LoginData): Promise<AuthResponse> => {
 
       SessionManager.resetTimer();
 
+      toast.success("Login successful!");
       return {
         token,
         user: userData,
@@ -96,14 +97,13 @@ const registerAsPatient = async (
 
       // Initialize session management
       SessionManager.resetTimer();
+      
+      toast.success("Registration successful!");
     }
 
     return response.data;
   } catch (error: any) {
     console.error("Patient registration error:", error);
-    const errorMessage =
-      error.response?.data?.message || "Registration failed. Please try again.";
-    toast.error(errorMessage);
     throw error;
   }
 };
@@ -128,14 +128,13 @@ const registerAsClinician = async (
 
       // Initialize session management
       SessionManager.resetTimer();
+      
+      toast.success("Registration successful!");
     }
 
     return response.data;
   } catch (error: any) {
     console.error("Clinician registration error:", error);
-    const errorMessage =
-      error.response?.data?.message || "Registration failed. Please try again.";
-    toast.error(errorMessage);
     throw error;
   }
 };

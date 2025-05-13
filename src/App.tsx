@@ -23,6 +23,7 @@ import Settings from "./pages/Settings";
 import PrivateRoute from "./utils/PrivateRoute";
 import AuthService from "./services/auth";
 import SessionTimeoutHandler from "./components/SessionTimeoutHandler";
+import { useEffect } from "react";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -45,7 +46,17 @@ const App = () => {
             <UserProvider>
               <TooltipProvider>
                 <Toaster />
-                <Sonner />
+                <Sonner 
+                  toastOptions={{
+                    // Only show success toasts, hide errors
+                    unstyled: false,
+                    classNames: {
+                      error: 'hidden',
+                      warning: 'hidden',
+                      info: 'hidden'
+                    }
+                  }}
+                />
                 {isAuthenticated && <SessionTimeoutHandler />}
                 <Routes>
                   {/* Public routes */}

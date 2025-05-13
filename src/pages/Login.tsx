@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -30,7 +31,6 @@ const Login = () => {
 
     if (!email || !password) {
       setError("Please enter both email and password");
-      toast.error("Please enter both email and password");
       return;
     }
 
@@ -38,9 +38,12 @@ const Login = () => {
 
     try {
       await AuthService.login({ email, password });
-      toast.success("Login successful!");
-      // Redirect to dashboard on successful login
-      navigate("/dashboard");
+      
+      // Wait slightly for state to update before redirecting
+      setTimeout(() => {
+        navigate("/dashboard", { replace: true });
+      }, 100);
+      
     } catch (error: any) {
       // Extract error message from the error object
       const errorMessage =
@@ -49,7 +52,6 @@ const Login = () => {
         "Invalid email or password. Please try again.";
 
       setError(errorMessage);
-      toast.error(errorMessage);
       console.error("Login failed:", error);
     } finally {
       setLoading(false);
